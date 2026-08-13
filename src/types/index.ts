@@ -139,3 +139,12 @@ export interface QuickHackAlert {
   xpReward: number;
   active: boolean;
 }
+
+export interface ResourceBooking {
+  id: string;
+  machine: 'Impressora 3D' | 'Cortadora a Laser';
+  studentName: string;
+  guildName?: string;
+  date: string; // ISO date, e.g. '2026-08-13'
+  timeSlot: string; // e.g. '13:00-13:30'
+}

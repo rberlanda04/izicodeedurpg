@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { SkillNode, SkillTier } from '../types';
+import type { SkillNode, SkillTier, ResourceBooking } from '../types';
 import { soundEngine } from '../services/soundEngine';
 import { GitFork, Lock, Unlock, CheckCircle2, Printer, Cpu, HelpCircle } from 'lucide-react';
 
@@ -7,17 +7,25 @@ interface SkillTreeViewProps {
   skills: SkillNode[];
   unlockedSkillIds: string[];
   onUnlockSkill: (skillId: string) => void;
-  onBookResource: (resourceName: string) => void;
+  bookings: ResourceBooking[];
+  onBookResource: (machine: ResourceBooking['machine'], timeSlot: string) => boolean;
 }
+
+const FABLAB_MACHINES: ResourceBooking['machine'][] = ['Impressora 3D', 'Cortadora a Laser'];
+
+const TIME_SLOTS = ['08:00-08:30', '09:30-10:00', '13:00-13:30', '14:30-15:00', '16:00-16:30'];
 
 export const SkillTreeView: React.FC<SkillTreeViewProps> = ({
   skills,
   unlockedSkillIds,
   onUnlockSkill,
+  bookings,
   onBookResource
 }) => {
   const [selectedSkill, setSelectedSkill] = useState<SkillNode | null>(skills[0]);
   const [bookingMessage, setBookingMessage] = useState('');
+  const [selectedMachine, setSelectedMachine] = useState<ResourceBooking['machine']>('Impressora 3D');
+  const today = new Date().toISOString().slice(0, 10);
 
   const tiers: Array<{ key: SkillTier; label: string; color: string; desc: string }> = [
     { key: 'BASIC', label: 'Nível Básico', color: '#00ffaa', desc: 'Lógica unplugged e pensamento computacional' },
@@ -43,10 +51,18 @@ export const SkillTreeView: React.FC<SkillTreeViewProps> = ({
     }
   };
 
-  const handleBook = (machine: string) => {
-    soundEngine.playItemCollect();
-    setBookingMessage(`✅ Agendamento de 45 min confirmado para ${machine}!`);
-    onBookResource(machine);
+  const isSlotTaken = (machine: ResourceBooking['machine'], timeSlot: string) =>
+    bookings.some((b) => b.machine === machine && b.date === today && b.timeSlot === timeSlot);
+
+  const handleBook = (machine: ResourceBooking['machine'], timeSlot: string) => {
+    const success = onBookResource(machine, timeSlot);
+    if (success) {
+      soundEngine.playItemCollect();
+      setBookingMessage(`✅ Reserva confirmada: ${machine} às ${timeSlot}!`);
+    } else {
+      soundEngine.playErrorBeep();
+      setBookingMessage(`⚠️ Esse horário já foi reservado por outra guilda. Escolha outro.`);
+    }
     setTimeout(() => setBookingMessage(''), 3000);
   };
 
@@ -201,18 +217,47 @@ export const SkillTreeView: React.FC<SkillTreeViewProps> = ({
                   <p className="font-pixel text-[10px] text-[#ff007f] flex items-center gap-1">
                     <Printer className="w-3.5 h-3.5" /> RESERVA DE MAQUINÁRIO FABLAB:
                   </p>
-                  <button
-                    onClick={() => handleBook('Impressora 3D Ender-3')}
-                    className="w-full text-left font-mono text-xs p-2 bg-[#161b2e] hover:bg-[#ff007f]/20 border border-[#ff007f] text-slate-200"
-                  >
-                    🖨️ Reservar Impressora 3D
-                  </button>
-                  <button
-                    onClick={() => handleBook('Cortadora a Laser CO2')}
-                    className="w-full text-left font-mono text-xs p-2 bg-[#161b2e] hover:bg-[#ff007f]/20 border border-[#ff007f] text-slate-200"
-                  >
-                    ⚡ Reservar Cortadora Laser
-                  </button>
+
+                  {/* Machine Selector */}
+                  <div className="flex gap-2">
+                    {FABLAB_MACHINES.map((machine) => (
+                      <button
+                        key={machine}
+                        onClick={() => {
+                          soundEngine.playItemCollect();
+                          setSelectedMachine(machine);
+                        }}
+                        className={`flex-1 font-mono text-[10px] p-2 border ${
+                          selectedMachine === machine
+                            ? 'bg-[#ff007f]/20 border-[#ff007f] text-[#ff007f]'
+                            : 'bg-[#161b2e] border-slate-700 text-slate-300 hover:border-[#ff007f]'
+                        }`}
+                      >
+                        {machine === 'Impressora 3D' ? '🖨️' : '⚡'} {machine}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Time Slot Grid */}
+                  <div className="grid grid-cols-1 gap-1.5 pt-1">
+                    {TIME_SLOTS.map((slot) => {
+                      const taken = isSlotTaken(selectedMachine, slot);
+                      return (
+                        <button
+                          key={slot}
+                          disabled={taken}
+                          onClick={() => handleBook(selectedMachine, slot)}
+                          className={`w-full text-left font-mono text-xs p-2 border ${
+                            taken
+                              ? 'bg-[#090c15] border-slate-700 text-slate-500 cursor-not-allowed line-through'
+                              : 'bg-[#161b2e] hover:bg-[#ff007f]/20 border-[#ff007f] text-slate-200'
+                          }`}
+                        >
+                          {taken ? `🔒 ${slot} — Ocupado` : `🕒 ${slot} — Reservar`}
+                        </button>
+                      );
+                    })}
+                  </div>
 
                   {bookingMessage && (
                     <p className="font-mono text-[11px] text-[#00ffaa] mt-1">{bookingMessage}</p>

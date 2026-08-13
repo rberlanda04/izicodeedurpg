@@ -22,7 +22,7 @@ import {
   HACKATHON_CAMPAIGN,
   QUICK_HACK_ALERT
 } from './data/mockData';
-import type { UserProfile, Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, SDGGoal } from './types';
+import type { UserProfile, UserRole, Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, SDGGoal, ResourceBooking } from './types';
 import { soundEngine } from './services/soundEngine';
 
 import './styles/pixel.css';
@@ -39,6 +39,7 @@ export function App() {
   const [roomPasscode, setRoomPasscode] = useState('IZI-9482');
   const [quickHack, setQuickHack] = useState(QUICK_HACK_ALERT);
   const [quickHackInput, setQuickHackInput] = useState('');
+  const [bookings, setBookings] = useState<ResourceBooking[]>([]);
 
   const [activeTab, setActiveTab] = useState('profile');
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
@@ -144,9 +145,34 @@ export function App() {
     });
   };
 
-  // Book Maquinário
-  const handleBookResource = (resourceName: string) => {
-    // Recorded booking
+  // DEV-ONLY: switch role for testing UI gating (to be replaced by Firebase Auth custom claims)
+  const handleChangeRole = (role: UserRole) => {
+    setUser((prev) => ({ ...prev, role }));
+    if (role === 'ADVENTURER' && activeTab === 'gamemaster') {
+      setActiveTab('profile');
+    }
+  };
+
+  // Book Maquinário (FabLab resource reservation — guards against double-booking)
+  const handleBookResource = (machine: ResourceBooking['machine'], timeSlot: string): boolean => {
+    const today = new Date().toISOString().slice(0, 10);
+    const guildName = guilds.find((g) => g.id === user.guildId)?.name;
+
+    const alreadyTaken = bookings.some(
+      (b) => b.machine === machine && b.date === today && b.timeSlot === timeSlot
+    );
+    if (alreadyTaken) return false;
+
+    const newBooking: ResourceBooking = {
+      id: `booking-${Date.now()}`,
+      machine,
+      studentName: user.adventureName,
+      guildName,
+      date: today,
+      timeSlot
+    };
+    setBookings((prev) => [...prev, newBooking]);
+    return true;
   };
 
   // Complete Quest
@@ -327,6 +353,7 @@ export function App() {
         soundOn={soundOn}
         setSoundOn={setSoundOn}
         roomPasscode={roomPasscode}
+        onChangeRole={handleChangeRole}
       />
 
       {/* Quick Hack Active Broadcast Banner */}
@@ -381,6 +408,7 @@ export function App() {
             skills={skills}
             unlockedSkillIds={user.unlockedSkills}
             onUnlockSkill={handleUnlockSkill}
+            bookings={bookings}
             onBookResource={handleBookResource}
           />
         )}
@@ -417,7 +445,7 @@ export function App() {
           />
         )}
 
-        {activeTab === 'gamemaster' && (
+        {activeTab === 'gamemaster' && (user.role === 'GAME_MASTER' || user.role === 'ADMIN') && (
           <GameMasterControlView
             roomPasscode={roomPasscode}
             onChangePasscode={(code) => setRoomPasscode(code)}
