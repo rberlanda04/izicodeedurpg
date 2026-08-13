@@ -20,10 +20,12 @@ import {
   HARDWARE_CATALOG,
   CURIOSITY_CARDS,
   HACKATHON_CAMPAIGN,
-  QUICK_HACK_ALERT
+  QUICK_HACK_ALERT,
+  QUEST_TEMPLATES
 } from './data/mockData';
 import type { UserProfile, Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, SDGGoal } from './types';
 import { soundEngine } from './services/soundEngine';
+import { generateAIQuest } from './services/questEngine';
 
 import './styles/pixel.css';
 import { Zap, X, ShieldAlert } from 'lucide-react';
@@ -198,19 +200,7 @@ export function App() {
 
   // AI Quest Generator
   const handleGenerateAIQuest = () => {
-    const aiQuest: Quest = {
-      id: `quest-ai-${Date.now()}`,
-      title: 'IA SUGGESTION: Sistema de Irrigação Inteligente ODS 12.c',
-      description: 'Missão gerada por IA baseada no seu nível especialista (NodeMCU ESP8266 + Higrômetro). Desenvolva um medidor de economia de água para hortas escolares.',
-      tier: 'SPECIALIST',
-      requiredSkills: ['esp8266_advanced'],
-      sdgGoals: ['12.c', '7.a'],
-      xpReward: 480,
-      coinReward: 130,
-      hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Sensor de Umidade de Solo'],
-      status: 'ACTIVE',
-      validationSteps: ['Demonstrar telemetria no painel da guilda.', 'Validar limiar de irrigação.']
-    };
+    const aiQuest = generateAIQuest(user, skills, quests, QUEST_TEMPLATES);
     setQuests((prev) => [aiQuest, ...prev]);
     triggerConfetti();
   };

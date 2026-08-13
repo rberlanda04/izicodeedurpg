@@ -230,6 +230,137 @@ export const QUESTS: Quest[] = [
   }
 ];
 
+// Pool of quest blueprints used by the AI Quest Engine (src/services/questEngine.ts)
+// to recommend missions based on the Guild's already-unlocked skills/hardware.
+export const QUEST_TEMPLATES: Omit<Quest, 'id' | 'status'>[] = [
+  {
+    title: 'Jogo Educativo: Aventura da Alfabetização Digital',
+    description: 'Crie um jogo 2D em blocos que ensine crianças a identificar sinais de trânsito e regras básicas de convivência escolar.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: [],
+    sdgGoals: ['4.3'],
+    xpReward: 200,
+    coinReward: 50,
+    hardwareRequired: ['Computador/Tablet com Scratch'],
+    validationSteps: [
+      'Apresentar ao menos 3 fases jogáveis sem erros de lógica.',
+      'Explicar ao Game Master as variáveis de pontuação utilizadas.'
+    ]
+  },
+  {
+    title: 'App Reciclador: Caça ao Lixo Certo',
+    description: 'Desenvolva um aplicativo móvel com App Inventor que ensine a separação correta de resíduos usando a câmera do smartphone.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['app_inventor'],
+    sdgGoals: ['12.c'],
+    xpReward: 280,
+    coinReward: 70,
+    hardwareRequired: ['Smartphone Android', 'App Inventor'],
+    validationSteps: [
+      'Demonstrar o app instalado em um smartphone real.',
+      'Classificar corretamente 5 tipos de resíduos no fluxo do app.'
+    ]
+  },
+  {
+    title: 'Sentinela Solar: Monitor de Painéis com Micro:bit',
+    description: 'Utilize a matriz de LEDs e o sensor de luz do Micro:bit para simular o monitoramento da incidência solar em painéis fotovoltaicos.',
+    tier: 'ADVANCED',
+    requiredSkills: ['microbit_starter'],
+    sdgGoals: ['7.a'],
+    xpReward: 320,
+    coinReward: 85,
+    hardwareRequired: ['Micro:bit', 'Sensor de Luz LDR'],
+    validationSteps: [
+      'Exibir na matriz de LEDs o nível de incidência solar captado.',
+      'Registrar 3 leituras em horários diferentes do dia.'
+    ]
+  },
+  {
+    title: 'Robôzinho Explorador: Mapeamento de Áreas de Risco Climático',
+    description: 'Programe o kit Matata Robotics acoplado ao Micro:bit para percorrer uma maquete e sinalizar zonas simuladas de alagamento.',
+    tier: 'ADVANCED',
+    requiredSkills: ['microbit_starter'],
+    sdgGoals: ['13.a'],
+    xpReward: 340,
+    coinReward: 90,
+    hardwareRequired: ['Matata Robotics Kit', 'Micro:bit'],
+    validationSteps: [
+      'Demonstrar o robô contornando obstáculos na maquete.',
+      'Acionar o alerta luminoso ao entrar em zona de risco.'
+    ]
+  },
+  {
+    title: 'Robô Catador: Triagem Automática de Resíduos com Lego EV3',
+    description: 'Construa um braço robótico com Lego Mindstorms EV3 que utilize o sensor de cor para separar materiais recicláveis por categoria.',
+    tier: 'ADVANCED',
+    requiredSkills: ['lego_ev3'],
+    sdgGoals: ['12.c', '13.a'],
+    xpReward: 380,
+    coinReward: 100,
+    hardwareRequired: ['Kit Lego Mindstorms EV3', 'Sensor de Cor'],
+    validationSteps: [
+      'Separar corretamente ao menos 3 categorias de material na demonstração.',
+      'Apresentar o fluxograma do algoritmo de triagem ao Game Master.'
+    ]
+  },
+  {
+    title: 'Rede de Sensores Climáticos: Alerta de Onda de Calor',
+    description: 'Monte uma rede de sensores com NodeMCU 1.0 (ESP8266) para monitorar temperatura extrema e disparar alertas remotos à comunidade escolar.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['esp8266_advanced'],
+    sdgGoals: ['13.a'],
+    xpReward: 460,
+    coinReward: 125,
+    hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Sensor DHT22'],
+    validationSteps: [
+      'Transmitir dados de temperatura em tempo real via Wi-Fi.',
+      'Disparar alerta automático ao ultrapassar o limiar configurado.'
+    ]
+  },
+  {
+    title: 'Horta Comunitária Autônoma: Irrigação por Sensores',
+    description: 'Desenvolva um sistema com NodeMCU 1.0 (ESP8266) e sensor de umidade de solo para economizar água na horta escolar comunitária.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['esp8266_advanced'],
+    sdgGoals: ['12.c', '7.a'],
+    xpReward: 480,
+    coinReward: 130,
+    hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Sensor de Umidade de Solo'],
+    validationSteps: [
+      'Demonstrar telemetria de umidade no painel da guilda.',
+      'Validar o acionamento automático da irrigação simulada.'
+    ]
+  },
+  {
+    title: 'Assistente de Mobilidade: Bengala com Alerta de Obstáculos',
+    description: 'Acople um sensor ultrassônico a uma bengala controlada por NodeMCU 1.0 (ESP8266) para alertar sobre obstáculos à frente de pessoas com deficiência visual.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['esp8266_advanced'],
+    sdgGoals: ['4.3'],
+    xpReward: 470,
+    coinReward: 128,
+    hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Sensor Ultrassônico HC-SR04'],
+    validationSteps: [
+      'Calibrar a distância mínima de disparo do alerta sonoro.',
+      'Validar o funcionamento em percurso com 3 obstáculos.'
+    ]
+  },
+  {
+    title: 'Fábrica Circular: Peças Recicladas em Impressão 3D',
+    description: 'Combine modelagem 3D e telemetria com NodeMCU 1.0 (ESP8266) para monitorar o consumo de filamento reciclado na fabricação de peças sob demanda.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['esp8266_advanced', 'fablab_machining'],
+    sdgGoals: ['12.c'],
+    xpReward: 520,
+    coinReward: 150,
+    hardwareRequired: ['Impressora 3D', 'Filamento PLA Reciclado', 'NodeMCU 1.0 (ESP8266)'],
+    validationSteps: [
+      'Fatiar e imprimir uma peça com material reciclado.',
+      'Apresentar o registro de consumo de filamento no painel da guilda.'
+    ]
+  }
+];
+
 export const HARDWARE_CATALOG: HardwareItem[] = [
   {
     id: 'hw-1',
