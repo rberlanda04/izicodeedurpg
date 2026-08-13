@@ -23,6 +23,7 @@ export const GameMasterControlView: React.FC<GameMasterControlViewProps> = ({
   const [newPasscode, setNewPasscode] = useState(roomPasscode);
   const [passcodeMsg, setPasscodeMsg] = useState('');
   const [customXp, setCustomXp] = useState(100);
+  const [xpMsg, setXpMsg] = useState('');
 
   const handleUpdatePasscode = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +47,23 @@ export const GameMasterControlView: React.FC<GameMasterControlViewProps> = ({
   const handleTriggerHack = () => {
     soundEngine.playBossHit();
     onTriggerQuickHack();
+  };
+
+  const handleAwardXp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customXp || customXp <= 0) return;
+
+    soundEngine.playLevelUp();
+    onAwardXP(customXp);
+    setXpMsg(`✅ +${customXp} XP concedido em tempo real para a turma!`);
+    setTimeout(() => setXpMsg(''), 2500);
+  };
+
+  const handleQuickAward = (amount: number) => {
+    soundEngine.playItemCollect();
+    onAwardXP(amount);
+    setXpMsg(`✅ +${amount} XP concedido em tempo real para a turma!`);
+    setTimeout(() => setXpMsg(''), 2500);
   };
 
   return (
@@ -121,6 +139,49 @@ export const GameMasterControlView: React.FC<GameMasterControlViewProps> = ({
           >
             ⚡ TRANSMITIR ALERTA DE DESAFIO PARA A SALA!
           </button>
+        </div>
+
+        {/* Live XP Award */}
+        <div className="pixel-box p-6 bg-[#161b2e] border-2 border-[#00ffaa] space-y-4 md:col-span-2">
+          <h3 className="font-pixel text-sm text-[#00ffaa] flex items-center gap-2">
+            <Award className="w-4 h-4" /> CONCEDER XP AO VIVO
+          </h3>
+          <p className="font-body text-xs text-slate-300 bg-[#090c15] p-3 border border-[#00ffaa]/40">
+            Distribua pontos de experiência instantaneamente para recompensar participação, esforço ou acertos rápidos durante a aula.
+          </p>
+
+          <form onSubmit={handleAwardXp} className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+            <div className="flex-1">
+              <label className="block font-pixel text-[10px] text-slate-300 mb-1">QUANTIDADE DE XP:</label>
+              <input
+                type="number"
+                min={1}
+                step={10}
+                value={customXp}
+                onChange={(e) => setCustomXp(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                className="w-full bg-[#090c15] border-2 border-[#2e3859] focus:border-[#00ffaa] p-2.5 text-center font-mono text-lg font-bold text-[#00ffaa] outline-none"
+              />
+            </div>
+            <button type="submit" className="pixel-btn pixel-btn-primary justify-center whitespace-nowrap">
+              <Zap className="w-4 h-4" /> CONCEDER {customXp} XP
+            </button>
+          </form>
+
+          <div className="flex flex-wrap gap-2">
+            {[10, 25, 50, 100].map((amount) => (
+              <button
+                key={amount}
+                onClick={() => handleQuickAward(amount)}
+                className="pixel-btn text-[10px] py-1.5 px-3 bg-[#1a2238] border-[#00ffaa] text-[#00ffaa] hover:bg-[#00ffaa] hover:text-[#0d0f18]"
+              >
+                +{amount} XP RÁPIDO
+              </button>
+            ))}
+          </div>
+
+          {xpMsg && (
+            <p className="font-mono text-xs text-[#00ffaa] text-center">{xpMsg}</p>
+          )}
         </div>
       </div>
 

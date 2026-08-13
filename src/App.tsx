@@ -22,7 +22,7 @@ import {
   HACKATHON_CAMPAIGN,
   QUICK_HACK_ALERT
 } from './data/mockData';
-import type { UserProfile, Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, SDGGoal, QuickHackAlert } from './types';
+import type { UserProfile, UserRole, Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, SDGGoal, QuickHackAlert, ResourceBooking } from './types';
 import { soundEngine } from './services/soundEngine';
 import { loadState, saveState, debounce } from './services/persistence';
 
@@ -54,6 +54,9 @@ export function App() {
   const [hasJoinedRoom, setHasJoinedRoom] = useState<boolean>(() =>
     loadState('izicode:v1:hasJoinedRoom', false)
   );
+  const [bookings, setBookings] = useState<ResourceBooking[]>(() =>
+    loadState('izicode:v1:bookings', [])
+  );
 
   const [activeTab, setActiveTab] = useState('profile');
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
@@ -75,6 +78,7 @@ export function App() {
         roomPasscode: string;
         quickHack: QuickHackAlert;
         hasJoinedRoom: boolean;
+        bookings: ResourceBooking[];
       }) => {
         saveState('izicode:v1:user', state.user);
         saveState('izicode:v1:guilds', state.guilds);
@@ -86,6 +90,7 @@ export function App() {
         saveState('izicode:v1:roomPasscode', state.roomPasscode);
         saveState('izicode:v1:quickHack', state.quickHack);
         saveState('izicode:v1:hasJoinedRoom', state.hasJoinedRoom);
+        saveState('izicode:v1:bookings', state.bookings);
       },
       300
     )
@@ -102,9 +107,10 @@ export function App() {
       campaign,
       roomPasscode,
       quickHack,
-      hasJoinedRoom
+      hasJoinedRoom,
+      bookings
     });
-  }, [user, guilds, skills, quests, catalog, curiosities, campaign, roomPasscode, quickHack, hasJoinedRoom]);
+  }, [user, guilds, skills, quests, catalog, curiosities, campaign, roomPasscode, quickHack, hasJoinedRoom, bookings]);
 
   // Global Keyboard Listener for CTRL + ~ to trigger Hacker Terminal
   useEffect(() => {
@@ -205,9 +211,34 @@ export function App() {
     });
   };
 
-  // Book Maquinário
-  const handleBookResource = (resourceName: string) => {
-    // Recorded booking
+  // DEV-ONLY: switch role for testing UI gating (to be replaced by Firebase Auth custom claims)
+  const handleChangeRole = (role: UserRole) => {
+    setUser((prev) => ({ ...prev, role }));
+    if (role === 'ADVENTURER' && activeTab === 'gamemaster') {
+      setActiveTab('profile');
+    }
+  };
+
+  // Book Maquinário (FabLab resource reservation — guards against double-booking)
+  const handleBookResource = (machine: ResourceBooking['machine'], timeSlot: string): boolean => {
+    const today = new Date().toISOString().slice(0, 10);
+    const guildName = guilds.find((g) => g.id === user.guildId)?.name;
+
+    const alreadyTaken = bookings.some(
+      (b) => b.machine === machine && b.date === today && b.timeSlot === timeSlot
+    );
+    if (alreadyTaken) return false;
+
+    const newBooking: ResourceBooking = {
+      id: `booking-${Date.now()}`,
+      machine,
+      studentName: user.adventureName,
+      guildName,
+      date: today,
+      timeSlot
+    };
+    setBookings((prev) => [...prev, newBooking]);
+    return true;
   };
 
   // Complete Quest
@@ -388,6 +419,7 @@ export function App() {
         soundOn={soundOn}
         setSoundOn={setSoundOn}
         roomPasscode={roomPasscode}
+        onChangeRole={handleChangeRole}
       />
 
       {/* Quick Hack Active Broadcast Banner */}
@@ -442,6 +474,7 @@ export function App() {
             skills={skills}
             unlockedSkillIds={user.unlockedSkills}
             onUnlockSkill={handleUnlockSkill}
+            bookings={bookings}
             onBookResource={handleBookResource}
           />
         )}
@@ -478,7 +511,7 @@ export function App() {
           />
         )}
 
-        {activeTab === 'gamemaster' && (
+        {activeTab === 'gamemaster' && (user.role === 'GAME_MASTER' || user.role === 'ADMIN') && (
           <GameMasterControlView
             roomPasscode={roomPasscode}
             onChangePasscode={(code) => setRoomPasscode(code)}

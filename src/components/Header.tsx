@@ -1,5 +1,5 @@
 import React from 'react';
-import type { UserProfile } from '../types';
+import type { UserProfile, UserRole } from '../types';
 import { soundEngine } from '../services/soundEngine';
 import { Terminal, Volume2, VolumeX, Shield, Users, GitFork, Scroll, Wrench, Compass, Swords, Crown, Key } from 'lucide-react';
 
@@ -12,6 +12,7 @@ interface HeaderProps {
   soundOn: boolean;
   setSoundOn: (val: boolean) => void;
   roomPasscode: string;
+  onChangeRole: (role: UserRole) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,9 +23,11 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenPasscodeModal,
   soundOn,
   setSoundOn,
-  roomPasscode
+  roomPasscode,
+  onChangeRole
 }) => {
   const xpPercent = Math.min(100, Math.round((user.xp / user.xpToNextLevel) * 100));
+  const isGameMaster = user.role === 'GAME_MASTER' || user.role === 'ADMIN';
 
   const navItems = [
     { id: 'profile', label: 'Ficha', icon: Shield },
@@ -34,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'hardware', label: 'Maker Lab', icon: Wrench },
     { id: 'curiosities', label: 'Curiosidades', icon: Compass },
     { id: 'hackathon', label: 'Hackathon (350+)', icon: Swords },
-    { id: 'gamemaster', label: 'Painel Mestre', icon: Crown },
+    ...(isGameMaster ? [{ id: 'gamemaster', label: 'Painel Mestre', icon: Crown }] : []),
   ];
 
   const handleTabClick = (tabId: string) => {
@@ -109,6 +112,23 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
+          {/* DEV-ONLY Role Switcher — temporary affordance, replace with Firebase Auth custom claims later */}
+          <div
+            className="flex items-center gap-1 bg-transparent border border-dashed border-slate-600 px-1.5 py-1 opacity-70 hover:opacity-100 transition-opacity"
+            title="Ferramenta temporária de desenvolvimento — substituir por Firebase Auth (custom claims) antes de produção."
+          >
+            <span className="font-mono text-[9px] text-slate-500 whitespace-nowrap">🛠 DEV: Papel de Teste</span>
+            <select
+              value={user.role}
+              onChange={(e) => onChangeRole(e.target.value as UserRole)}
+              className="bg-[#0d0f18] border border-slate-600 text-slate-400 font-mono text-[9px] px-1 py-0.5 outline-none cursor-pointer"
+            >
+              <option value="ADVENTURER">ADVENTURER</option>
+              <option value="GAME_MASTER">GAME_MASTER</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
+          </div>
+
           {/* Terminal CLI Toggle */}
           <button
             onClick={onOpenTerminal}
