@@ -270,7 +270,32 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     category: 'MICROCONTROLLER',
     stockQuantity: 22,
     coinCost: 80,
-    icon: '🔌'
+    icon: '🔌',
+    pinoutDiagramUrl: 'https://images.unsplash.com/photo-1553406830-ef2513450d76?w=500&auto=format&fit=crop&q=80',
+    troubleshootingGuide: {
+      overview: 'Guia de Interface Serial (USB), Upload de Sketch e Compatibilidade de Nível Lógico para Arduino Uno R3.',
+      commonErrors: [
+        {
+          error: "Porta COM não aparece no Gerenciador de Dispositivos / Arduino IDE",
+          solution: 'Placas com chip CH340/CH341 (clones SMD) precisam do driver CH340 instalado manualmente — o Windows não reconhece nativamente. Placas originais usam FTDI e já são plug-and-play. Baixe o driver CH340 no site do fabricante e reinicie o PC. Confira também se o cabo USB é de dados (não apenas de carregamento).'
+        },
+        {
+          error: "avrdude: stk500_recv(): programmer is not responding",
+          solution: 'Verifique se a porta e a placa corretas estão selecionadas em Ferramentas > Placa/Porta. Feche o Monitor Serial antes de subir o código (ele ocupa a porta). Pressione o botão RESET físico da placa 1-2 segundos antes de clicar em "Carregar". Se persistir, o bootloader pode estar corrompido — regrave via outro Arduino como ISP.'
+        },
+        {
+          error: "Sensor I2C de 3.3V (ex: MMA8451) queima ou trava a leitura ao ligar no Arduino Uno",
+          solution: 'O Arduino Uno opera em lógica de 5V nos pinos digitais/analógicos, mas muitos sensores (MMA8451, MPU6050 sem regulador) toleram apenas 3.3V. Use a saída 3.3V da própria placa para alimentar o sensor e, se o módulo não tiver level shifter embutido, use um conversor de nível lógico bidirecional nas linhas SDA/SCL.'
+        }
+      ],
+      compatibleLibraries: ['Wire.h', 'Adafruit_MMA8451.h', 'Adafruit_Unified_Sensor.h', 'Servo.h'],
+      wiringDiagram: [
+        { pinFrom: 'MMA8451 VCC', pinTo: 'Arduino 3.3V', note: 'Confira o datasheet do módulo antes de ligar no 5V — muitos breakouts MMA8451 não têm regulador.' },
+        { pinFrom: 'MMA8451 GND', pinTo: 'Arduino GND', note: 'GND comum de referência.' },
+        { pinFrom: 'MMA8451 SDA', pinTo: 'Arduino A4 (SDA)', note: 'No Uno R3 o barramento I2C usa os pinos analógicos A4/A5, diferente do NodeMCU (D1/D2).' },
+        { pinFrom: 'MMA8451 SCL', pinTo: 'Arduino A5 (SCL)', note: 'Barramento de Clock I2C.' }
+      ]
+    }
   },
   {
     id: 'hw-3',
@@ -278,7 +303,36 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     category: 'SENSOR',
     stockQuantity: 18,
     coinCost: 60,
-    icon: '🧭'
+    icon: '🧭',
+    troubleshootingGuide: {
+      overview: 'Guia de Diagnóstico para Sensores Inerciais I2C — cobre tanto o Acelerômetro MMA8451 quanto o IMU MPU6050 (Acelerômetro + Giroscópio), incluindo conflitos de endereço e escolha correta de biblioteca.',
+      commonErrors: [
+        {
+          error: "I2C Scanner não encontra o MMA8451 nem em 0x1C nem em 0x1D",
+          solution: 'O pino SA0 do MMA8451 define o endereço: ligado ao GND = 0x1C, ligado ao 3.3V = 0x1D. Confira se o pino não está flutuando (sem ligação) — isso deixa o endereço instável.'
+        },
+        {
+          error: "Dois sensores MPU6050 no mesmo barramento colidem em 0x68",
+          solution: 'O MPU6050 usa o pino AD0 para alternar endereço: AD0 em GND (padrão interno) = 0x68, AD0 em 3.3V = 0x69. Ligue o AD0 de um dos dois módulos ao 3.3V para rodar ambos no mesmo barramento I2C.'
+        },
+        {
+          error: "I2C Scanner não encontra NENHUM dispositivo (0 devices found)",
+          solution: 'Falta de resistores pull-up de 4.7kΩ nas linhas SDA/SCL. A maioria dos breakouts já traz pull-ups onboard, mas ao encadear vários módulos no mesmo barramento os pull-ups se somam e podem enfraquecer o sinal — remova os resistores extras dos módulos secundários se o scanner ainda falhar.'
+        },
+        {
+          error: "Erro de compilação ou leituras absurdas (NaN / valores travados em zero)",
+          solution: 'Confusão entre bibliotecas: Adafruit_MMA8451.h é exclusiva para o chip MMA8451 (acelerômetro simples), enquanto MPU6050.h (ex: bibliotecas Electronic Cats ou i2cdevlib) é para o MPU6050 (acelerômetro + giroscópio). Confirme o chip impresso no módulo físico antes de instalar a biblioteca — usar a errada compila mas lê registradores I2C incorretos.'
+        }
+      ],
+      compatibleLibraries: ['Adafruit_MMA8451.h', 'Adafruit_Unified_Sensor.h', 'Wire.h', 'MPU6050.h', 'I2Cdev.h'],
+      wiringDiagram: [
+        { pinFrom: 'Sensor VCC', pinTo: 'Placa 3V3', note: 'MMA8451 e MPU6050 operam em 3.3V — nunca ligar diretamente no 5V (Vin).' },
+        { pinFrom: 'Sensor GND', pinTo: 'Placa GND', note: 'GND comum de referência.' },
+        { pinFrom: 'Sensor SDA', pinTo: 'D2/GPIO4 (NodeMCU) ou A4 (Arduino Uno)', note: 'Barramento de Dados I2C — o pino varia conforme a placa controladora usada.' },
+        { pinFrom: 'Sensor SCL', pinTo: 'D1/GPIO5 (NodeMCU) ou A5 (Arduino Uno)', note: 'Barramento de Clock I2C.' },
+        { pinFrom: 'MMA8451 SA0 / MPU6050 AD0', pinTo: 'GND ou 3V3', note: 'Define o endereço I2C do sensor: SA0 GND=0x1C / 3V3=0x1D (MMA8451); AD0 GND=0x68 / 3V3=0x69 (MPU6050).' }
+      ]
+    }
   },
   {
     id: 'hw-4',
@@ -286,7 +340,26 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     category: 'TOOLS',
     stockQuantity: 8,
     coinCost: 40,
-    icon: '🧵'
+    icon: '🧵',
+    troubleshootingGuide: {
+      overview: 'Guia rápido de armazenamento e diagnóstico de falhas de extrusão para Filamento PLA — o PLA é higroscópico e absorve umidade do ar, o que compromete a impressão.',
+      commonErrors: [
+        {
+          error: "Estalos/crepitação (crackling) e bolhas na superfície durante a impressão",
+          solution: 'Sinal clássico de filamento úmido. Seque o rolo em desidratador de alimentos ou forno doméstico a 45-50°C por 4-6 horas antes de reimprimir.'
+        },
+        {
+          error: "Sub-extrusão ou entupimento (clog) no bico",
+          solution: 'Filamento guardado fora da embalagem selada por longos períodos incha levemente e passa a raspar dentro do hotend. Armazene sempre em recipiente hermético com sachês de sílica gel entre usos.'
+        },
+        {
+          error: "Fios (stringing) excessivos entre partes da peça",
+          solution: 'Normalmente não é umidade, e sim temperatura do bico muito alta ou retração mal calibrada. Reduza a temperatura em 5-10°C e aumente a distância/velocidade de retração no fatiador (Cura/PrusaSlicer).'
+        }
+      ],
+      compatibleLibraries: [],
+      wiringDiagram: []
+    }
   }
 ];
 

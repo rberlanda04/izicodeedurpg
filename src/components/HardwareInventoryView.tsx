@@ -14,10 +14,21 @@ export const HardwareInventoryView: React.FC<HardwareInventoryViewProps> = ({
   userCoins,
   onRequestHardware
 }) => {
-  const [selectedItem, setSelectedItem] = useState<HardwareItem>(catalog[0]);
+  // Store only the id so the selection always reflects the live catalog item
+  // (stockQuantity changes after each requisition and must stay in sync here).
+  const [selectedItemId, setSelectedItemId] = useState<string>(catalog[0]?.id ?? '');
   const [purchaseMsg, setPurchaseMsg] = useState('');
 
+  const selectedItem = catalog.find((item) => item.id === selectedItemId) ?? catalog[0];
+
   const handleRequestClick = (item: HardwareItem) => {
+    if (item.stockQuantity <= 0) {
+      soundEngine.playErrorBeep();
+      setPurchaseMsg('❌ Item esgotado no laboratório!');
+      setTimeout(() => setPurchaseMsg(''), 2500);
+      return;
+    }
+
     if (userCoins < item.coinCost) {
       soundEngine.playErrorBeep();
       setPurchaseMsg('❌ Izicoins insuficientes!');
@@ -71,7 +82,7 @@ export const HardwareInventoryView: React.FC<HardwareInventoryViewProps> = ({
                 key={item.id}
                 onClick={() => {
                   soundEngine.playItemCollect();
-                  setSelectedItem(item);
+                  setSelectedItemId(item.id);
                 }}
                 className={`p-4 border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
                   isSelected
@@ -110,9 +121,16 @@ export const HardwareInventoryView: React.FC<HardwareInventoryViewProps> = ({
 
               <button
                 onClick={() => handleRequestClick(selectedItem)}
-                className="pixel-btn pixel-btn-primary"
+                disabled={selectedItem.stockQuantity <= 0}
+                className={
+                  selectedItem.stockQuantity <= 0
+                    ? 'pixel-btn grayscale opacity-50 cursor-not-allowed hover:!translate-y-0'
+                    : 'pixel-btn pixel-btn-primary'
+                }
               >
-                REQUISITAR HARDWARE (🪙 {selectedItem.coinCost})
+                {selectedItem.stockQuantity <= 0
+                  ? 'ESGOTADO NO LABORATÓRIO'
+                  : `REQUISITAR HARDWARE (🪙 ${selectedItem.coinCost})`}
               </button>
             </div>
 
@@ -142,43 +160,47 @@ export const HardwareInventoryView: React.FC<HardwareInventoryViewProps> = ({
                 </div>
 
                 {/* Wiring Pinout Table */}
-                <div className="space-y-2">
-                  <h5 className="font-pixel text-[11px] text-[#00ffaa] flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5" /> PINAGEM I2C ENTRE ESP8266 & ACELERÔMETRO MMA8451:
-                  </h5>
-                  <div className="bg-[#090c15] p-3 border border-[#2e3859] overflow-x-auto">
-                    <table className="w-full text-left font-mono text-xs">
-                      <thead>
-                        <tr className="border-b border-[#2e3859] text-slate-400">
-                          <th className="pb-1">Pino Sensor (MMA8451)</th>
-                          <th className="pb-1">Pino Placa (ESP8266 / NodeMCU)</th>
-                          <th className="pb-1">Observação Técnica</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#2e3859]">
-                        {selectedItem.troubleshootingGuide.wiringDiagram.map((row, idx) => (
-                          <tr key={idx} className="text-slate-200">
-                            <td className="py-1.5 text-[#00e1ff]">{row.pinFrom}</td>
-                            <td className="py-1.5 text-[#00ffaa]">{row.pinTo}</td>
-                            <td className="py-1.5 text-slate-400 text-[11px]">{row.note}</td>
+                {selectedItem.troubleshootingGuide.wiringDiagram.length > 0 && (
+                  <div className="space-y-2">
+                    <h5 className="font-pixel text-[11px] text-[#00ffaa] flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5" /> DIAGRAMA DE PINAGEM ({selectedItem.name}):
+                    </h5>
+                    <div className="bg-[#090c15] p-3 border border-[#2e3859] overflow-x-auto">
+                      <table className="w-full text-left font-mono text-xs">
+                        <thead>
+                          <tr className="border-b border-[#2e3859] text-slate-400">
+                            <th className="pb-1">Pino Origem</th>
+                            <th className="pb-1">Pino Destino</th>
+                            <th className="pb-1">Observação Técnica</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="divide-y divide-[#2e3859]">
+                          {selectedItem.troubleshootingGuide.wiringDiagram.map((row, idx) => (
+                            <tr key={idx} className="text-slate-200">
+                              <td className="py-1.5 text-[#00e1ff]">{row.pinFrom}</td>
+                              <td className="py-1.5 text-[#00ffaa]">{row.pinTo}</td>
+                              <td className="py-1.5 text-slate-400 text-[11px]">{row.note}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Compatible Libraries */}
-                <div className="bg-[#090c15] p-3 border border-[#2e3859]">
-                  <p className="font-pixel text-[10px] text-slate-400 mb-1">BIBLIOTECAS C++ REQUERIDAS (ARDUINO IDE):</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedItem.troubleshootingGuide.compatibleLibraries.map((lib) => (
-                      <span key={lib} className="font-mono text-xs bg-[#161b2e] border border-[#00e1ff] text-[#00e1ff] px-2 py-0.5">
-                        #include &lt;{lib}&gt;
-                      </span>
-                    ))}
+                {selectedItem.troubleshootingGuide.compatibleLibraries.length > 0 && (
+                  <div className="bg-[#090c15] p-3 border border-[#2e3859]">
+                    <p className="font-pixel text-[10px] text-slate-400 mb-1">BIBLIOTECAS C++ REQUERIDAS (ARDUINO IDE):</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedItem.troubleshootingGuide.compatibleLibraries.map((lib) => (
+                        <span key={lib} className="font-mono text-xs bg-[#161b2e] border border-[#00e1ff] text-[#00e1ff] px-2 py-0.5">
+                          #include &lt;{lib}&gt;
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <div className="bg-[#090c15] p-4 text-center font-body text-xs text-slate-400 border border-[#2e3859]">

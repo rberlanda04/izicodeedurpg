@@ -240,10 +240,29 @@ export function App() {
 
   // Request Hardware
   const handleRequestHardware = (itemId: string, cost: number) => {
-    setUser((prev) => ({
-      ...prev,
-      izicoins: prev.izicoins - cost
-    }));
+    const item = catalog.find((i) => i.id === itemId);
+
+    // Item unknown or already out of stock: block the request entirely, no coin deduction.
+    if (!item || item.stockQuantity <= 0) return;
+
+    setCatalog((prev) =>
+      prev.map((i) => (i.id === itemId ? { ...i, stockQuantity: i.stockQuantity - 1 } : i))
+    );
+
+    setUser((prev) => {
+      const alreadyOwned = prev.inventory.find((inv) => inv.itemId === itemId);
+      const nextInventory = alreadyOwned
+        ? prev.inventory.map((inv) =>
+            inv.itemId === itemId ? { ...inv, qty: inv.qty + 1 } : inv
+          )
+        : [...prev.inventory, { itemId: item.id, name: item.name, qty: 1, icon: item.icon }];
+
+      return {
+        ...prev,
+        izicoins: prev.izicoins - cost,
+        inventory: nextInventory
+      };
+    });
   };
 
   // Unlock Curiosity Card
