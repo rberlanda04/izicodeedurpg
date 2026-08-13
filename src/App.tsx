@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Header } from './components/Header';
 import { PasscodeModal } from './components/PasscodeModal';
@@ -22,28 +22,89 @@ import {
   HACKATHON_CAMPAIGN,
   QUICK_HACK_ALERT
 } from './data/mockData';
-import type { UserProfile, Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, SDGGoal } from './types';
+import type { UserProfile, Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, SDGGoal, QuickHackAlert } from './types';
 import { soundEngine } from './services/soundEngine';
+import { loadState, saveState, debounce } from './services/persistence';
 
 import './styles/pixel.css';
 import { Zap, X, ShieldAlert } from 'lucide-react';
 
 export function App() {
-  const [user, setUser] = useState<UserProfile>(INITIAL_USER);
-  const [guilds, setGuilds] = useState<Guild[]>(INITIAL_GUILDS);
-  const [skills, setSkills] = useState<SkillNode[]>(SKILL_NODES);
-  const [quests, setQuests] = useState<Quest[]>(QUESTS);
-  const [catalog, setCatalog] = useState<HardwareItem[]>(HARDWARE_CATALOG);
-  const [curiosities, setCuriosities] = useState<CuriosityCard[]>(CURIOSITY_CARDS);
-  const [campaign, setCampaign] = useState<BossRaidCampaign>(HACKATHON_CAMPAIGN);
-  const [roomPasscode, setRoomPasscode] = useState('IZI-9482');
-  const [quickHack, setQuickHack] = useState(QUICK_HACK_ALERT);
+  const [user, setUser] = useState<UserProfile>(() => loadState('izicode:v1:user', INITIAL_USER));
+  const [guilds, setGuilds] = useState<Guild[]>(() => loadState('izicode:v1:guilds', INITIAL_GUILDS));
+  const [skills, setSkills] = useState<SkillNode[]>(() => loadState('izicode:v1:skills', SKILL_NODES));
+  const [quests, setQuests] = useState<Quest[]>(() => loadState('izicode:v1:quests', QUESTS));
+  const [catalog, setCatalog] = useState<HardwareItem[]>(() => loadState('izicode:v1:catalog', HARDWARE_CATALOG));
+  const [curiosities, setCuriosities] = useState<CuriosityCard[]>(() =>
+    loadState('izicode:v1:curiosities', CURIOSITY_CARDS)
+  );
+  const [campaign, setCampaign] = useState<BossRaidCampaign>(() =>
+    loadState('izicode:v1:campaign', HACKATHON_CAMPAIGN)
+  );
+  const [roomPasscode, setRoomPasscode] = useState<string>(() =>
+    loadState('izicode:v1:roomPasscode', 'IZI-9482')
+  );
+  const [quickHack, setQuickHack] = useState<QuickHackAlert>(() =>
+    loadState('izicode:v1:quickHack', QUICK_HACK_ALERT)
+  );
   const [quickHackInput, setQuickHackInput] = useState('');
+  // Tracks whether THIS student session has confirmed the room passcode —
+  // distinct from roomPasscode itself, which is the code the Game Master
+  // broadcasts. Joining a room must never mutate the broadcast code.
+  const [hasJoinedRoom, setHasJoinedRoom] = useState<boolean>(() =>
+    loadState('izicode:v1:hasJoinedRoom', false)
+  );
 
   const [activeTab, setActiveTab] = useState('profile');
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isPasscodeModalOpen, setIsPasscodeModalOpen] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
+
+  // Persist state to localStorage, debounced so rapid successive updates
+  // (e.g. several setState calls in one handler) collapse into one write.
+  const debouncedSaveRef = useRef(
+    debounce(
+      (state: {
+        user: UserProfile;
+        guilds: Guild[];
+        skills: SkillNode[];
+        quests: Quest[];
+        catalog: HardwareItem[];
+        curiosities: CuriosityCard[];
+        campaign: BossRaidCampaign;
+        roomPasscode: string;
+        quickHack: QuickHackAlert;
+        hasJoinedRoom: boolean;
+      }) => {
+        saveState('izicode:v1:user', state.user);
+        saveState('izicode:v1:guilds', state.guilds);
+        saveState('izicode:v1:skills', state.skills);
+        saveState('izicode:v1:quests', state.quests);
+        saveState('izicode:v1:catalog', state.catalog);
+        saveState('izicode:v1:curiosities', state.curiosities);
+        saveState('izicode:v1:campaign', state.campaign);
+        saveState('izicode:v1:roomPasscode', state.roomPasscode);
+        saveState('izicode:v1:quickHack', state.quickHack);
+        saveState('izicode:v1:hasJoinedRoom', state.hasJoinedRoom);
+      },
+      300
+    )
+  );
+
+  useEffect(() => {
+    debouncedSaveRef.current({
+      user,
+      guilds,
+      skills,
+      quests,
+      catalog,
+      curiosities,
+      campaign,
+      roomPasscode,
+      quickHack,
+      hasJoinedRoom
+    });
+  }, [user, guilds, skills, quests, catalog, curiosities, campaign, roomPasscode, quickHack, hasJoinedRoom]);
 
   // Global Keyboard Listener for CTRL + ~ to trigger Hacker Terminal
   useEffect(() => {
@@ -436,7 +497,8 @@ export function App() {
         isOpen={isPasscodeModalOpen}
         onClose={() => setIsPasscodeModalOpen(false)}
         currentPasscode={roomPasscode}
-        onJoinRoom={(code) => setRoomPasscode(code)}
+        hasJoinedRoom={hasJoinedRoom}
+        onJoinRoom={() => setHasJoinedRoom(true)}
       />
 
       <HackerTerminalModal

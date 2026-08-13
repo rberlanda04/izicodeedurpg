@@ -6,13 +6,22 @@ interface PasscodeModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentPasscode: string;
-  onJoinRoom: (code: string) => void;
+  /** Whether this student session has already confirmed the room code. */
+  hasJoinedRoom: boolean;
+  /**
+   * Called when the student successfully confirms the passcode currently
+   * displayed by the Game Master. This only marks the session as joined —
+   * it must NEVER change the room's active code (that's the Game Master's
+   * "ATUALIZAR CÓDIGO DA SALA" action).
+   */
+  onJoinRoom: () => void;
 }
 
 export const PasscodeModal: React.FC<PasscodeModalProps> = ({
   isOpen,
   onClose,
   currentPasscode,
+  hasJoinedRoom,
   onJoinRoom
 }) => {
   const [inputCode, setInputCode] = useState('');
@@ -34,7 +43,7 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
       soundEngine.playLevelUp();
       setMessage('✅ Conectado com Sucesso à Sala de Aprendizado!');
       setTimeout(() => {
-        onJoinRoom(inputCode);
+        onJoinRoom();
         onClose();
       }, 1000);
     } else {
@@ -76,7 +85,15 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
 
           <div className="flex items-center justify-center gap-4 text-xs font-mono text-slate-300 mt-2">
             <span className="flex items-center gap-1">
-              <Users className="w-3.5 h-3.5 text-[#ffb700]" /> 32 Alunos Conectados
+              {hasJoinedRoom ? (
+                <>
+                  <Users className="w-3.5 h-3.5 text-[#00ffaa]" /> Você está conectado
+                </>
+              ) : (
+                <>
+                  <Users className="w-3.5 h-3.5 text-[#ffb700]" /> Você ainda não entrou
+                </>
+              )}
             </span>
             <span className="flex items-center gap-1">
               <Zap className="w-3.5 h-3.5 text-[#00ffaa]" /> Sessão Ativa
