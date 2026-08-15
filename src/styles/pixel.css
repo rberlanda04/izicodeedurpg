@@ -21,7 +21,13 @@
   --color-text-dim: #94a3b8;
 }
 
-body {
+/*
+ * Este arquivo só se aplica no "Modo Hacker" (data-theme="hacker" na
+ * raiz do documento, ver src/contexts/ThemeContext.tsx). O modo padrão
+ * "STEM amigável" usa os tokens em src/index.css — o body abaixo fica
+ * escopado para não vazar o tema escuro/CRT pro modo padrão.
+ */
+[data-theme='hacker'] body {
   margin: 0;
   background-color: var(--color-bg);
   color: var(--color-text);

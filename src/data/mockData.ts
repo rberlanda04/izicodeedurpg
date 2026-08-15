@@ -1,37 +1,5 @@
-import type { UserProfile, Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, QuickHackAlert } from '../types';
-
-export const INITIAL_USER: UserProfile = {
-  uid: 'user-77',
-  adventureName: 'CyberKnight_99', // LGPD Anonymized Codename
-  realName: 'Gabriel Oliveira',
-  role: 'ADVENTURER',
-  level: 4,
-  xp: 1450,
-  xpToNextLevel: 2000,
-  izicoins: 380,
-  guildId: 'guild-1',
-  guildRole: 'MAKER',
-  avatarConfig: {
-    head: '🤖',
-    body: '🛡️',
-    accessory: '⚡',
-    color: '#00e1ff'
-  },
-  unlockedSkills: ['logic_unplugged', 'scratch_basics', 'microbit_starter', 'esp8266_advanced'],
-  badges: [
-    { id: 'b1', name: 'Primeira Linha', description: 'Escreveu seu primeiro algoritmo sem erros.', icon: '📜' },
-    { id: 'b2', name: 'Mestre da Solda', description: 'Completou um circuito impresso perfeito.', icon: '⚡' },
-    { id: 'b3', name: 'Guardião ODS', description: 'Criou um projeto alinhado à Meta 7.a da ONU.', icon: '🌱' },
-    { id: 'b4', name: 'Cypher Hacker', description: 'Desvendou o primeiro enigma do Terminal CLI.', icon: '👾', isSecret: true }
-  ],
-  inventory: [
-    { itemId: 'hw-1', name: 'Placa NodeMCU 1.0 (ESP8266)', qty: 1, icon: '📟' },
-    { itemId: 'hw-3', name: 'Acelerômetro MMA8451 I2C', qty: 1, icon: '🧭' },
-    { itemId: 'hw-4', name: 'Kit Resistores 220Ω', qty: 5, icon: '🔋' }
-  ],
-  unlockedCuriosities: ['curio-1', 'curio-3'],
-  heroContractSigned: true
-};
+import type { Guild, SkillNode, Quest, HardwareItem, CuriosityCard, BossRaidCampaign, QuickHackAlert } from '../types';
+import { PROJECT_CATALOG } from './projectCatalog';
 
 export const INITIAL_GUILDS: Guild[] = [
   {
@@ -65,6 +33,10 @@ export const INITIAL_GUILDS: Guild[] = [
   }
 ];
 
+// Árvore de habilidades — os ids batem com os que src/data/projectCatalog.ts
+// (gerado do catálogo real de 37 projetos do izicode-landing) usa em
+// requiredSkills, então cada ferramenta real (Arduino, Python, Tinkercad,
+// Raspberry Pi, Makey Makey) tem um nó correspondente para destravar.
 export const SKILL_NODES: SkillNode[] = [
   // Tier Básico
   {
@@ -85,6 +57,45 @@ export const SKILL_NODES: SkillNode[] = [
     description: 'Fluxogramas e lógica condicional aplicada à resolução de problemas cotidianos.',
     icon: '🔀'
   },
+  {
+    id: 'circuitos_makey_makey',
+    title: 'Circuitos com Makey Makey',
+    tier: 'BASIC',
+    category: 'ELECTRONICS',
+    prerequisites: [],
+    hardwareUnlocked: ['makey_makey'],
+    description: 'Condutividade elétrica de materiais do dia a dia (frutas, água, grafite) para fechar circuitos com o próprio corpo.',
+    icon: '🍌'
+  },
+  {
+    id: 'arduino_basico',
+    title: 'Eletrônica Básica com Arduino',
+    tier: 'BASIC',
+    category: 'ELECTRONICS',
+    prerequisites: ['logic_unplugged'],
+    hardwareUnlocked: ['arduino_uno', 'leds', 'resistores', 'sensores_basicos'],
+    description: 'LEDs, resistores, botões e sensores simples com Arduino Uno e C++ — a porta de entrada para eletrônica programável.',
+    icon: '🔌'
+  },
+  {
+    id: 'lego_wedo',
+    title: 'Robótica Inicial com Lego WeDo 2.0',
+    tier: 'BASIC',
+    category: 'ELECTRONICS',
+    prerequisites: [],
+    hardwareUnlocked: ['lego_wedo2'],
+    description: 'Primeiro contato com robótica motorizada: engrenagens simples, um motor e um sensor, programados em blocos no app oficial.',
+    icon: '🧱'
+  },
+  {
+    id: 'identidade_visual_canva',
+    title: 'Identidade Visual com Canva',
+    tier: 'BASIC',
+    category: 'DESIGN',
+    prerequisites: [],
+    description: 'Criação de logotipos, paletas de cor e materiais gráficos simples para dar cara a um projeto ou a uma guilda.',
+    icon: '🎨'
+  },
   // Tier Intermediário
   {
     id: 'scratch_basics',
@@ -103,6 +114,52 @@ export const SKILL_NODES: SkillNode[] = [
     prerequisites: ['scratch_basics'],
     description: 'Desenvolvimento de aplicativos móveis para Android usando sensores de smartphone.',
     icon: '📱'
+  },
+  {
+    id: 'python_intro',
+    title: 'Programação em Python',
+    tier: 'INTERMEDIATE',
+    category: 'LOGIC',
+    prerequisites: ['scratch_basics'],
+    description: 'Salto dos blocos para código em texto: variáveis, laços, condicionais e strings em Python puro.',
+    icon: '🐍'
+  },
+  {
+    id: 'modelagem_3d_tinkercad',
+    title: 'Modelagem 3D no Tinkercad',
+    tier: 'INTERMEDIATE',
+    category: 'PROTOTYPING',
+    prerequisites: ['logic_unplugged'],
+    hardwareUnlocked: ['tinkercad'],
+    description: 'Geometria espacial e prototipagem digital: sólidos, agrupamentos e furos para desenhar antes de fabricar.',
+    icon: '🧊'
+  },
+  {
+    id: 'minecraft_education',
+    title: 'Pensamento Computacional no Minecraft Education',
+    tier: 'INTERMEDIATE',
+    category: 'BLOCKS',
+    prerequisites: ['scratch_basics'],
+    description: 'Code Builder e circuitos de redstone para resolver desafios de construção e automação dentro do jogo.',
+    icon: '⛏️'
+  },
+  {
+    id: 'open_roberta_lab',
+    title: 'Programação de Robôs no Open Roberta Lab',
+    tier: 'INTERMEDIATE',
+    category: 'BLOCKS',
+    prerequisites: ['scratch_basics'],
+    description: 'Ambiente de blocos livre (NEPO) usado para programar diferentes robôs educacionais na mesma interface.',
+    icon: '🧭'
+  },
+  {
+    id: 'apresentacao_publica',
+    title: 'Apresentação de Projetos com Gamma & Office 365',
+    tier: 'INTERMEDIATE',
+    category: 'DESIGN',
+    prerequisites: ['identidade_visual_canva'],
+    description: 'Estruturar um pitch: slides gerados com IA no Gamma e documentação/planilhas de dados no Office 365.',
+    icon: '📊'
   },
   // Tier Avançado
   {
@@ -131,8 +188,8 @@ export const SKILL_NODES: SkillNode[] = [
     title: 'Microcontroladores IoT (ESP8266 & NodeMCU 1.0)',
     tier: 'SPECIALIST',
     category: 'PROTOTYPING',
-    prerequisites: ['microbit_starter'],
-    hardwareUnlocked: ['esp8266', 'nodemcu_1.0', 'arduino_uno', 'mma8451_accel'],
+    prerequisites: ['arduino_basico'],
+    hardwareUnlocked: ['esp8266', 'nodemcu_1.0', 'mma8451_accel'],
     description: 'Conectividade Wi-Fi, comunicação bus I2C, leitura de acelerômetros analógicos/digitais e telemetria HTTP/MQTT.',
     icon: '📡'
   },
@@ -141,10 +198,30 @@ export const SKILL_NODES: SkillNode[] = [
     title: 'Fabricação Digital (Laser & Impressora 3D)',
     tier: 'SPECIALIST',
     category: 'PROTOTYPING',
-    prerequisites: ['esp8266_advanced'],
+    prerequisites: ['modelagem_3d_tinkercad'],
     allowsResourceBooking: true,
-    description: 'Modelagem 3D no Tinkercad/Fusion360, fatiamento Cura e corte vetorial em acrílico/MDF.',
+    description: 'Do modelo 3D à peça física: fatiamento no Cura e corte vetorial em acrílico/MDF.',
     icon: '🖨️'
+  },
+  {
+    id: 'raspberry_pi_avancado',
+    title: 'Sistemas Embarcados com Raspberry Pi',
+    tier: 'SPECIALIST',
+    category: 'PROTOTYPING',
+    prerequisites: ['python_intro'],
+    hardwareUnlocked: ['raspberry_pi'],
+    description: 'Linux embarcado, GPIO e projetos completos de computador de placa única.',
+    icon: '🍓'
+  },
+  {
+    id: 'drone_intro',
+    title: 'Aeromodelismo Programável (Drones)',
+    tier: 'SPECIALIST',
+    category: 'ELECTRONICS',
+    prerequisites: ['arduino_basico'],
+    hardwareUnlocked: ['drone_kit'],
+    description: 'Controladoras de voo, calibração de motores e missões autônomas simples com drones educacionais.',
+    icon: '🚁'
   },
   // Secret Node (Hacker Hidden Quest)
   {
@@ -160,63 +237,158 @@ export const SKILL_NODES: SkillNode[] = [
   }
 ];
 
-export const QUESTS: Quest[] = [
+// Mural inicial de uma turma nova: um recorte com 1-2 projetos reais do
+// catálogo (src/data/projectCatalog.ts) por tier, escolhidos pela variedade
+// de ferramentas, mais a quest secreta do Terminal Hacker.
+const STARTER_PROJECT_IDS = [
+  'proj-piano-de-frutas', // BASIC · Makey Makey
+  'proj-jogo-reciclagem-scratch', // BASIC · Scratch
+  'proj-semaforo-inteligente', // BASIC · Arduino
+  'proj-robo-seguidor-linha', // INTERMEDIATE · Arduino
+  'proj-cidade-inteligente-tinkercad', // INTERMEDIATE · Tinkercad
+  'proj-pedometro-microbit', // INTERMEDIATE · Micro:bit + Python
+  'proj-braco-robotico-servo', // ADVANCED · Arduino
+  'proj-carro-autonomo-nepo', // ADVANCED · Arduino + NEPO
+  'proj-retropie-console' // SPECIALIST · Raspberry Pi
+];
+
+// Missões escritas à mão para as ferramentas que entraram na árvore depois
+// do catálogo de 37 projetos (pasta de logos: App Inventor, Lego WeDo 2.0,
+// Minecraft Education, Open Roberta Lab, drones, Canva, Gamma/Office 365) —
+// cada uma garante que o nó de habilidade correspondente tenha pelo menos
+// uma missão real para destravar, e não fique “órfão” na trilha.
+const TOOL_QUESTS: Quest[] = [
   {
-    id: 'quest-1',
-    title: 'Estação Meteorológica IoT Comunitária',
-    description: 'Projete um protótipo com ESP8266/NodeMCU 1.0 que leia temperatura, umidade e envie alertas automáticos contra enchentes na sua região.',
-    tier: 'SPECIALIST',
-    requiredSkills: ['esp8266_advanced'],
-    sdgGoals: ['13.a', '7.a'],
-    xpReward: 450,
-    coinReward: 120,
-    hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Sensor DHT11', 'Display OLED I2C'],
-    status: 'ACTIVE',
-    validationSteps: [
-      'Montar circuito na protoboard sem curto-circuito.',
-      'Conectar o ESP8266 à rede Wi-Fi da escola.',
-      'Apresentar os dados no painel da guilda ao Game Master.'
-    ]
-  },
-  {
-    id: 'quest-2',
-    title: 'Monitor de Consumo Consciente de Energia',
-    description: 'Crie um medidor com Arduino/ESP8266 para medir o tempo de luzes acesas em salas vazias e emitir um bipe de alerta.',
-    tier: 'ADVANCED',
-    requiredSkills: ['microbit_starter'],
-    sdgGoals: ['12.c', '7.a'],
+    id: 'tool-quest-app-inventor',
+    title: 'Fiscal Verde: App de Denúncia de Descarte Irregular',
+    description:
+      'Crie um aplicativo com App Inventor que use a câmera e a localização do celular para registrar e mapear pontos de descarte irregular de lixo no bairro.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['app_inventor'],
+    sdgGoals: ['12'],
     xpReward: 350,
     coinReward: 90,
-    hardwareRequired: ['Sensor LDR de Luz', 'Buzzer 5V', 'Arduino Uno'],
+    hardwareRequired: ['App Inventor', 'Smartphone Android'],
     status: 'ACTIVE',
     validationSteps: [
-      'Programar o limiar de iluminação.',
-      'Demonstrar o disparo do alarme ao escurecer o sensor.'
+      'Demonstrar o app registrando uma foto com localização em um smartphone real.',
+      'Explicar ao Game Master como os dados poderiam chegar até a prefeitura.'
     ]
   },
   {
-    id: 'quest-3',
-    title: 'Dispositivo Acessível para Deficientes Visuais',
-    description: 'Utilize um sensor acelerômetro MMA8451 acoplado a uma bengala para detectar quedas e inclinações bruscas.',
-    tier: 'SPECIALIST',
-    requiredSkills: ['esp8266_advanced'],
-    sdgGoals: ['4.3'],
-    xpReward: 500,
-    coinReward: 150,
-    hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Acelerômetro MMA8451 I2C'],
+    id: 'tool-quest-lego-wedo',
+    title: 'Milo, o Rover Explorador',
+    description:
+      'Monte e programe o Milo, o rover espacial oficial do Lego WeDo 2.0, para avançar, desviar de obstáculos e coletar uma "amostra".',
+    tier: 'BASIC',
+    requiredSkills: ['lego_wedo'],
+    sdgGoals: ['4'],
+    xpReward: 200,
+    coinReward: 55,
+    hardwareRequired: ['Lego WeDo 2.0'],
     status: 'ACTIVE',
     validationSteps: [
-      'Calibrar os eixos X, Y e Z do acelerômetro.',
-      'Validar o envio de alerta de queda via MQTT/Terminal.'
+      'Demonstrar o rover se movendo e parando ao detectar o sensor de movimento.',
+      'Explicar ao Game Master qual bloco controla a potência do motor.'
     ]
   },
+  {
+    id: 'tool-quest-minecraft',
+    title: 'Cidade Circular em Minecraft',
+    description:
+      'Use o Code Builder do Minecraft Education para automatizar a coleta e separação de materiais recicláveis dentro de uma cidade construída no jogo.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['minecraft_education'],
+    sdgGoals: ['11'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['Minecraft Education'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Demonstrar o código automatizando pelo menos uma tarefa repetitiva na construção.',
+      'Apresentar a planta da cidade e sua lógica de coleta seletiva ao Game Master.'
+    ]
+  },
+  {
+    id: 'tool-quest-open-roberta',
+    title: 'Robô Universal: Seguidor de Linha no Open Roberta Lab',
+    description:
+      'Programe em blocos NEPO, no Open Roberta Lab, um robô seguidor de linha — a mesma lógica funciona em diferentes robôs compatíveis com a plataforma.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['open_roberta_lab'],
+    sdgGoals: ['9'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['Open Roberta Lab'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Demonstrar o robô completando o trajeto sem sair da linha.',
+      'Explicar ao Game Master a diferença entre programar no Open Roberta e no Scratch.'
+    ]
+  },
+  {
+    id: 'tool-quest-drone',
+    title: 'Guardião Aéreo: Monitoramento de Área Verde',
+    description:
+      'Calibre e pilote um drone educacional para sobrevoar e fotografar uma área verde da escola, identificando sinais de desmatamento ou lixo acumulado.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['drone_intro'],
+    sdgGoals: ['13'],
+    xpReward: 650,
+    coinReward: 170,
+    hardwareRequired: ['Drone Educacional'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Realizar um voo controlado completo sem colisões.',
+      'Apresentar as fotos aéreas e um resumo do que foi identificado na área.'
+    ]
+  },
+  {
+    id: 'tool-quest-canva',
+    title: 'Identidade da Guilda: Marca Própria',
+    description:
+      'Use o Canva para criar o logotipo, a paleta de cores e um banner de apresentação da sua guilda, prontos para usar no perfil e nas missões em equipe.',
+    tier: 'BASIC',
+    requiredSkills: ['identidade_visual_canva'],
+    sdgGoals: ['4'],
+    xpReward: 200,
+    coinReward: 55,
+    hardwareRequired: ['Canva'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Apresentar o logotipo e a paleta de cores da guilda ao Game Master.',
+      'Aplicar a identidade visual no emblema da guilda na plataforma.'
+    ]
+  },
+  {
+    id: 'tool-quest-pitch-day',
+    title: 'Pitch Day: Apresente seu Protótipo',
+    description:
+      'Monte uma apresentação com o Gamma (gerada por IA) e organize os dados do seu projeto numa planilha do Office 365, para um pitch de 3 minutos à turma.',
+    tier: 'ADVANCED',
+    requiredSkills: ['apresentacao_publica'],
+    sdgGoals: ['4'],
+    xpReward: 500,
+    coinReward: 130,
+    hardwareRequired: ['Gamma', 'Office 365'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Apresentar o pitch em até 3 minutos, com slides gerados no Gamma.',
+      'Mostrar a planilha de dados/custos do projeto no Office 365.'
+    ]
+  }
+];
+
+export const QUESTS: Quest[] = [
+  ...PROJECT_CATALOG.filter((q) => STARTER_PROJECT_IDS.includes(q.id)),
+  ...TOOL_QUESTS,
   {
     id: 'quest-secret-1',
     title: 'Enigma Cypher: O Sinal Criptografado',
     description: 'Quest Secreta encontrada através do Terminal Hacker. Encontre o código hex gravado na Cortadora Laser para destravar o sinal.',
     tier: 'SPECIALIST',
     requiredSkills: ['logic_unplugged'],
-    sdgGoals: ['4.3'],
+    sdgGoals: ['4'],
     xpReward: 600,
     coinReward: 200,
     hardwareRequired: ['Terminal CLI', 'Scanner de QR Code'],
@@ -230,135 +402,13 @@ export const QUESTS: Quest[] = [
   }
 ];
 
-// Pool of quest blueprints used by the AI Quest Engine (src/services/questEngine.ts)
-// to recommend missions based on the Guild's already-unlocked skills/hardware.
+// Pool completo (todos os 37 projetos reais) usado pelo Motor de Missões IA
+// (src/services/questEngine.ts como fallback local, e o serviço de IA da
+// NVIDIA como inspiração) para recomendar missões com base nas
+// habilidades/hardware já desbloqueados pela guilda.
 export const QUEST_TEMPLATES: Omit<Quest, 'id' | 'status'>[] = [
-  {
-    title: 'Jogo Educativo: Aventura da Alfabetização Digital',
-    description: 'Crie um jogo 2D em blocos que ensine crianças a identificar sinais de trânsito e regras básicas de convivência escolar.',
-    tier: 'INTERMEDIATE',
-    requiredSkills: [],
-    sdgGoals: ['4.3'],
-    xpReward: 200,
-    coinReward: 50,
-    hardwareRequired: ['Computador/Tablet com Scratch'],
-    validationSteps: [
-      'Apresentar ao menos 3 fases jogáveis sem erros de lógica.',
-      'Explicar ao Game Master as variáveis de pontuação utilizadas.'
-    ]
-  },
-  {
-    title: 'App Reciclador: Caça ao Lixo Certo',
-    description: 'Desenvolva um aplicativo móvel com App Inventor que ensine a separação correta de resíduos usando a câmera do smartphone.',
-    tier: 'INTERMEDIATE',
-    requiredSkills: ['app_inventor'],
-    sdgGoals: ['12.c'],
-    xpReward: 280,
-    coinReward: 70,
-    hardwareRequired: ['Smartphone Android', 'App Inventor'],
-    validationSteps: [
-      'Demonstrar o app instalado em um smartphone real.',
-      'Classificar corretamente 5 tipos de resíduos no fluxo do app.'
-    ]
-  },
-  {
-    title: 'Sentinela Solar: Monitor de Painéis com Micro:bit',
-    description: 'Utilize a matriz de LEDs e o sensor de luz do Micro:bit para simular o monitoramento da incidência solar em painéis fotovoltaicos.',
-    tier: 'ADVANCED',
-    requiredSkills: ['microbit_starter'],
-    sdgGoals: ['7.a'],
-    xpReward: 320,
-    coinReward: 85,
-    hardwareRequired: ['Micro:bit', 'Sensor de Luz LDR'],
-    validationSteps: [
-      'Exibir na matriz de LEDs o nível de incidência solar captado.',
-      'Registrar 3 leituras em horários diferentes do dia.'
-    ]
-  },
-  {
-    title: 'Robôzinho Explorador: Mapeamento de Áreas de Risco Climático',
-    description: 'Programe o kit Matata Robotics acoplado ao Micro:bit para percorrer uma maquete e sinalizar zonas simuladas de alagamento.',
-    tier: 'ADVANCED',
-    requiredSkills: ['microbit_starter'],
-    sdgGoals: ['13.a'],
-    xpReward: 340,
-    coinReward: 90,
-    hardwareRequired: ['Matata Robotics Kit', 'Micro:bit'],
-    validationSteps: [
-      'Demonstrar o robô contornando obstáculos na maquete.',
-      'Acionar o alerta luminoso ao entrar em zona de risco.'
-    ]
-  },
-  {
-    title: 'Robô Catador: Triagem Automática de Resíduos com Lego EV3',
-    description: 'Construa um braço robótico com Lego Mindstorms EV3 que utilize o sensor de cor para separar materiais recicláveis por categoria.',
-    tier: 'ADVANCED',
-    requiredSkills: ['lego_ev3'],
-    sdgGoals: ['12.c', '13.a'],
-    xpReward: 380,
-    coinReward: 100,
-    hardwareRequired: ['Kit Lego Mindstorms EV3', 'Sensor de Cor'],
-    validationSteps: [
-      'Separar corretamente ao menos 3 categorias de material na demonstração.',
-      'Apresentar o fluxograma do algoritmo de triagem ao Game Master.'
-    ]
-  },
-  {
-    title: 'Rede de Sensores Climáticos: Alerta de Onda de Calor',
-    description: 'Monte uma rede de sensores com NodeMCU 1.0 (ESP8266) para monitorar temperatura extrema e disparar alertas remotos à comunidade escolar.',
-    tier: 'SPECIALIST',
-    requiredSkills: ['esp8266_advanced'],
-    sdgGoals: ['13.a'],
-    xpReward: 460,
-    coinReward: 125,
-    hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Sensor DHT22'],
-    validationSteps: [
-      'Transmitir dados de temperatura em tempo real via Wi-Fi.',
-      'Disparar alerta automático ao ultrapassar o limiar configurado.'
-    ]
-  },
-  {
-    title: 'Horta Comunitária Autônoma: Irrigação por Sensores',
-    description: 'Desenvolva um sistema com NodeMCU 1.0 (ESP8266) e sensor de umidade de solo para economizar água na horta escolar comunitária.',
-    tier: 'SPECIALIST',
-    requiredSkills: ['esp8266_advanced'],
-    sdgGoals: ['12.c', '7.a'],
-    xpReward: 480,
-    coinReward: 130,
-    hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Sensor de Umidade de Solo'],
-    validationSteps: [
-      'Demonstrar telemetria de umidade no painel da guilda.',
-      'Validar o acionamento automático da irrigação simulada.'
-    ]
-  },
-  {
-    title: 'Assistente de Mobilidade: Bengala com Alerta de Obstáculos',
-    description: 'Acople um sensor ultrassônico a uma bengala controlada por NodeMCU 1.0 (ESP8266) para alertar sobre obstáculos à frente de pessoas com deficiência visual.',
-    tier: 'SPECIALIST',
-    requiredSkills: ['esp8266_advanced'],
-    sdgGoals: ['4.3'],
-    xpReward: 470,
-    coinReward: 128,
-    hardwareRequired: ['NodeMCU 1.0 (ESP8266)', 'Sensor Ultrassônico HC-SR04'],
-    validationSteps: [
-      'Calibrar a distância mínima de disparo do alerta sonoro.',
-      'Validar o funcionamento em percurso com 3 obstáculos.'
-    ]
-  },
-  {
-    title: 'Fábrica Circular: Peças Recicladas em Impressão 3D',
-    description: 'Combine modelagem 3D e telemetria com NodeMCU 1.0 (ESP8266) para monitorar o consumo de filamento reciclado na fabricação de peças sob demanda.',
-    tier: 'SPECIALIST',
-    requiredSkills: ['esp8266_advanced', 'fablab_machining'],
-    sdgGoals: ['12.c'],
-    xpReward: 520,
-    coinReward: 150,
-    hardwareRequired: ['Impressora 3D', 'Filamento PLA Reciclado', 'NodeMCU 1.0 (ESP8266)'],
-    validationSteps: [
-      'Fatiar e imprimir uma peça com material reciclado.',
-      'Apresentar o registro de consumo de filamento no painel da guilda.'
-    ]
-  }
+  ...PROJECT_CATALOG.map(({ id: _id, status: _status, ...rest }) => rest),
+  ...TOOL_QUESTS.map(({ id: _id, status: _status, ...rest }) => rest)
 ];
 
 export const HARDWARE_CATALOG: HardwareItem[] = [
@@ -540,7 +590,7 @@ export const HACKATHON_CAMPAIGN: BossRaidCampaign = {
   timeRemainingSeconds: 3420, // 57 min
   recentLogs: [
     { id: 'l1', text: 'Guilda "Mágicos do Solder" causou 250 de dano concluindo protótipo de medidor de energia!', time: '10:42', guildName: 'Mágicos do Solder' },
-    { id: 'l2', text: 'Guilda "Hackers da Amazônia" ativou o ataque crítico ODS 7.a! (-400 HP ao Boss)', time: '10:40', guildName: 'Hackers da Amazônia' },
+    { id: 'l2', text: 'Guilda "Hackers da Amazônia" ativou o ataque crítico ODS 13! (-400 HP ao Boss)', time: '10:40', guildName: 'Hackers da Amazônia' },
     { id: 'l3', text: 'Guilda "Engenheiros do ESP8266" enviou dados em lote (Firestore Batch OK)!', time: '10:38', guildName: 'Engenheiros do ESP8266' }
   ]
 };

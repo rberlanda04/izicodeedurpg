@@ -1,0 +1,141 @@
+rules_version = '2';
+
+// Modelo multi-tenant: schools/{schoolId}, classes/{classId} (turmas),
+// coleções de escola (hardwareCatalog, bookings, curiosities) e coleções
+// de turma (guilds, quests, quickHacks, campaigns) — todas ACHATADAS no
+// nível raiz com um campo schoolId/classId, não aninhadas, para permitir
+// queries cross-turma do Admin sem precisar de collection group queries
+// em toda parte. Ver PLANO_DESENVOLVIMENTO.md seção 12.1 e o plano de
+// implementação em C:\Users\rberl\.claude\plans\wild-enchanting-cat.md.
+//
+// LIMITAÇÃO CONHECIDA (aceita nesta etapa): a checagem de papel (role/
+// schoolAdminOf/classIdsAsGameMaster) é feita só por regra, lendo o
+// próprio documento em users/{uid} — não por Custom Claims. Isso é
+// suficiente sem Cloud Functions no projeto, mas depende inteiramente
+// de nenhuma outra rota de escrita conseguir violar as invariantes de
+// "create"/"update" abaixo. Fast-follow recomendado: mover papel para
+// Custom Claims via Cloud Function trigger.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function me() { return get(/databases/$(database)/documents/users/$(uid())).data; }
+
+    function isSelf(userId) { return isSignedIn() && uid() == userId; }
+    function isSchoolAdmin(schoolId) { return isSignedIn() && schoolId in me().schoolAdminOf; }
+    function isGmOfClass(classId) { return isSignedIn() && classId in me().classIdsAsGameMaster; }
+    function isStudentOfClass(classId) { return isSignedIn() && classId in me().classIdsAsStudent; }
+    function isMemberOfClass(classId) { return isGmOfClass(classId) || isStudentOfClass(classId); }
+    function isMemberOfSchool(schoolId) { return isSignedIn() && schoolId in me().schoolIds; }
+
+    function onlyChanged(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // ---- Raízes de tenancy ----
+    match /schools/{schoolId} {
+      allow read: if isSignedIn();
+      allow write: if isSchoolAdmin(schoolId);
+    }
+
+    match /classes/{classId} {
+      allow read: if isMemberOfClass(classId) || isSchoolAdmin(resource.data.schoolId);
+      allow create: if isSchoolAdmin(request.resource.data.schoolId);
+      allow update: if isSchoolAdmin(resource.data.schoolId)
+        || isGmOfClass(classId)
+        || ( // auto-entrada via código de sala resolvido: só pode ANEXAR o próprio uid
+          isSignedIn()
+          && onlyChanged(['studentIds'])
+          && request.resource.data.studentIds == resource.data.studentIds.concat([uid()])
+        );
+      allow delete: if isSchoolAdmin(resource.data.schoolId);
+    }
+
+    // Lookup código de sala -> turma. NUNCA listável — só "get" sabendo o código exato.
+    match /roomPasscodes/{code} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow write: if isSchoolAdmin(request.resource.data.schoolId) || isGmOfClass(request.resource.data.classId);
+    }
+
+    // ---- Coleções por turma ----
+    match /guilds/{guildId} {
+      allow read: if isMemberOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+      allow create: if isMemberOfClass(request.resource.data.classId);
+      allow update: if isMemberOfClass(resource.data.classId);
+      allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+    }
+
+    match /quests/{questId} {
+      allow read: if isMemberOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+      allow create: if isGmOfClass(request.resource.data.classId)
+        || (isStudentOfClass(request.resource.data.classId) && request.resource.data.status == 'PROPOSED');
+      allow update: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
+        || ( // aluno só pode transicionar a PRÓPRIA quest de ACTIVE -> COMPLETED, nada mais
+          isStudentOfClass(resource.data.classId) && onlyChanged(['status'])
+          && resource.data.status == 'ACTIVE' && request.resource.data.status == 'COMPLETED'
+        );
+      allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+    }
+
+    match /quickHacks/{hackId} {
+      allow read: if isMemberOfClass(resource.data.classId);
+      allow write: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+    }
+
+    match /campaigns/{classId} {
+      allow read: if isMemberOfClass(classId);
+      allow update: if isMemberOfClass(classId); // qualquer membro pode registrar um ataque ao boss
+      allow create, delete: if isGmOfClass(classId)
+        || isSchoolAdmin(get(/databases/$(database)/documents/classes/$(classId)).data.schoolId);
+    }
+
+    // ---- Recursos compartilhados por escola ----
+    match /hardwareCatalog/{itemId} {
+      allow read: if isMemberOfSchool(resource.data.schoolId) || isSchoolAdmin(resource.data.schoolId);
+      allow update: if isSchoolAdmin(resource.data.schoolId)
+        || (isMemberOfSchool(resource.data.schoolId) && onlyChanged(['stockQuantity']));
+      allow create, delete: if isSchoolAdmin(resource.data.schoolId);
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isMemberOfSchool(resource.data.schoolId) || isSchoolAdmin(resource.data.schoolId);
+      allow create: if isMemberOfSchool(request.resource.data.schoolId) && request.resource.data.studentUid == uid();
+      allow update: if false; // imutável; cancelar = deletar
+      allow delete: if isSchoolAdmin(resource.data.schoolId) || resource.data.studentUid == uid();
+    }
+
+    match /curiosities/{curiosityId} {
+      allow read: if isMemberOfSchool(resource.data.schoolId) || isSchoolAdmin(resource.data.schoolId);
+      allow update: if isMemberOfSchool(resource.data.schoolId) && onlyChanged(['unlocked']);
+      allow create, delete: if isSchoolAdmin(resource.data.schoolId);
+    }
+
+    // ---- Usuários ----
+    match /users/{userId} {
+      allow read: if isSelf(userId)
+        || (resource.data.classIdsAsStudent.hasAny(me().classIdsAsGameMaster))
+        || (resource.data.schoolIds.hasAny(me().schoolAdminOf));
+
+      // Auto-provisionamento no primeiro login: papel é forçado, nunca
+      // escolhido pelo cliente — fecha a falha de autopromoção a ADMIN.
+      allow create: if isSelf(userId)
+        && request.resource.data.role == 'ADVENTURER'
+        && request.resource.data.schoolAdminOf.size() == 0
+        && request.resource.data.classIdsAsGameMaster.size() == 0;
+
+      allow update: if (
+          isSelf(userId)
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.schoolAdminOf == resource.data.schoolAdminOf
+          && request.resource.data.classIdsAsGameMaster == resource.data.classIdsAsGameMaster
+        )
+        || ( // promoção feita por Admin/GM (papel, vínculos, schoolAdminOf)
+          resource.data.schoolIds.hasAny(me().schoolAdminOf)
+        );
+
+      allow delete: if false; // via suporte/Admin SDK, não pelo cliente
+    }
+  }
+}

@@ -10,10 +10,15 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+functions/lib
 *.local
 
 # Agent worktree checkouts
 .claude/worktrees
+
+# Firebase Admin SDK service account key — grants full project access,
+# must never be committed. See scripts/seedAdmin.ts.
+service-account.json
 
 # Editor directories and files
 .vscode/*

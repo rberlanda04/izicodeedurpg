@@ -4,7 +4,9 @@ export type ScrumRole = 'SCRUM_MASTER' | 'DEVELOPER' | 'MAKER' | 'PRODUCT_OWNER'
 
 export type SkillTier = 'BASIC' | 'INTERMEDIATE' | 'ADVANCED' | 'SPECIALIST';
 
-export type SDGGoal = '4.3' | '7.a' | '12.c' | '13.a';
+// Números reais dos ODS da ONU que aparecem no catálogo de projetos
+// (src/data/projectCatalog.ts, importado de github.com/izicripto/izicode-landing).
+export type SDGGoal = '2' | '3' | '4' | '9' | '11' | '12' | '13' | '16';
 
 export interface Badge {
   id: string;
@@ -15,11 +17,17 @@ export interface Badge {
   isSecret?: boolean;
 }
 
+export interface ClassMembership {
+  guildId?: string;
+  guildRole?: ScrumRole;
+  joinedAt: string; // ISO timestamp
+}
+
 export interface UserProfile {
   uid: string;
   adventureName: string; // Codinome Público (LGPD)
   realName: string; // Restrito a Professores/Admin
-  role: UserRole;
+  role: UserRole; // papel de fallback/exibição — a permissão real vem dos arrays abaixo
   level: number;
   xp: number;
   xpToNextLevel: number;
@@ -37,6 +45,42 @@ export interface UserProfile {
   inventory: Array<{ itemId: string; name: string; qty: number; icon: string }>;
   unlockedCuriosities: string[];
   heroContractSigned: boolean;
+
+  // --- Multi-tenant (escolas/turmas) ---
+  // Denormalizados de propósito: as regras do Firestore não conseguem
+  // atravessar um mapa por valor, então precisam desses arrays diretos
+  // para checar "este usuário é GM/aluno desta turma?" sem outra leitura.
+  schoolAdminOf: string[]; // schoolIds onde é ADMIN
+  schoolIds: string[]; // schoolIds de qualquer vínculo (admin, GM ou aluno)
+  classIdsAsGameMaster: string[];
+  classIdsAsStudent: string[];
+  memberships: Record<string, ClassMembership>; // classId -> vínculo
+}
+
+export interface School {
+  id: string;
+  name: string;
+  city: string;
+  adminIds: string[];
+}
+
+export interface ClassRoom {
+  id: string;
+  schoolId: string;
+  name: string; // "9º Ano B — Robótica 2026"
+  gradeRange: string; // "6º ao 9º ano" | "Ensino Médio"
+  gameMasterIds: string[];
+  studentIds: string[];
+  roomPasscode: string;
+  createdAt: string;
+  archivedAt: string | null;
+}
+
+// Documento de lookup em roomPasscodes/{code} — nunca listável nas regras,
+// só "get" direto pelo código exato, para não permitir enumeração.
+export interface RoomPasscodeLookup {
+  classId: string;
+  schoolId: string;
 }
 
 export interface Guild {
@@ -60,7 +104,7 @@ export interface SkillNode {
   id: string;
   title: string;
   tier: SkillTier;
-  category: 'LOGIC' | 'BLOCKS' | 'ELECTRONICS' | 'PROTOTYPING';
+  category: 'LOGIC' | 'BLOCKS' | 'ELECTRONICS' | 'PROTOTYPING' | 'DESIGN';
   prerequisites: string[];
   hardwareUnlocked?: string[];
   allowsResourceBooking?: boolean;
@@ -86,6 +130,13 @@ export interface Quest {
   validationSteps: string[];
   isSecretQuest?: boolean;
   secretPasscode?: string;
+
+  // --- Campos vindos do catálogo real de projetos (izicode-landing) ---
+  grade?: string; // série/ano recomendado, ex: "Ensino Fundamental II (8º e 9º ano)"
+  duration?: string; // ex: "4 aulas"
+  guideContent?: string; // tutorial completo em markdown (montagem, código, dicas)
+  externalLink?: string; // ex: link do Hackster.io com o projeto de referência
+  imageUrl?: string;
 }
 
 export interface HardwareItem {
