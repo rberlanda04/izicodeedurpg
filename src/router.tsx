@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { LandingPage } from './routes/marketing/LandingPage';
 import { LoginView } from './routes/auth/LoginView';
 import { RegisterView } from './routes/auth/RegisterView';
 import { OnboardingView } from './routes/auth/OnboardingView';
@@ -17,7 +18,7 @@ import { GmDashboardPage } from './routes/gm/GmDashboardPage';
 import { AdminDashboardPage } from './routes/admin/AdminDashboardPage';
 
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/entrar" replace /> },
+  { path: '/', element: <LandingPage /> },
   { path: '/entrar', element: <LoginView /> },
   { path: '/cadastro', element: <RegisterView /> },
 
@@ -54,5 +55,5 @@ export const router = createBrowserRouter([
     children: [{ path: '/admin/:schoolId', element: <AdminDashboardPage /> }]
   },
 
-  { path: '*', element: <Navigate to="/entrar" replace /> }
+  { path: '*', element: <Navigate to="/" replace /> }
 ]);
