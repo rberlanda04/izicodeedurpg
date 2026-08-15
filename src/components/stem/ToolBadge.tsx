@@ -12,10 +12,10 @@ interface ToolInfo {
 // public/tool-logos/. Ferramentas sem logo próprio (C++, Blocos, NEPO etc.)
 // caem no fallback de texto simples.
 const TOOLS: Record<string, ToolInfo> = {
-  Arduino: { logo: '/tool-logos/arduino-logo.svg', url: 'https://www.arduino.cc' },
-  Scratch: { logo: '/tool-logos/scratch-logo.svg', url: 'https://scratch.mit.edu' },
-  Tinkercad: { logo: '/tool-logos/tinkercad-logo.svg', url: 'https://www.tinkercad.com' },
-  'Code.org': { logo: '/tool-logos/codeorg-logo.svg', url: 'https://code.org' },
+  Arduino: { logo: '/tool-logos/arduino.png', url: 'https://www.arduino.cc' },
+  Scratch: { logo: '/tool-logos/scratch.png', url: 'https://scratch.mit.edu' },
+  Tinkercad: { logo: '/tool-logos/tinkercad.jpg', url: 'https://www.tinkercad.com' },
+  'Code.org': { logo: '/tool-logos/codeorg.png', url: 'https://code.org' },
   'Micro:bit': { logo: '/tool-logos/microbit.png', url: 'https://microbit.org' },
   'Raspberry Pi': { logo: '/tool-logos/pi.png', url: 'https://www.raspberrypi.org' },
   'Open Roberta': { logo: '/tool-logos/openroberta.png', url: 'https://lab.open-roberta.org' },
