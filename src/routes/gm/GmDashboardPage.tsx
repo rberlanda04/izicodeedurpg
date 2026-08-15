@@ -3,31 +3,36 @@ import { Link, useParams } from 'react-router-dom';
 import { Crown, Key, Zap, CheckCircle, Copy, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { subscribeToClass } from '../../services/classRepo';
-import { updateUserProfile } from '../../services/userRepo';
 import { useClassLocalState } from '../../hooks/useClassLocalState';
+import { useApplyUserPatch } from '../../hooks/useApplyUserPatch';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
+import { ErrorState } from '../../components/stem/ErrorState';
 import type { ClassRoom } from '../../types';
 
 export const GmDashboardPage: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
   const { profile } = useAuth();
   const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
+  const [classError, setClassError] = useState<string | null>(null);
   const [xpAmount, setXpAmount] = useState(100);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!classId) return;
-    return subscribeToClass(classId, setClassRoom);
+    setClassError(null);
+    return subscribeToClass(classId, setClassRoom, (error) => {
+      console.error('Falha ao carregar a turma:', error);
+      setClassError('Não foi possível carregar esta turma. Verifique sua conexão e tente novamente.');
+    });
   }, [classId]);
 
-  const applyUserPatch = (patch: Partial<NonNullable<typeof profile>>) => {
-    if (!profile) return;
-    updateUserProfile(profile.uid, patch);
-  };
+  const applyUserPatch = useApplyUserPatch(profile);
   const classState = useClassLocalState(classId ?? 'unknown', profile!, applyUserPatch);
 
-  if (!classId || !profile || !classRoom) return null;
+  if (!classId || !profile) return null;
+  if (classError) return <ErrorState message={classError} />;
+  if (!classRoom) return null;
 
   const proposedQuests = classState.quests.filter((q) => q.status === 'PROPOSED');
 
@@ -98,11 +103,13 @@ export const GmDashboardPage: React.FC = () => {
               onChange={(e) => setXpAmount(Number(e.target.value))}
               className="w-28 rounded-xl border-2 border-stem-line px-3 py-2 font-display font-bold outline-none focus:border-stem-violet"
             />
-            <Button onClick={() => applyUserPatch({ xp: profile.xp + xpAmount })}>Conceder {xpAmount} XP</Button>
+            <Button onClick={() => applyUserPatch((current) => ({ xp: current.xp + xpAmount }))}>
+              Conceder {xpAmount} XP
+            </Button>
             {[10, 25, 50, 100].map((v) => (
               <button
                 key={v}
-                onClick={() => applyUserPatch({ xp: profile.xp + v })}
+                onClick={() => applyUserPatch((current) => ({ xp: current.xp + v }))}
                 className="text-xs font-display font-bold text-stem-violet border-2 border-stem-violet/30 rounded-full px-3 py-1.5 hover:bg-stem-violet/10"
               >
                 +{v}

@@ -4,6 +4,8 @@ import {
   setDoc,
   updateDoc,
   onSnapshot,
+  runTransaction,
+  type FirestoreError,
   type Unsubscribe
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -52,13 +54,37 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 
 export function subscribeToUserProfile(
   uid: string,
-  onChange: (profile: UserProfile | null) => void
+  onChange: (profile: UserProfile | null) => void,
+  onError?: (error: FirestoreError) => void
 ): Unsubscribe {
-  return onSnapshot(doc(db, 'users', uid), (snap) => {
-    onChange(snap.exists() ? (snap.data() as UserProfile) : null);
-  });
+  return onSnapshot(
+    doc(db, 'users', uid),
+    (snap) => {
+      onChange(snap.exists() ? (snap.data() as UserProfile) : null);
+    },
+    onError
+  );
 }
 
 export async function updateUserProfile(uid: string, patch: Partial<UserProfile>): Promise<void> {
   await updateDoc(doc(db, 'users', uid), patch);
+}
+
+/**
+ * Patches derived from the current profile value (XP/coin/inventory grants,
+ * level-up thresholds) must read that value inside the transaction, not from
+ * a possibly-stale in-memory `profile` snapshot — two rapid actions (double
+ * click, two tabs of the same account) can otherwise both read the same
+ * pre-update value and one silently overwrites the other's grant.
+ */
+export async function updateUserProfileWithTransaction(
+  uid: string,
+  updater: (current: UserProfile) => Partial<UserProfile>
+): Promise<void> {
+  const ref = doc(db, 'users', uid);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error('Perfil não encontrado.');
+    tx.update(ref, updater(snap.data() as UserProfile));
+  });
 }

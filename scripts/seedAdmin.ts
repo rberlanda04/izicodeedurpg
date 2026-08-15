@@ -1,29 +1,29 @@
 /**
- * One-time bootstrap: creates the first School + Class + promotes a user
- * to school ADMIN. There is no public "become an admin" flow in the app by
- * design (a client-writable path to ADMIN would be a security hole — see
- * firestore.rules), so this has to run with elevated (Admin SDK) access.
+ * Manual/operator variant of the "create a school" flow — most teachers
+ * should now use the self-service onboarding flow in the app itself
+ * (OnboardingView.tsx -> server/onboardSchoolHandler.ts), which does the
+ * same transaction but is triggered by the user's own login, not this
+ * script. This remains useful for support/ops (e.g. onboarding someone
+ * without walking them through the UI) since it needs elevated (Admin SDK)
+ * access that a client-writable path can't have — see firestore.rules.
  *
  * Setup:
  *   1. Create the target user's account first through the normal app
  *      /cadastro flow (or Firebase Console > Authentication), so they have
  *      a uid and a users/{uid} profile document already.
- *   2. Authenticate locally with a Google account that has Editor/Owner
- *      access on the Firebase project — either already logged in via
- *      `gcloud auth application-default login`, OR generate a service
- *      account key (Firebase Console > Project Settings > Service Accounts
- *      > Generate new private key) and save it as `service-account.json`
- *      in the repo root (gitignored — NEVER commit it, it grants full
- *      admin access to your Firebase project). This script tries
- *      Application Default Credentials first and falls back to that file.
+ *   2. Authenticate locally: generate a service account key (Firebase
+ *      Console > Project Settings > Service Accounts > Generate new private
+ *      key) and save it as `service-account.json` in the repo root
+ *      (gitignored — NEVER commit it, it grants full admin access to your
+ *      Firebase project), or have `gcloud auth application-default login`
+ *      already run. See server/firebaseAdmin.ts for the exact fallback
+ *      order.
  *   3. Run:
  *        npx tsx scripts/seedAdmin.ts --uid <firebaseUid> --school "Nome da Escola" --city "Cidade"
  */
-import { existsSync, readFileSync } from 'node:fs';
-import { initializeApp, applicationDefault, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-
-const PROJECT_ID = 'izicodeedurpg';
+import { FieldValue, getFirestore } from 'firebase-admin/firestore';
+import { getFirebaseAdminApp } from '../server/firebaseAdmin.ts';
+import { generateRoomPasscode } from '../src/services/passcode.ts';
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -44,13 +44,7 @@ function parseArgs() {
 async function main() {
   const { uid, school, city } = parseArgs();
 
-  if (existsSync('./service-account.json')) {
-    const serviceAccount = JSON.parse(readFileSync('./service-account.json', 'utf-8'));
-    initializeApp({ credential: cert(serviceAccount), projectId: PROJECT_ID });
-  } else {
-    initializeApp({ credential: applicationDefault(), projectId: PROJECT_ID });
-  }
-  const db = getFirestore();
+  const db = getFirestore(getFirebaseAdminApp());
 
   const userRef = db.collection('users').doc(uid);
   const userSnap = await userRef.get();
@@ -61,7 +55,7 @@ async function main() {
 
   const schoolRef = db.collection('schools').doc();
   const classRef = db.collection('classes').doc();
-  const passcode = 'IZI-' + Math.floor(1000 + Math.random() * 9000);
+  const passcode = generateRoomPasscode();
 
   await db.runTransaction(async (tx) => {
     tx.set(schoolRef, { id: schoolRef.id, name: school, city, adminIds: [uid] });
@@ -78,9 +72,9 @@ async function main() {
     });
     tx.set(db.collection('roomPasscodes').doc(passcode), { classId: classRef.id, schoolId: schoolRef.id });
     tx.update(userRef, {
-      schoolAdminOf: [schoolRef.id],
-      schoolIds: [schoolRef.id],
-      classIdsAsGameMaster: [classRef.id]
+      schoolAdminOf: FieldValue.arrayUnion(schoolRef.id),
+      schoolIds: FieldValue.arrayUnion(schoolRef.id),
+      classIdsAsGameMaster: FieldValue.arrayUnion(classRef.id)
     });
   });
 

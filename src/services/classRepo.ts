@@ -9,14 +9,12 @@ import {
   query,
   where,
   getDocs,
+  type FirestoreError,
   type Unsubscribe
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { generateRoomPasscode } from './passcode';
 import type { School, ClassRoom, RoomPasscodeLookup } from '../types';
-
-function randomPasscode(): string {
-  return 'IZI-' + Math.floor(1000 + Math.random() * 9000);
-}
 
 export async function createSchool(name: string, city: string, adminUid: string): Promise<School> {
   const ref = doc(db, 'schools', crypto.randomUUID());
@@ -36,7 +34,7 @@ export async function createClass(
   name: string,
   gradeRange: string,
   gameMasterUid: string,
-  passcode: string = randomPasscode()
+  passcode: string = generateRoomPasscode()
 ): Promise<ClassRoom> {
   const ref = doc(db, 'classes', crypto.randomUUID());
   const classRoom: ClassRoom = {
@@ -69,10 +67,18 @@ export async function getClass(classId: string): Promise<ClassRoom | null> {
   return snap.exists() ? (snap.data() as ClassRoom) : null;
 }
 
-export function subscribeToClass(classId: string, onChange: (c: ClassRoom | null) => void): Unsubscribe {
-  return onSnapshot(doc(db, 'classes', classId), (snap) => {
-    onChange(snap.exists() ? (snap.data() as ClassRoom) : null);
-  });
+export function subscribeToClass(
+  classId: string,
+  onChange: (c: ClassRoom | null) => void,
+  onError?: (error: FirestoreError) => void
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, 'classes', classId),
+    (snap) => {
+      onChange(snap.exists() ? (snap.data() as ClassRoom) : null);
+    },
+    onError
+  );
 }
 
 /**

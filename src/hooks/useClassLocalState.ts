@@ -14,6 +14,7 @@ import { generateAIQuest } from '../services/questEngine';
 import { generateQuestWithAI } from '../services/aiContentService';
 import { loadState, saveState, debounce, NAMESPACE } from '../services/persistence';
 import { soundEngine } from '../services/soundEngine';
+import type { ApplyUserPatch } from './useApplyUserPatch';
 import type {
   Guild,
   Quest,
@@ -44,11 +45,7 @@ function classKey(classId: string, name: string) {
  * through `applyUserPatch`, never local state, because the user profile is
  * global across classes/years, not per-turma.
  */
-export function useClassLocalState(
-  classId: string,
-  profile: UserProfile,
-  applyUserPatch: (patch: Partial<UserProfile>) => void
-) {
+export function useClassLocalState(classId: string, profile: UserProfile, applyUserPatch: ApplyUserPatch) {
   const [guilds, setGuilds] = useState<Guild[]>(() => loadState(classKey(classId, 'guilds'), INITIAL_GUILDS));
   const [quests, setQuests] = useState<Quest[]>(() => loadState(classKey(classId, 'quests'), QUESTS));
   const [catalog, setCatalog] = useState<HardwareItem[]>(() =>
@@ -98,20 +95,26 @@ export function useClassLocalState(
   const triggerConfetti = () => confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
 
   const grantXpAndCoins = (xp: number, coins: number) => {
-    const newXp = profile.xp + xp;
-    let newLevel = profile.level;
-    let nextLevelXp = profile.xpToNextLevel;
-    if (newXp >= nextLevelXp) {
-      newLevel += 1;
-      nextLevelXp += 1000;
-    }
-    applyUserPatch({ xp: newXp, level: newLevel, xpToNextLevel: nextLevelXp, izicoins: profile.izicoins + coins });
+    applyUserPatch((current) => {
+      const newXp = current.xp + xp;
+      let newLevel = current.level;
+      let nextLevelXp = current.xpToNextLevel;
+      if (newXp >= nextLevelXp) {
+        newLevel += 1;
+        nextLevelXp += 1000;
+      }
+      return { xp: newXp, level: newLevel, xpToNextLevel: nextLevelXp, izicoins: current.izicoins + coins };
+    });
   };
 
   const handleSignContract = () => {
     soundEngine.playLevelUp();
     triggerConfetti();
-    applyUserPatch({ heroContractSigned: true, xp: profile.xp + 100, izicoins: profile.izicoins + 50 });
+    applyUserPatch((current) => ({
+      heroContractSigned: true,
+      xp: current.xp + 100,
+      izicoins: current.izicoins + 50
+    }));
   };
 
   const handleUpdateAvatar = (avatarConfig: UserProfile['avatarConfig']) => {
@@ -155,19 +158,22 @@ export function useClassLocalState(
     if (profile.unlockedSkills.includes(skillId)) return;
     soundEngine.playLevelUp();
     triggerConfetti();
-    const newXp = profile.xp + 200;
-    let newLevel = profile.level;
-    let nextLevelXp = profile.xpToNextLevel;
-    if (newXp >= nextLevelXp) {
-      newLevel += 1;
-      nextLevelXp += 1000;
-    }
-    applyUserPatch({
-      unlockedSkills: [...profile.unlockedSkills, skillId],
-      xp: newXp,
-      level: newLevel,
-      xpToNextLevel: nextLevelXp,
-      izicoins: profile.izicoins + 40
+    applyUserPatch((current) => {
+      if (current.unlockedSkills.includes(skillId)) return {};
+      const newXp = current.xp + 200;
+      let newLevel = current.level;
+      let nextLevelXp = current.xpToNextLevel;
+      if (newXp >= nextLevelXp) {
+        newLevel += 1;
+        nextLevelXp += 1000;
+      }
+      return {
+        unlockedSkills: [...current.unlockedSkills, skillId],
+        xp: newXp,
+        level: newLevel,
+        xpToNextLevel: nextLevelXp,
+        izicoins: current.izicoins + 40
+      };
     });
   };
 
@@ -237,10 +243,13 @@ export function useClassLocalState(
     if (code !== 'IZI-CYBER') return false;
     triggerConfetti();
     if (!profile.unlockedSkills.includes('secret_cypher_node')) {
-      applyUserPatch({
-        unlockedSkills: [...profile.unlockedSkills, 'secret_cypher_node'],
-        xp: profile.xp + 600,
-        izicoins: profile.izicoins + 150
+      applyUserPatch((current) => {
+        if (current.unlockedSkills.includes('secret_cypher_node')) return {};
+        return {
+          unlockedSkills: [...current.unlockedSkills, 'secret_cypher_node'],
+          xp: current.xp + 600,
+          izicoins: current.izicoins + 150
+        };
       });
     }
     setQuests((prev) => prev.map((q) => (q.id === 'quest-secret-1' ? { ...q, status: 'COMPLETED' } : q)));
@@ -251,11 +260,13 @@ export function useClassLocalState(
     const item = catalog.find((i) => i.id === itemId);
     if (!item || item.stockQuantity <= 0) return;
     setCatalog((prev) => prev.map((i) => (i.id === itemId ? { ...i, stockQuantity: i.stockQuantity - 1 } : i)));
-    const alreadyOwned = profile.inventory.find((inv) => inv.itemId === itemId);
-    const nextInventory = alreadyOwned
-      ? profile.inventory.map((inv) => (inv.itemId === itemId ? { ...inv, qty: inv.qty + 1 } : inv))
-      : [...profile.inventory, { itemId: item.id, name: item.name, qty: 1, icon: item.icon }];
-    applyUserPatch({ izicoins: profile.izicoins - cost, inventory: nextInventory });
+    applyUserPatch((current) => {
+      const alreadyOwned = current.inventory.find((inv) => inv.itemId === itemId);
+      const nextInventory = alreadyOwned
+        ? current.inventory.map((inv) => (inv.itemId === itemId ? { ...inv, qty: inv.qty + 1 } : inv))
+        : [...current.inventory, { itemId: item.id, name: item.name, qty: 1, icon: item.icon }];
+      return { izicoins: current.izicoins - cost, inventory: nextInventory };
+    });
   };
 
   const handleUnlockCuriosityCard = (code: string): boolean => {
@@ -265,7 +276,10 @@ export function useClassLocalState(
     setCuriosities((prev) =>
       prev.map((c) => (c.code.toUpperCase() === code.toUpperCase() ? { ...c, unlocked: true } : c))
     );
-    applyUserPatch({ xp: profile.xp + card.xpReward, unlockedCuriosities: [...profile.unlockedCuriosities, card.id] });
+    applyUserPatch((current) => {
+      if (current.unlockedCuriosities.includes(card.id)) return {};
+      return { xp: current.xp + card.xpReward, unlockedCuriosities: [...current.unlockedCuriosities, card.id] };
+    });
     return true;
   };
 

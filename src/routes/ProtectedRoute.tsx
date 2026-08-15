@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getClass } from '../services/classRepo';
+import { ErrorState } from '../components/stem/ErrorState';
 
 interface ProtectedRouteProps {
   requireRole?: 'GAME_MASTER' | 'ADMIN';
@@ -26,7 +27,7 @@ const NoAccess: React.FC = () => (
 );
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requireRole, matchParam }) => {
-  const { firebaseUser, profile, loading, isGmOfClass, isSchoolAdmin } = useAuth();
+  const { firebaseUser, profile, loading, profileError, isGmOfClass, isSchoolAdmin } = useAuth();
   const params = useParams();
 
   // A :classId route param isn't a schoolId — school admins are only
@@ -43,13 +44,21 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requireRole, mat
       setResolvingClass(false);
       return;
     }
-    getClass(classId).then((classRoom) => {
-      setClassSchoolId(classRoom?.schoolId ?? null);
-      setResolvingClass(false);
-    });
+    getClass(classId)
+      .then((classRoom) => {
+        setClassSchoolId(classRoom?.schoolId ?? null);
+      })
+      .catch((error) => {
+        // Previously left `resolvingClass` true forever on failure — the
+        // safe default here is to deny access, not hang on a loader.
+        console.error('Falha ao resolver a turma para checagem de permissão:', error);
+        setClassSchoolId(null);
+      })
+      .finally(() => setResolvingClass(false));
   }, [needsClassSchoolLookup, params.classId]);
 
   if (loading || (needsClassSchoolLookup && resolvingClass)) return <FullPageLoader />;
+  if (profileError) return <ErrorState message={profileError} />;
   if (!firebaseUser || !profile) return <Navigate to="/entrar" replace />;
 
   if (requireRole && matchParam) {

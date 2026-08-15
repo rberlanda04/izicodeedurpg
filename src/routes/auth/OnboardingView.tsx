@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Key } from 'lucide-react';
+import { Key, School } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { joinClassByPasscode } from '../../services/classRepo';
+import { createSchoolAsTeacher } from '../../services/onboardService';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
 
 export const OnboardingView: React.FC = () => {
-  const { profile, loading } = useAuth();
+  const { firebaseUser, profile, loading } = useAuth();
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+
+  const [schoolName, setSchoolName] = useState('');
+  const [city, setCity] = useState('');
+  const [schoolError, setSchoolError] = useState('');
+  const [schoolBusy, setSchoolBusy] = useState(false);
 
   if (loading || !profile) return null;
   const hasAnyClass = profile.classIdsAsGameMaster.length > 0 || profile.classIdsAsStudent.length > 0;
@@ -36,6 +42,21 @@ export const OnboardingView: React.FC = () => {
     }
   };
 
+  const handleCreateSchool = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firebaseUser) return;
+    setSchoolError('');
+    setSchoolBusy(true);
+    try {
+      const result = await createSchoolAsTeacher(firebaseUser, schoolName.trim(), city.trim());
+      window.location.href = `/admin/${result.schoolId}`;
+    } catch (err) {
+      setSchoolError(err instanceof Error ? err.message : 'Não foi possível cadastrar a escola.');
+    } finally {
+      setSchoolBusy(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-stem-mist flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6 text-center">
@@ -52,7 +73,7 @@ export const OnboardingView: React.FC = () => {
           <form onSubmit={handleJoin} className="space-y-4">
             <input
               required
-              placeholder="IZI-9482"
+              placeholder="IZI-7K4QXP"
               value={passcode}
               onChange={(e) => setPasscode(e.target.value.toUpperCase())}
               className="w-full rounded-xl border-2 border-stem-line px-3 py-2.5 text-center font-display font-bold tracking-widest outline-none focus:border-stem-violet"
@@ -63,6 +84,39 @@ export const OnboardingView: React.FC = () => {
             </Button>
           </form>
         </Card>
+
+        {/* Anonymous (room-code guest) sessions can't create a school — the
+            server rejects that token, so hide the option instead of letting
+            it fail. */}
+        {firebaseUser && !firebaseUser.isAnonymous && (
+          <>
+            <p className="font-body-stem text-xs font-bold uppercase tracking-wide text-stem-ink-soft">ou</p>
+            <Card accent="teal">
+              <p className="font-display font-bold text-sm text-stem-ink mb-3">
+                Sou professor(a) e quero cadastrar minha escola
+              </p>
+              <form onSubmit={handleCreateSchool} className="space-y-3">
+                <input
+                  required
+                  placeholder="Nome da escola"
+                  value={schoolName}
+                  onChange={(e) => setSchoolName(e.target.value)}
+                  className="w-full rounded-xl border-2 border-stem-line px-3 py-2.5 font-body-stem outline-none focus:border-stem-teal"
+                />
+                <input
+                  placeholder="Cidade (opcional)"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full rounded-xl border-2 border-stem-line px-3 py-2.5 font-body-stem outline-none focus:border-stem-teal"
+                />
+                {schoolError && <p className="text-sm text-stem-coral font-body-stem">{schoolError}</p>}
+                <Button type="submit" fullWidth variant="secondary" disabled={schoolBusy}>
+                  <School className="w-4 h-4" /> Cadastrar escola
+                </Button>
+              </form>
+            </Card>
+          </>
+        )}
       </div>
     </div>
   );

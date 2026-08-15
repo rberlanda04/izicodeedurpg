@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { generateContent, type ContentKind } from './server/aiContentHandler.ts'
+import { onboardSchool } from './server/onboardSchoolHandler.ts'
 
 // Dev-only server-side proxy for AI content generation: keeps NVIDIA_API_KEY
 // out of the client bundle entirely (this file runs in Node, never ships to
@@ -46,10 +47,51 @@ function nvidiaProxyPlugin(apiKey: string | undefined): Plugin {
   };
 }
 
+// Dev-only server-side proxy for the self-service "create my school"
+// onboarding flow — production equivalent is api/onboard-school.ts. Uses
+// the Admin SDK (server/firebaseAdmin.ts), which in dev reads
+// service-account.json from the repo root, same as scripts/seedAdmin.ts.
+function onboardSchoolProxyPlugin(): Plugin {
+  return {
+    name: 'onboard-school-proxy',
+    configureServer(server) {
+      server.middlewares.use('/api/onboard-school', async (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405;
+          res.end('Method not allowed');
+          return;
+        }
+        try {
+          const chunks: Buffer[] = [];
+          for await (const chunk of req) chunks.push(chunk as Buffer);
+          const { idToken, schoolName, city } = JSON.parse(Buffer.concat(chunks).toString('utf-8')) as {
+            idToken?: string;
+            schoolName?: string;
+            city?: string;
+          };
+          if (!idToken || !schoolName) {
+            res.statusCode = 400;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'idToken e schoolName são obrigatórios.' }));
+            return;
+          }
+          const result = await onboardSchool(idToken, schoolName, city ?? '');
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(result));
+        } catch (err) {
+          res.statusCode = 400;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Erro desconhecido' }));
+        }
+      });
+    }
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
-    plugins: [react(), tailwindcss(), nvidiaProxyPlugin(env.NVIDIA_API_KEY)]
+    plugins: [react(), tailwindcss(), nvidiaProxyPlugin(env.NVIDIA_API_KEY), onboardSchoolProxyPlugin()]
   };
 })

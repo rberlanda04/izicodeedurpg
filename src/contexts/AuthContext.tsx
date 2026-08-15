@@ -10,6 +10,7 @@ interface AuthContextValue {
   firebaseUser: User | null;
   profile: UserProfile | null;
   loading: boolean;
+  profileError: string | null;
   activeClassId: string | null;
   setActiveClassId: (classId: string | null) => void;
   isSchoolAdmin: (schoolId: string) => boolean;
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const [authResolved, setAuthResolved] = useState(false);
   const [profileResolved, setProfileResolved] = useState(false);
   const [activeClassId, setActiveClassIdState] = useState<string | null>(() =>
@@ -44,10 +46,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!firebaseUser) return;
     setProfileResolved(false);
-    const unsubscribe = subscribeToUserProfile(firebaseUser.uid, (p) => {
-      setProfile(p);
-      setProfileResolved(true);
-    });
+    setProfileError(null);
+    const unsubscribe = subscribeToUserProfile(
+      firebaseUser.uid,
+      (p) => {
+        setProfile(p);
+        setProfileResolved(true);
+      },
+      (error) => {
+        // Without this, a permission-denied/offline error left the listener
+        // silently never firing — profileResolved (and thus `loading`) got
+        // stuck true forever with no way for the UI to show anything.
+        console.error('Falha ao carregar perfil do usuário:', error);
+        setProfileError('Não foi possível carregar seu perfil. Verifique sua conexão e tente novamente.');
+        setProfileResolved(true);
+      }
+    );
     return unsubscribe;
   }, [firebaseUser]);
 
@@ -61,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       firebaseUser,
       profile,
       loading: !authResolved || !profileResolved,
+      profileError,
       activeClassId,
       setActiveClassId,
       isSchoolAdmin: (schoolId) => profile?.schoolAdminOf.includes(schoolId) ?? false,
@@ -72,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         false,
       signOut: signOutUser
     }),
-    [firebaseUser, profile, authResolved, profileResolved, activeClassId]
+    [firebaseUser, profile, profileError, authResolved, profileResolved, activeClassId]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
