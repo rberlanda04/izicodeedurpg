@@ -54,7 +54,16 @@ service cloud.firestore {
     }
 
     match /classes/{classId} {
-      allow read: if isMemberOfClass(classId) || isSchoolAdmin(resource.data.schoolId);
+      // Any signed-in user, not just members/admin — join-by-passcode
+      // needed this: joinClassByPasscode's transaction does tx.get(classRef)
+      // before the self-join update, and a transaction's read is gated by
+      // the READ rule even though the follow-up write is already correctly
+      // scoped below — without this, every join attempt failed with
+      // PERMISSION_DENIED before ever reaching the update step. classId is
+      // a crypto.randomUUID(), never guessable/enumerable on its own, so
+      // this doesn't reopen the passcode-enumeration risk the roomPasscodes
+      // collection's get-only rule already closes.
+      allow read: if isSignedIn();
       allow create: if isSchoolAdmin(request.resource.data.schoolId);
       allow update: if isSchoolAdmin(resource.data.schoolId)
         || isGmOfClass(classId)
