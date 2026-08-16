@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { generateContent, type ContentKind } from '../server/aiContentHandler.ts';
+import { generateContent, type ContentKind } from '../server/aiContentHandler';
 
 // Production equivalent of the Vite dev-server proxy (vite.config.ts) for
 // Vercel's static build — Vite's dev-only middleware doesn't run in a

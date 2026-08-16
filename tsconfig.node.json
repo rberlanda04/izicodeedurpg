@@ -6,9 +6,15 @@
     "types": ["node"],
     "skipLibCheck": true,
 
-    /* Bundler mode */
-    "module": "nodenext",
-    "allowImportingTsExtensions": true,
+    /* Bundler mode — these files (vite.config.ts, api/, scripts/) always run
+       through a bundler (Vite, Vercel's @vercel/node esbuild, or tsx) rather
+       than plain unbundled `node`, so "nodenext" resolution (which requires
+       explicit .ts extensions on relative imports) was stricter than
+       reality and actively broke production: Vercel's function bundler
+       doesn't rewrite .ts-suffixed import specifiers, so the deployed
+       function crashed looking for a literal .ts file at runtime. */
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,

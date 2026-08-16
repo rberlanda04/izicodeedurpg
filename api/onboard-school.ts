@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { onboardSchool } from '../server/onboardSchoolHandler.ts';
+import { onboardSchool } from '../server/onboardSchoolHandler';
 
 // Production equivalent of the Vite dev-server proxy (vite.config.ts),
 // mirroring the pattern already established for AI content generation

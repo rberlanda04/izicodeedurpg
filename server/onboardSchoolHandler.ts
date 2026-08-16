@@ -1,7 +1,7 @@
 import { getAuth } from 'firebase-admin/auth';
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { getFirebaseAdminApp } from './firebaseAdmin.ts';
-import { generateRoomPasscode } from '../src/services/passcode.ts';
+import { getFirebaseAdminApp } from './firebaseAdmin';
+import { generateRoomPasscode } from '../src/services/passcode';
 
 export interface OnboardSchoolResult {
   schoolId: string;
