@@ -61,9 +61,8 @@ export const LoginView: React.FC = () => {
   return (
     <div className="min-h-screen bg-stem-mist flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-1">
-          <span className="text-4xl">🧭</span>
-          <h1 className="font-display font-extrabold text-2xl text-stem-ink">Izicode Maker</h1>
+        <div className="text-center space-y-2">
+          <img src="/marketing/rpgmaker-logo.png" alt="Izicode Maker RPG" className="h-12 w-auto object-contain mx-auto" />
           <p className="font-body-stem text-sm text-stem-ink-soft">Sua jornada STEAM começa aqui.</p>
         </div>
 

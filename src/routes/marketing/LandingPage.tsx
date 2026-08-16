@@ -97,10 +97,7 @@ export const LandingPage: React.FC = () => {
       {/* Nav */}
       <header className="sticky top-0 z-40 bg-stem-cloud/90 backdrop-blur border-b-2 border-stem-line">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/marketing/robot-logo.png" alt="" className="w-9 h-9" />
-            <span className="font-display font-extrabold text-lg text-stem-teal">Izicode Maker</span>
-          </div>
+          <img src="/marketing/rpgmaker-logo.png" alt="Izicode Maker RPG" className="h-9 w-auto object-contain" />
           <div className="flex items-center gap-2">
             <Link to="/entrar" className="text-sm font-display font-semibold text-stem-ink-soft hover:text-stem-ink px-3 py-2">
               Entrar
@@ -256,10 +253,7 @@ export const LandingPage: React.FC = () => {
 
       <footer className="border-t-2 border-stem-line py-8">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <img src="/marketing/robot-logo.png" alt="" className="w-6 h-6" />
-            <span className="font-display font-bold text-sm text-stem-ink">Izicode Maker</span>
-          </div>
+          <img src="/marketing/rpgmaker-logo.png" alt="Izicode Maker RPG" className="h-6 w-auto object-contain" />
           <p className="font-body-stem text-xs text-stem-ink-soft">© 2026 Izicode Maker. Plataforma educacional STEAM.</p>
         </div>
       </footer>

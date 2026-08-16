@@ -9,16 +9,21 @@
  * (bg-stem-teal, font-display, etc.), sem tailwind.config.js.
  */
 @theme {
-  --color-stem-teal: #0e7c7b; /* primária — crescimento/tecnologia */
-  --color-stem-teal-dark: #0a5a59;
-  --color-stem-coral: #f25c54; /* ação/CTA */
-  --color-stem-amber: #f4a259; /* conquista/recompensa */
-  --color-stem-violet: #6a4c93; /* criatividade/badges */
-  --color-stem-ink: #1b2430; /* texto principal */
-  --color-stem-ink-soft: #4a5568; /* texto secundário */
-  --color-stem-mist: #f4f7f6; /* fundo da página */
+  /* Paleta RPG Maker: azul + azul-marinho como cor primária (mesmo par
+     usado na logo real da marca), branco como fundo, marrom e verde como
+     cores de apoio. Os nomes dos tokens (teal/coral/amber/violet) ficam
+     como estão de propósito — são só identificadores internos, trocar
+     centenas de classes Tailwind em todo o app não seria necessário. */
+  --color-stem-teal: #38b6ff; /* primária — azul da logo RPG Maker */
+  --color-stem-teal-dark: #1a8fd1;
+  --color-stem-coral: #004b72; /* ação/CTA forte — azul-marinho da logo */
+  --color-stem-amber: #c08347; /* conquista/recompensa — marrom */
+  --color-stem-violet: #2f9e44; /* criatividade/badges — verde */
+  --color-stem-ink: #16232c; /* texto principal */
+  --color-stem-ink-soft: #4d6478; /* texto secundário */
+  --color-stem-mist: #eef6fb; /* fundo da página */
   --color-stem-cloud: #ffffff; /* fundo de cartões */
-  --color-stem-line: #e2e8e7; /* bordas sutis */
+  --color-stem-line: #dce8ef; /* bordas sutis */
 
   --font-display: 'Baloo 2', sans-serif;
   --font-body-stem: 'Manrope', sans-serif;

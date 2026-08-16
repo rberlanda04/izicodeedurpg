@@ -16,8 +16,8 @@ export const TopNav: React.FC<{ onOpenTerminal?: () => void }> = ({ onOpenTermin
   return (
     <header className="sticky top-0 z-40 bg-stem-cloud/90 backdrop-blur border-b-2 border-stem-line">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        <Link to="/app" className="flex items-center gap-2 font-display font-extrabold text-lg text-stem-teal">
-          <span className="text-2xl">🧭</span> Izicode Maker
+        <Link to="/app" className="flex items-center">
+          <img src="/marketing/rpgmaker-logo.png" alt="Izicode Maker RPG" className="h-9 w-auto object-contain" />
         </Link>
 
         <div className="hidden md:flex items-center gap-3 flex-1 max-w-xs">
