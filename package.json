@@ -21,6 +21,9 @@
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"
   },
+  "overrides": {
+    "jose": "4.15.9"
+  },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",

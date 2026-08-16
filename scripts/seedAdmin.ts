@@ -22,8 +22,8 @@
  *        npx tsx scripts/seedAdmin.ts --uid <firebaseUid> --school "Nome da Escola" --city "Cidade"
  */
 import { FieldValue, getFirestore } from 'firebase-admin/firestore';
-import { getFirebaseAdminApp } from '../server/firebaseAdmin';
-import { generateRoomPasscode } from '../src/services/passcode';
+import { getFirebaseAdminApp } from '../server/firebaseAdmin.js';
+import { generateRoomPasscode } from '../src/services/passcode.js';
 
 function parseArgs() {
   const args = process.argv.slice(2);

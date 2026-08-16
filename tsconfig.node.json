@@ -6,13 +6,19 @@
     "types": ["node"],
     "skipLibCheck": true,
 
-    /* Bundler mode — these files (vite.config.ts, api/, scripts/) always run
-       through a bundler (Vite, Vercel's @vercel/node esbuild, or tsx) rather
-       than plain unbundled `node`, so "nodenext" resolution (which requires
-       explicit .ts extensions on relative imports) was stricter than
-       reality and actively broke production: Vercel's function bundler
-       doesn't rewrite .ts-suffixed import specifiers, so the deployed
-       function crashed looking for a literal .ts file at runtime. */
+    /* moduleResolution "bundler" (not "nodenext"): Vercel's function builder
+       transpiles each api/*.ts file individually and traces+includes local
+       imports as real sibling .js files (e.g. server/aiContentHandler.js),
+       WITHOUT rewriting the import specifiers — and since package.json has
+       "type": "module", the deployed function runs under native Node ESM,
+       which requires the import specifier to exactly match the file on
+       disk. So relative imports here MUST use a literal ".js" extension
+       (the eventual compiled output), never ".ts" and never omitted — "ts"
+       extensions or missing ones both produced ERR_MODULE_NOT_FOUND in
+       production because Node looked for a file that didn't exist.
+       "bundler" resolution (matching tsconfig.app.json) still resolves
+       these ".js" specifiers against the real ".ts" source files for
+       type-checking and works correctly under Vite/tsx too. */
     "module": "esnext",
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,

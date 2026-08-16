@@ -1,8 +1,8 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { generateContent, type ContentKind } from './server/aiContentHandler'
-import { onboardSchool } from './server/onboardSchoolHandler'
+import { generateContent, type ContentKind } from './server/aiContentHandler.js'
+import { onboardSchool } from './server/onboardSchoolHandler.js'
 
 // Dev-only server-side proxy for AI content generation: keeps NVIDIA_API_KEY
 // out of the client bundle entirely (this file runs in Node, never ships to
