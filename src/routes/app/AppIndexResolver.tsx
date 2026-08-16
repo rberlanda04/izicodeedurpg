@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { listClassesByIds } from '../../services/classRepo';
 import type { ClassRoom } from '../../types';
@@ -11,6 +11,7 @@ import { Card } from '../../components/stem/Card';
  */
 export const AppIndexResolver: React.FC = () => {
   const { profile, activeClassId, setActiveClassId } = useAuth();
+  const navigate = useNavigate();
   const [classes, setClasses] = useState<ClassRoom[] | null>(null);
 
   const allClassIds = [...(profile?.classIdsAsGameMaster ?? []), ...(profile?.classIdsAsStudent ?? [])];
@@ -46,7 +47,7 @@ export const AppIndexResolver: React.FC = () => {
               className="w-full text-left"
               onClick={() => {
                 setActiveClassId(c.id);
-                window.location.href = `/app/${c.id}/trilha`;
+                navigate(`/app/${c.id}/trilha`);
               }}
             >
               <p className="font-display font-bold text-stem-ink">{c.name}</p>

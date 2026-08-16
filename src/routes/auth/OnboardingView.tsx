@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Key, School } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { joinClassByPasscode } from '../../services/classRepo';
@@ -9,6 +9,7 @@ import { Button } from '../../components/stem/Button';
 
 export const OnboardingView: React.FC = () => {
   const { firebaseUser, profile, loading } = useAuth();
+  const navigate = useNavigate();
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -34,7 +35,7 @@ export const OnboardingView: React.FC = () => {
     setBusy(true);
     try {
       const classRoom = await joinClassByPasscode(profile.uid, passcode.trim());
-      window.location.href = `/app/${classRoom.id}/trilha`;
+      navigate(`/app/${classRoom.id}/trilha`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Código inválido.');
     } finally {
@@ -49,7 +50,7 @@ export const OnboardingView: React.FC = () => {
     setSchoolBusy(true);
     try {
       const result = await createSchoolAsTeacher(firebaseUser, schoolName.trim(), city.trim());
-      window.location.href = `/admin/${result.schoolId}`;
+      navigate(`/admin/${result.schoolId}`);
     } catch (err) {
       setSchoolError(err instanceof Error ? err.message : 'Não foi possível cadastrar a escola.');
     } finally {
