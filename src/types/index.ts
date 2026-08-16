@@ -199,3 +199,102 @@ export interface ResourceBooking {
   date: string; // ISO date, e.g. '2026-08-13'
   timeSlot: string; // e.g. '13:00-13:30'
 }
+
+// --- Módulo EcoGuardians: hackathon de justiça climática, cross-turma/escola ---
+// Coleções próprias no nível raiz (não aninhadas em classes/schools) porque um
+// evento reúne equipes de qualquer turma/escola — ver PLANO em
+// C:\Users\rberl\.claude\plans\wild-enchanting-cat.md.
+
+export type HackathonDisasterType = 'TSUNAMI' | 'DESLIZAMENTO' | 'ENCHENTE' | 'TORNADO';
+
+export interface HackathonSchedulePhase {
+  id: string;
+  label: string;
+  startTime: string; // 'HH:mm', hora local do evento
+  endTime: string; // 'HH:mm'
+}
+
+export interface HackathonTestingWindow {
+  start: string; // 'HH:mm'
+  end: string; // 'HH:mm'
+}
+
+export interface HackathonEvent {
+  id: string;
+  name: string;
+  date: string; // ISO date
+  joinCode: string;
+  staffIds: string[];
+  schedule: HackathonSchedulePhase[];
+  testingWindows: HackathonTestingWindow[];
+  createdAt: string;
+}
+
+// Documento de lookup em hackathonEventCodes/{joinCode} — mesmo padrão de
+// RoomPasscodeLookup: get-only, nunca listável, evita enumeração de códigos.
+export interface HackathonEventCodeLookup {
+  eventId: string;
+}
+
+export interface HackathonTeamMember {
+  name: string;
+  avatarHead: string;
+  role: ScrumRole;
+  joinedAt: string;
+}
+
+export interface HackathonTeamScores {
+  engenharia?: number;
+  equidade?: number;
+  regeneracao?: number;
+}
+
+export interface HackathonTeam {
+  id: string;
+  eventId: string;
+  name: string;
+  questId?: string; // uma das 4 HackathonQuest fixas (src/data/hackathonQuests.ts)
+  members: Record<string, HackathonTeamMember>; // uid -> membro, mesmo padrão de UserProfile.memberships
+  scores: HackathonTeamScores;
+  scoreNotes?: string;
+  createdAt: string;
+}
+
+export type HackathonMentorRequestType = 'technical' | 'social' | 'pitch';
+export type HackathonMentorRequestStatus = 'waiting' | 'claimed' | 'resolved';
+
+export interface HackathonMentorRequest {
+  id: string;
+  eventId: string;
+  teamId: string;
+  teamName: string;
+  type: HackathonMentorRequestType;
+  status: HackathonMentorRequestStatus;
+  claimedByUid?: string;
+  claimedByName?: string;
+  createdAt: string;
+}
+
+export type HackathonTestingSlotStatus = 'available' | 'booked' | 'completed';
+
+export interface HackathonTestingSlot {
+  id: string; // determinístico: `${eventId}__${station}__${timeSlot}`
+  eventId: string;
+  station: HackathonDisasterType;
+  timeSlot: string; // 'HH:mm-HH:mm'
+  teamId?: string;
+  teamName?: string;
+  status: HackathonTestingSlotStatus;
+  outcome?: 'passed' | 'retry';
+  staffNote?: string;
+}
+
+export interface HackathonCheckin {
+  id: string;
+  eventId: string;
+  teamId: string;
+  teamName: string;
+  level: 1 | 2 | 3;
+  checkpointLabel: string;
+  createdAt: string;
+}

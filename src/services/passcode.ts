@@ -8,14 +8,17 @@ const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const CODE_LENGTH = 6;
 
 /**
- * Generates a room passcode with ~32^6 (≈1 billion) combinations — the
- * previous "IZI-" + 4 digits format (~9,000 combinations) was brute-forceable
- * by scripting anonymous sign-ins against the get-only roomPasscodes lookup.
+ * Generates a passcode with ~32^6 (≈1 billion) combinations — the previous
+ * "IZI-" + 4 digits format (~9,000 combinations) was brute-forceable by
+ * scripting anonymous sign-ins against the get-only roomPasscodes lookup.
+ * `prefix` lets callers use the same entropy/format for a different
+ * namespace (e.g. 'ECO' for hackathon event join codes) without colliding
+ * with room passcodes in the same get-only-lookup style collection pattern.
  */
-export function generateRoomPasscode(): string {
+export function generateRoomPasscode(prefix = 'IZI'): string {
   let code = '';
   for (let i = 0; i < CODE_LENGTH; i++) {
     code += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
   }
-  return `IZI-${code}`;
+  return `${prefix}-${code}`;
 }

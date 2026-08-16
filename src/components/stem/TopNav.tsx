@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Terminal, Moon, Sun, LogOut } from 'lucide-react';
+import { Terminal, Moon, Sun, LogOut, Globe2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ClassSwitcher } from './ClassSwitcher';
@@ -39,6 +39,14 @@ export const TopNav: React.FC<{ onOpenTerminal?: () => void }> = ({ onOpenTermin
           </div>
 
           <ClassSwitcher />
+
+          <Link
+            to="/eventos"
+            title="Eventos Maker (hackathons)"
+            className="p-2 rounded-xl border-2 border-stem-line hover:border-stem-teal text-stem-ink-soft hover:text-stem-teal transition-colors"
+          >
+            <Globe2 className="w-4 h-4" />
+          </Link>
 
           {onOpenTerminal && (
             <button

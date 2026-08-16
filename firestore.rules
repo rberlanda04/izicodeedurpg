@@ -33,6 +33,20 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
 
+    // "Staff" (facilitador/mentor/jurado) de um evento EcoGuardians não é um
+    // papel novo no RBAC — é só estar listado no staffIds do PRÓPRIO evento,
+    // mesmo espírito de classes/{id}.gameMasterIds, mas escopado a um evento
+    // cross-turma/escola em vez de a uma turma.
+    function eventStaff(eventId) {
+      return isSignedIn()
+        && uid() in get(/databases/$(database)/documents/hackathonEvents/$(eventId)).data.staffIds;
+    }
+
+    function isTeamMember(teamId) {
+      return isSignedIn()
+        && uid() in get(/databases/$(database)/documents/hackathonTeams/$(teamId)).data.members.keys();
+    }
+
     // ---- Raízes de tenancy ----
     match /schools/{schoolId} {
       allow read: if isSignedIn();
@@ -57,6 +71,71 @@ service cloud.firestore {
       allow get: if isSignedIn();
       allow list: if false;
       allow write: if isSchoolAdmin(request.resource.data.schoolId) || isGmOfClass(request.resource.data.classId);
+    }
+
+    // ---- Módulo EcoGuardians (hackathon cross-turma/escola) ----
+    // Dados de evento não são sensíveis (nomes de equipe, pontuação, fila de
+    // mentoria de um evento de um dia) — leitura livre para qualquer
+    // signed-in, mesmo padrão já usado em schools/{schoolId} acima.
+    match /hackathonEvents/{eventId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && (me().classIdsAsGameMaster.size() > 0 || me().schoolAdminOf.size() > 0)
+        && request.resource.data.staffIds == [uid()];
+      allow update: if isSignedIn() && uid() in resource.data.staffIds;
+      allow delete: if false;
+    }
+
+    // Lookup código do evento -> eventId. NUNCA listável — só "get" sabendo o código exato.
+    match /hackathonEventCodes/{code} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow create: if isSignedIn() && (me().classIdsAsGameMaster.size() > 0 || me().schoolAdminOf.size() > 0);
+      allow update, delete: if false;
+    }
+
+    match /hackathonTeams/{teamId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.members.keys() == [uid()];
+      allow update: if isSignedIn() && (
+          ( // entrar na equipe: só posso alterar a MINHA própria chave no mapa de membros
+            onlyChanged(['members'])
+            && request.resource.data.members.diff(resource.data.members).affectedKeys().hasOnly([uid()])
+          )
+          || ( // escolher/trocar a quest: só quem já é membro
+            onlyChanged(['questId']) && uid() in resource.data.members.keys()
+          )
+          || ( // pontuação: só staff do evento
+            onlyChanged(['scores', 'scoreNotes']) && eventStaff(resource.data.eventId)
+          )
+        );
+      allow delete: if false;
+    }
+
+    match /hackathonMentorRequests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && isTeamMember(request.resource.data.teamId)
+        && request.resource.data.status == 'waiting';
+      allow update: if eventStaff(resource.data.eventId);
+      allow delete: if false;
+    }
+
+    match /hackathonTestingSlots/{slotId} {
+      allow read: if isSignedIn();
+      // ID determinístico (evento+estação+horário) — a exclusividade real
+      // vem da transação no client (hackathonRepo.ts:bookTestingSlot), que só
+      // escreve se o doc ainda não existir; esta regra só garante que quem
+      // reserva é de fato membro do time referenciado.
+      allow create: if isSignedIn() && isTeamMember(request.resource.data.teamId);
+      allow update: if eventStaff(resource.data.eventId) && onlyChanged(['status', 'outcome', 'staffNote']);
+      allow delete: if false;
+    }
+
+    match /hackathonCheckins/{checkinId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isTeamMember(request.resource.data.teamId);
+      allow update, delete: if false;
     }
 
     // ---- Coleções por turma ----

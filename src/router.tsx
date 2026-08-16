@@ -16,6 +16,10 @@ import { PortaisPage } from './routes/app/PortaisPage';
 import { PerfilPage } from './routes/app/PerfilPage';
 import { GmDashboardPage } from './routes/gm/GmDashboardPage';
 import { AdminDashboardPage } from './routes/admin/AdminDashboardPage';
+import { EventsListPage } from './routes/hackathon/EventsListPage';
+import { CreateEventPage } from './routes/hackathon/CreateEventPage';
+import { EventHubPage } from './routes/hackathon/EventHubPage';
+import { EventStaffPage } from './routes/hackathon/EventStaffPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -27,6 +31,10 @@ export const router = createBrowserRouter([
     children: [
       { path: '/onboarding', element: <OnboardingView /> },
       { path: '/app', element: <AppIndexResolver /> },
+      { path: '/eventos', element: <EventsListPage /> },
+      { path: '/eventos/novo', element: <CreateEventPage /> },
+      { path: '/eventos/:eventId', element: <EventHubPage /> },
+      { path: '/eventos/:eventId/staff', element: <EventStaffPage /> },
       {
         path: '/app/:classId',
         element: <ClassLayout />,
