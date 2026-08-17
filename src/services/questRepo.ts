@@ -11,7 +11,11 @@ import {
   type Unsubscribe
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Quest, SDGGoal } from '../types';
+import type { Quest, QuestValidation, SDGGoal } from '../types';
+
+function generateValidationToken(): string {
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
 
 // Follows classRepo.ts/userRepo.ts conventions: subscribeToX(id, onChange,
 // onError) with the 3-arg onSnapshot form. quests/{questId} already has
@@ -80,8 +84,59 @@ export async function approveQuest(questId: string): Promise<void> {
   await updateDoc(doc(db, 'quests', questId), { status: 'ACTIVE' });
 }
 
-export async function completeQuest(questId: string): Promise<void> {
+/** Only for the Terminal Hacker secret quest — see the firestore.rules carve-out. */
+export async function completeSecretQuest(questId: string): Promise<void> {
   await updateDoc(doc(db, 'quests', questId), { status: 'COMPLETED' });
+}
+
+/**
+ * "Aceitar o desafio" — a student claims an ACTIVE quest to work on. Moves
+ * it to PENDING_VALIDATION and generates a 4-digit code that only the GM
+ * can read back (questValidations/{questId} — see firestore.rules). The
+ * student gets the code from the teacher in person once the work is
+ * actually done, not from Firestore.
+ */
+export async function acceptQuest(
+  classId: string,
+  schoolId: string,
+  questId: string,
+  studentUid: string,
+  studentName: string,
+  xpReward: number,
+  coinReward: number
+): Promise<string> {
+  const token = generateValidationToken();
+  const validation: QuestValidation = {
+    questId,
+    classId,
+    schoolId,
+    studentUid,
+    studentName,
+    token,
+    xpReward,
+    coinReward,
+    createdAt: new Date().toISOString()
+  };
+  await setDoc(doc(db, 'questValidations', questId), validation);
+  await updateDoc(doc(db, 'quests', questId), {
+    status: 'PENDING_VALIDATION',
+    pendingValidationStudentUid: studentUid,
+    pendingValidationStudentName: studentName
+  });
+  return token;
+}
+
+/** GM-only in practice — questValidations read is rules-restricted to GM/Admin. */
+export function subscribeToClassValidations(
+  classId: string,
+  onChange: (validations: QuestValidation[]) => void,
+  onError?: (error: FirestoreError) => void
+): Unsubscribe {
+  return onSnapshot(
+    query(collection(db, 'questValidations'), where('classId', '==', classId)),
+    (snap) => onChange(snap.docs.map((d) => d.data() as QuestValidation)),
+    onError
+  );
 }
 
 /**

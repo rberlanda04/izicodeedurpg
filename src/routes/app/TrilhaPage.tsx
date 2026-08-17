@@ -5,7 +5,7 @@ import { Trail } from '../../components/trail/Trail';
 import type { ClassOutletContext } from './ClassLayout';
 
 export const TrilhaPage: React.FC = () => {
-  const { skills, quests, handleUnlockSkill, handleCompleteQuest, classRoom } =
+  const { skills, quests, handleUnlockSkill, handleAcceptQuest, classRoom } =
     useOutletContext<ClassOutletContext>();
   const { profile } = useAuth();
   if (!profile) return null;
@@ -22,8 +22,9 @@ export const TrilhaPage: React.FC = () => {
         skills={skills}
         quests={quests}
         unlockedSkillIds={profile.unlockedSkills}
+        currentUid={profile.uid}
         onUnlockSkill={handleUnlockSkill}
-        onCompleteQuest={handleCompleteQuest}
+        onAcceptQuest={handleAcceptQuest}
       />
     </div>
   );

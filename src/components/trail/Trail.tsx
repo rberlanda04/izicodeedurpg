@@ -8,11 +8,19 @@ interface TrailProps {
   skills: SkillNode[];
   quests: Quest[];
   unlockedSkillIds: string[];
+  currentUid: string;
   onUnlockSkill: (skillId: string) => void;
-  onCompleteQuest: (questId: string, xpReward: number, coinReward: number) => void;
+  onAcceptQuest: (questId: string, xpReward: number, coinReward: number) => void;
 }
 
-export const Trail: React.FC<TrailProps> = ({ skills, quests, unlockedSkillIds, onUnlockSkill, onCompleteQuest }) => {
+export const Trail: React.FC<TrailProps> = ({
+  skills,
+  quests,
+  unlockedSkillIds,
+  currentUid,
+  onUnlockSkill,
+  onAcceptQuest
+}) => {
   const layout = useMemo(() => computeTrailLayout(skills, quests), [skills, quests]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -107,8 +115,9 @@ export const Trail: React.FC<TrailProps> = ({ skills, quests, unlockedSkillIds, 
           kind="quest"
           data={selectedQuest}
           status={questStatus(selectedQuest)}
-          onComplete={() => {
-            onCompleteQuest(selectedQuest.id, selectedQuest.xpReward, selectedQuest.coinReward);
+          currentUid={currentUid}
+          onAccept={() => {
+            onAcceptQuest(selectedQuest.id, selectedQuest.xpReward, selectedQuest.coinReward);
             setSelectedId(null);
           }}
           onClose={() => setSelectedId(null)}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Bot, PlusCircle, Globe, CheckCircle, BookOpen } from 'lucide-react';
+import { Bot, PlusCircle, Globe, CheckCircle, BookOpen, Key } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
 import type { Quest, SDGGoal } from '../../types';
@@ -10,8 +11,9 @@ import { QuestGuideModal } from '../../components/stem/QuestGuideModal';
 import type { ClassOutletContext } from './ClassLayout';
 
 export const MissoesPage: React.FC = () => {
-  const { quests, handleCompleteQuest, handleProposeQuest, handleGenerateAIQuest } =
+  const { quests, handleAcceptQuest, handleValidateQuest, validationError, handleProposeQuest, handleGenerateAIQuest } =
     useOutletContext<ClassOutletContext>();
+  const { profile } = useAuth();
   const [filter, setFilter] = useState<SDGGoal | 'ALL'>('ALL');
   const [showPropose, setShowPropose] = useState(false);
   const [title, setTitle] = useState('');
@@ -19,6 +21,7 @@ export const MissoesPage: React.FC = () => {
   const [sdg, setSdg] = useState<SDGGoal>('4');
   const [generating, setGenerating] = useState(false);
   const [guideQuest, setGuideQuest] = useState<Quest | null>(null);
+  const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
 
   const filtered = quests.filter((q) => filter === 'ALL' || q.sdgGoals.includes(filter));
 
@@ -108,19 +111,48 @@ export const MissoesPage: React.FC = () => {
                     <BookOpen className="w-4 h-4" /> Ver tutorial completo
                   </Button>
                 )}
-                {completed ? (
+                {completed && (
                   <div className="flex items-center justify-center gap-2 text-stem-teal font-display font-bold text-sm py-2">
                     <CheckCircle className="w-4 h-4" /> Concluída
                   </div>
-                ) : (
-                  <Button
-                    fullWidth
-                    variant="secondary"
-                    onClick={() => handleCompleteQuest(q.id, q.xpReward, q.coinReward)}
-                    disabled={q.status !== 'ACTIVE'}
-                  >
-                    {q.status === 'PROPOSED' ? 'Aguardando aprovação' : 'Enviar para validação'}
+                )}
+                {q.status === 'PROPOSED' && (
+                  <Button fullWidth variant="secondary" disabled>
+                    Aguardando aprovação
                   </Button>
+                )}
+                {q.status === 'ACTIVE' && (
+                  <Button fullWidth variant="secondary" onClick={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}>
+                    Aceitar desafio
+                  </Button>
+                )}
+                {q.status === 'PENDING_VALIDATION' &&
+                  (q.pendingValidationStudentUid === profile?.uid ? (
+                    <form
+                      className="flex gap-2"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleValidateQuest(q.id, codeInputs[q.id] ?? '');
+                      }}
+                    >
+                      <input
+                        required
+                        placeholder="Código do professor"
+                        value={codeInputs[q.id] ?? ''}
+                        onChange={(e) => setCodeInputs((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                        className="flex-1 min-w-0 rounded-xl border-2 border-stem-line px-3 py-2.5 text-center font-display font-bold tracking-widest outline-none focus:border-stem-teal"
+                      />
+                      <Button type="submit">
+                        <Key className="w-4 h-4" /> Validar
+                      </Button>
+                    </form>
+                  ) : (
+                    <Button fullWidth variant="ghost" disabled>
+                      {q.pendingValidationStudentName ?? 'Um colega'} está validando com o Game Master
+                    </Button>
+                  ))}
+                {q.status === 'PENDING_VALIDATION' && q.pendingValidationStudentUid === profile?.uid && validationError && (
+                  <p className="text-xs text-stem-coral font-body-stem text-center">{validationError}</p>
                 )}
               </div>
             </Card>

@@ -160,10 +160,38 @@ service cloud.firestore {
       allow create: if isGmOfClass(request.resource.data.classId)
         || (isStudentOfClass(request.resource.data.classId) && request.resource.data.status == 'PROPOSED');
       allow update: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
-        || ( // aluno só pode transicionar a PRÓPRIA quest de ACTIVE -> COMPLETED, nada mais
+        || ( // aluno "aceita o desafio": ACTIVE -> PENDING_VALIDATION, e só pode se
+             // reivindicar a SI MESMO como pendingValidationStudentUid — a
+             // transição final PENDING_VALIDATION -> COMPLETED (com concessão de
+             // XP/moedas) só acontece via api/validate-quest.ts (Admin SDK), que
+             // confere o código guardado em questValidations/{questId} antes —
+             // por isso não existe aqui uma regra de cliente para essa transição.
+          isStudentOfClass(resource.data.classId)
+          && onlyChanged(['status', 'pendingValidationStudentUid', 'pendingValidationStudentName'])
+          && resource.data.status == 'ACTIVE' && request.resource.data.status == 'PENDING_VALIDATION'
+          && request.resource.data.pendingValidationStudentUid == uid()
+        )
+        || ( // quest secreta do Terminal Hacker: continua auto-validável — já
+             // tem seu próprio mecanismo de código secreto (secretPasscode),
+             // não passa pelo fluxo de validação presencial do professor.
           isStudentOfClass(resource.data.classId) && onlyChanged(['status'])
+          && resource.data.isSecretQuest == true
           && resource.data.status == 'ACTIVE' && request.resource.data.status == 'COMPLETED'
         );
+      allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+    }
+
+    // Código de validação presencial: só o Game Master/Admin da turma pode
+    // LER o token (é isso que impede o aluno de ler o valor direto do
+    // Firestore em vez de esperar o professor falar/mostrar). O aluno só
+    // precisa CRIAR o próprio pedido (ao "aceitar o desafio") — nunca lê de
+    // volta. A confirmação final (comparar o código digitado pelo aluno) é
+    // feita pela function server-side (Admin SDK), não por uma regra aqui.
+    match /questValidations/{questId} {
+      allow read: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+      allow create: if isStudentOfClass(request.resource.data.classId)
+        && request.resource.data.studentUid == uid();
+      allow update: if false;
       allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
     }
 

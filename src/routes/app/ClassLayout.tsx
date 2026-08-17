@@ -16,7 +16,7 @@ export interface ClassOutletContext extends ReturnType<typeof useClassLocalState
 
 export const ClassLayout: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
-  const { profile, isMemberOfClass, setActiveClassId } = useAuth();
+  const { profile, firebaseUser, isMemberOfClass, setActiveClassId } = useAuth();
   const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
   const [classError, setClassError] = useState<string | null>(null);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
@@ -37,7 +37,7 @@ export const ClassLayout: React.FC = () => {
 
   // Hooks below always run (React rule of hooks) — the hook safely no-ops on
   // fallback values while we wait for profile/classId/classRoom to resolve.
-  const classState = useClassLocalState(classId ?? 'unknown', classRoom?.schoolId ?? '', profile!, applyUserPatch);
+  const classState = useClassLocalState(classId ?? 'unknown', classRoom?.schoolId ?? '', profile!, applyUserPatch, firebaseUser);
 
   if (!classId || !profile) return null;
   if (!isMemberOfClass(classId)) return <Navigate to="/app" replace />;

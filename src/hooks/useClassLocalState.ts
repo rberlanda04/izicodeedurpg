@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
+import type { User } from 'firebase/auth';
 import {
   HARDWARE_CATALOG,
   CURIOSITY_CARDS,
@@ -10,7 +11,15 @@ import {
 import { SKILL_NODES } from '../data/mockData';
 import { generateAIQuest } from '../services/questEngine';
 import { generateQuestWithAI } from '../services/aiContentService';
-import { subscribeToClassQuests, proposeQuest, createQuest, approveQuest as approveQuestFs, completeQuest as completeQuestFs } from '../services/questRepo';
+import {
+  subscribeToClassQuests,
+  proposeQuest,
+  createQuest,
+  approveQuest as approveQuestFs,
+  completeSecretQuest,
+  acceptQuest as acceptQuestFs
+} from '../services/questRepo';
+import { submitValidationCode } from '../services/questValidationService';
 import { subscribeToClassGuilds, createGuild, joinGuild } from '../services/guildRepo';
 import { loadState, saveState, debounce, NAMESPACE } from '../services/persistence';
 import { soundEngine } from '../services/soundEngine';
@@ -52,7 +61,8 @@ export function useClassLocalState(
   classId: string,
   schoolId: string,
   profile: UserProfile,
-  applyUserPatch: ApplyUserPatch
+  applyUserPatch: ApplyUserPatch,
+  firebaseUser: User | null
 ) {
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [quests, setQuests] = useState<Quest[]>([]);
@@ -193,10 +203,25 @@ export function useClassLocalState(
     return true;
   };
 
-  const handleCompleteQuest = (questId: string, xpReward: number, coinReward: number) => {
-    triggerConfetti();
-    void completeQuestFs(questId);
-    grantXpAndCoins(xpReward, coinReward);
+  const [validationError, setValidationError] = useState('');
+
+  /** Student "accepts" an ACTIVE quest — generates the code the GM will reveal in person once the work is done. */
+  const handleAcceptQuest = (questId: string, xpReward: number, coinReward: number) => {
+    void acceptQuestFs(classId, schoolId, questId, profile.uid, profile.adventureName, xpReward, coinReward);
+  };
+
+  /** Student submits the code the GM told/showed them — grants XP/coins server-side only on a match. */
+  const handleValidateQuest = async (questId: string, code: string) => {
+    if (!firebaseUser) return;
+    setValidationError('');
+    try {
+      await submitValidationCode(firebaseUser, questId, code);
+      soundEngine.playLevelUp();
+      triggerConfetti();
+    } catch (err) {
+      soundEngine.playErrorBeep();
+      setValidationError(err instanceof Error ? err.message : 'Código incorreto.');
+    }
   };
 
   const handleProposeQuest = (title: string, description: string, sdgGoals: SDGGoal[]) => {
@@ -252,7 +277,7 @@ export function useClassLocalState(
       });
     }
     const secretQuest = quests.find((q) => q.isSecretQuest);
-    if (secretQuest) void completeQuestFs(secretQuest.id);
+    if (secretQuest) void completeSecretQuest(secretQuest.id);
     return true;
   };
 
@@ -334,13 +359,15 @@ export function useClassLocalState(
     bookings,
     quickHackInput,
     setQuickHackInput,
+    validationError,
     handleSignContract,
     handleUpdateAvatar,
     handleJoinGuild,
     handleCreateGuild,
     handleUnlockSkill,
     handleBookResource,
-    handleCompleteQuest,
+    handleAcceptQuest,
+    handleValidateQuest,
     handleProposeQuest,
     handleGenerateAIQuest,
     handleUnlockSecretQuest,

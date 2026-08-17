@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Crown, Key, Zap, CheckCircle, Copy, ArrowLeft } from 'lucide-react';
+import { Crown, Key, Zap, CheckCircle, Copy, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { subscribeToClass } from '../../services/classRepo';
+import { subscribeToClassValidations } from '../../services/questRepo';
 import { useClassLocalState } from '../../hooks/useClassLocalState';
 import { useApplyUserPatch } from '../../hooks/useApplyUserPatch';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
 import { ErrorState } from '../../components/stem/ErrorState';
-import type { ClassRoom } from '../../types';
+import { ValidationCodeReveal } from '../../components/stem/ValidationCodeReveal';
+import type { ClassRoom, QuestValidation } from '../../types';
 
 export const GmDashboardPage: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
-  const { profile } = useAuth();
+  const { profile, firebaseUser } = useAuth();
   const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
   const [classError, setClassError] = useState<string | null>(null);
+  const [validations, setValidations] = useState<QuestValidation[]>([]);
   const [xpAmount, setXpAmount] = useState(100);
   const [copied, setCopied] = useState(false);
 
@@ -27,14 +30,31 @@ export const GmDashboardPage: React.FC = () => {
     });
   }, [classId]);
 
+  useEffect(() => {
+    if (!classId) return;
+    // questValidations is rules-restricted to GM/Admin — a student's
+    // browser can never subscribe to this successfully, which is the whole
+    // point (the code only exists somewhere the class can't read).
+    return subscribeToClassValidations(classId, setValidations, (error) =>
+      console.error('Falha ao carregar validações pendentes:', error)
+    );
+  }, [classId]);
+
   const applyUserPatch = useApplyUserPatch(profile);
-  const classState = useClassLocalState(classId ?? 'unknown', classRoom?.schoolId ?? '', profile!, applyUserPatch);
+  const classState = useClassLocalState(
+    classId ?? 'unknown',
+    classRoom?.schoolId ?? '',
+    profile!,
+    applyUserPatch,
+    firebaseUser
+  );
 
   if (!classId || !profile) return null;
   if (classError) return <ErrorState message={classError} />;
   if (!classRoom) return null;
 
   const proposedQuests = classState.quests.filter((q) => q.status === 'PROPOSED');
+  const pendingValidations = classState.quests.filter((q) => q.status === 'PENDING_VALIDATION');
 
   return (
     <div className="min-h-screen bg-stem-mist">
@@ -116,6 +136,39 @@ export const GmDashboardPage: React.FC = () => {
               </button>
             ))}
           </div>
+        </Card>
+
+        <Card accent="amber">
+          <h3 className="font-display font-bold text-stem-ink mb-3 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-stem-amber" /> Validações pendentes ({pendingValidations.length})
+          </h3>
+          <p className="text-xs font-body-stem text-stem-ink-soft mb-3">
+            Confira o trabalho do aluno pessoalmente antes de revelar o código — é isso que libera o XP.
+          </p>
+          {pendingValidations.length === 0 ? (
+            <p className="text-sm font-body-stem text-stem-ink-soft text-center py-4">
+              Nenhum aluno com missão em andamento no momento.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {pendingValidations.map((q) => {
+                const validation = validations.find((v) => v.questId === q.id);
+                return (
+                  <div key={q.id} className="bg-stem-mist rounded-xl p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="font-display font-bold text-sm text-stem-ink">{q.title}</p>
+                        <p className="text-xs font-body-stem text-stem-ink-soft">
+                          {q.pendingValidationStudentName ?? 'Aventureiro'} está com esta missão
+                        </p>
+                      </div>
+                      {validation && <ValidationCodeReveal token={validation.token} />}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </Card>
 
         <Card>

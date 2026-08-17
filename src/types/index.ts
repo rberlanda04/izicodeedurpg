@@ -126,10 +126,18 @@ export interface Quest {
   hardwareRequired: string[];
   proposedByStudentId?: string;
   proposedByStudentName?: string;
-  status: 'PROPOSED' | 'APPROVED' | 'ACTIVE' | 'COMPLETED';
+  status: 'PROPOSED' | 'APPROVED' | 'ACTIVE' | 'PENDING_VALIDATION' | 'COMPLETED';
   validationSteps: string[];
   isSecretQuest?: boolean;
   secretPasscode?: string;
+
+  // Quem está com a missão em mãos, aguardando o professor validar
+  // presencialmente — visível para a turma toda (não é segredo). O código
+  // de validação em si NÃO fica aqui — vive em questValidations/{questId},
+  // com leitura restrita ao Game Master/Admin, justamente para não vazar
+  // pra quem lê o documento da quest.
+  pendingValidationStudentUid?: string;
+  pendingValidationStudentName?: string;
 
   // --- Campos vindos do catálogo real de projetos (izicode-landing) ---
   grade?: string; // série/ano recomendado, ex: "Ensino Fundamental II (8º e 9º ano)"
@@ -137,6 +145,22 @@ export interface Quest {
   guideContent?: string; // tutorial completo em markdown (montagem, código, dicas)
   externalLink?: string; // ex: link do Hackster.io com o projeto de referência
   imageUrl?: string;
+}
+
+// questValidations/{questId} — código de validação presencial gerado
+// quando um aluno aceita uma missão ACTIVE. Leitura restrita ao Game
+// Master/Admin da turma (ver firestore.rules); o aluno nunca lê o campo
+// `token` de volta, só digita o que o professor disser/mostrar.
+export interface QuestValidation {
+  questId: string;
+  classId: string;
+  schoolId: string;
+  studentUid: string;
+  studentName: string;
+  token: string;
+  xpReward: number;
+  coinReward: number;
+  createdAt: string;
 }
 
 export interface HardwareItem {

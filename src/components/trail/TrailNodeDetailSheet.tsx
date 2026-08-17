@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Zap, Gift, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { X, Zap, Gift, BookOpen, Key } from 'lucide-react';
 import { Button } from '../stem/Button';
 import { ToolBadgeRow } from '../stem/ToolBadge';
 import { QuestGuideModal } from '../stem/QuestGuideModal';
@@ -18,7 +19,8 @@ interface QuestSheet {
   kind: 'quest';
   data: Quest;
   status: TrailNodeStatus;
-  onComplete: () => void;
+  currentUid: string;
+  onAccept: () => void;
 }
 
 type TrailNodeDetailSheetProps = (SkillSheet | QuestSheet) & { onClose: () => void };
@@ -92,9 +94,21 @@ export const TrailNodeDetailSheet: React.FC<TrailNodeDetailSheetProps> = (props)
           <Button fullWidth onClick={props.onUnlock}>
             Desbloquear habilidade
           </Button>
+        ) : props.data.status === 'PENDING_VALIDATION' ? (
+          props.data.pendingValidationStudentUid === props.currentUid ? (
+            <Link to="../missoes">
+              <Button fullWidth>
+                <Key className="w-4 h-4" /> Peça o código ao professor no Mural de Missões
+              </Button>
+            </Link>
+          ) : (
+            <div className="text-center font-body-stem text-sm text-stem-ink-soft py-2">
+              {props.data.pendingValidationStudentName ?? 'Um colega'} está validando esta missão com o Game Master.
+            </div>
+          )
         ) : (
-          <Button fullWidth onClick={props.onComplete}>
-            Enviar para validação do Mestre
+          <Button fullWidth onClick={props.onAccept}>
+            Aceitar desafio
           </Button>
         )}
       </div>
