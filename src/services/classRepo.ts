@@ -14,6 +14,8 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { generateRoomPasscode } from './passcode';
+import { seedClassQuests } from './questRepo';
+import { STARTER_QUEST_TEMPLATES } from '../data/mockData';
 import type { School, ClassRoom, RoomPasscodeLookup } from '../types';
 
 export async function createSchool(name: string, city: string, adminUid: string): Promise<School> {
@@ -58,6 +60,13 @@ export async function createClass(
       classIdsAsGameMaster: arrayUnion(ref.id)
     });
   });
+
+  // Best-effort follow-up, not part of the class-creation transaction: if
+  // it partially fails, the class still exists and works, just with fewer
+  // starter quests on the mural — the GM can always add more manually.
+  seedClassQuests(ref.id, schoolId, STARTER_QUEST_TEMPLATES).catch((err) =>
+    console.error('Falha ao semear missões iniciais da turma:', err)
+  );
 
   return classRoom;
 }

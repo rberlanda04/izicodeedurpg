@@ -36,8 +36,8 @@ export const ClassLayout: React.FC = () => {
   const applyUserPatch = useApplyUserPatch(profile);
 
   // Hooks below always run (React rule of hooks) — the hook safely no-ops on
-  // fallback values while we wait for profile/classId to resolve.
-  const classState = useClassLocalState(classId ?? 'unknown', profile!, applyUserPatch);
+  // fallback values while we wait for profile/classId/classRoom to resolve.
+  const classState = useClassLocalState(classId ?? 'unknown', classRoom?.schoolId ?? '', profile!, applyUserPatch);
 
   if (!classId || !profile) return null;
   if (!isMemberOfClass(classId)) return <Navigate to="/app" replace />;

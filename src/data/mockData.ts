@@ -237,19 +237,39 @@ export const SKILL_NODES: SkillNode[] = [
   }
 ];
 
-// Mural inicial de uma turma nova: um recorte com 1-2 projetos reais do
-// catálogo (src/data/projectCatalog.ts) por tier, escolhidos pela variedade
-// de ferramentas, mais a quest secreta do Terminal Hacker.
+// Mural inicial de uma turma nova: um recorte real do catálogo
+// (src/data/projectCatalog.ts) com boa variedade de tier e ferramenta —
+// todos com guideContent (tutorial completo), mais a quest secreta do
+// Terminal Hacker. Ampliado de 9 para 24 projetos nesta rodada.
 const STARTER_PROJECT_IDS = [
-  'proj-piano-de-frutas', // BASIC · Makey Makey
-  'proj-jogo-reciclagem-scratch', // BASIC · Scratch
-  'proj-semaforo-inteligente', // BASIC · Arduino
-  'proj-robo-seguidor-linha', // INTERMEDIATE · Arduino
-  'proj-cidade-inteligente-tinkercad', // INTERMEDIATE · Tinkercad
-  'proj-pedometro-microbit', // INTERMEDIATE · Micro:bit + Python
-  'proj-braco-robotico-servo', // ADVANCED · Arduino
-  'proj-carro-autonomo-nepo', // ADVANCED · Arduino + NEPO
-  'proj-retropie-console' // SPECIALIST · Raspberry Pi
+  // BASIC
+  'proj-piano-de-frutas', // Makey Makey
+  'proj-jogo-reciclagem-scratch', // Scratch
+  'proj-semaforo-inteligente', // Arduino
+  'proj-estacao-meteorologica-microbit', // Micro:bit
+  'proj-chat-python-ia', // Python
+  'proj-jogo-pong-scratch', // Scratch
+  'proj-dado-digital-calliope', // Calliope
+  'proj-jogo-reacao-leds', // Arduino + LEDs
+  'proj-estacao-lcd-arduino', // Arduino + LCD
+  // INTERMEDIATE
+  'proj-robo-seguidor-linha', // Arduino
+  'proj-cidade-inteligente-tinkercad', // Tinkercad
+  'proj-pedometro-microbit', // Micro:bit + Python
+  'proj-piano-luz-microbit', // Micro:bit
+  'proj-sistema-irrigacao-inteligente', // Sensores
+  'proj-contador-pessoas-sensor', // Sensor
+  'proj-sinalizador-morse', // Arduino
+  'proj-introducao-raspberry-pi', // Raspberry Pi
+  'proj-horta-iot-cloud', // IoT Cloud
+  // ADVANCED
+  'proj-braco-robotico-servo', // Arduino
+  'proj-carro-autonomo-nepo', // Arduino + NEPO
+  'proj-robo-desenhista', // Arduino
+  'proj-estacao-qualidade-ar', // Sensores
+  'proj-cofre-eletronico-keypad', // Arduino + Keypad
+  // SPECIALIST
+  'proj-retropie-console' // Raspberry Pi
 ];
 
 // Missões escritas à mão para as ferramentas que entraram na árvore depois
@@ -401,6 +421,11 @@ export const QUESTS: Quest[] = [
     ]
   }
 ];
+
+// Mesmo conteúdo de QUESTS, sem o campo `id` — usado para semear o mural de
+// missões de uma turma nova no Firestore (cada turma recebe suas PRÓPRIAS
+// cópias dos documentos, com IDs gerados pelo Firestore).
+export const STARTER_QUEST_TEMPLATES: Array<Omit<Quest, 'id'>> = QUESTS.map(({ id: _id, ...rest }) => rest);
 
 // Pool completo (todos os 37 projetos reais) usado pelo Motor de Missões IA
 // (src/services/questEngine.ts como fallback local, e o serviço de IA da

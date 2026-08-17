@@ -1,4 +1,6 @@
 import type { User } from 'firebase/auth';
+import { seedClassQuests } from './questRepo';
+import { STARTER_QUEST_TEMPLATES } from '../data/mockData';
 
 export interface OnboardSchoolResult {
   schoolId: string;
@@ -39,5 +41,19 @@ export async function createSchoolAsTeacher(
   if (!data) {
     throw new Error('Resposta inesperada do servidor ao cadastrar a escola.');
   }
+
+  // Seeded client-side (not inside the Admin SDK handler) on purpose: the
+  // handler runs as a Vercel serverless function that only bundles files it
+  // directly traces, and pulling in mockData.ts's whole real-content
+  // dependency chain there risks the same import-resolution bug already
+  // fixed once for api/*.ts (see tsconfig.node.json's comment). The GM is
+  // already the class's own gameMasterIds by the time this runs (the Admin
+  // SDK write already committed), so the normal quests/{questId} create
+  // rule (isGmOfClass) already allows this from the client with no
+  // elevated privileges needed.
+  seedClassQuests(data.classId, data.schoolId, STARTER_QUEST_TEMPLATES).catch((err) =>
+    console.error('Falha ao semear missões iniciais da turma piloto:', err)
+  );
+
   return data;
 }

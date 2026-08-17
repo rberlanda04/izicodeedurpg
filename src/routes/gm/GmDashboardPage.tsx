@@ -28,7 +28,7 @@ export const GmDashboardPage: React.FC = () => {
   }, [classId]);
 
   const applyUserPatch = useApplyUserPatch(profile);
-  const classState = useClassLocalState(classId ?? 'unknown', profile!, applyUserPatch);
+  const classState = useClassLocalState(classId ?? 'unknown', classRoom?.schoolId ?? '', profile!, applyUserPatch);
 
   if (!classId || !profile) return null;
   if (classError) return <ErrorState message={classError} />;
