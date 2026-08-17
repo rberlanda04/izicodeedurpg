@@ -396,6 +396,145 @@ const TOOL_QUESTS: Quest[] = [
       'Apresentar o pitch em até 3 minutos, com slides gerados no Gamma.',
       'Mostrar a planilha de dados/custos do projeto no Office 365.'
     ]
+  },
+  // --- Missões autorais adicionais — cobrindo nós de habilidade sem
+  // nenhuma missão própria (lego_ev3, fablab_machining) e trazendo mais
+  // variedade criativa para ferramentas já cobertas pelo catálogo real.
+  {
+    id: 'tool-quest-lego-ev3-sentinela',
+    title: 'Sentinela do Labirinto',
+    description:
+      'Monte um robô com o kit Lego Mindstorms EV3 equipado com sensor ultrassônico e sensor de cor, capaz de navegar por um labirinto detectando paredes e seguindo uma trilha colorida até a saída.',
+    tier: 'ADVANCED',
+    requiredSkills: ['lego_ev3'],
+    sdgGoals: ['9'],
+    xpReward: 500,
+    coinReward: 130,
+    hardwareRequired: ['Lego Mindstorms EV3'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Demonstrar o robô completando o labirinto sem colidir nas paredes.',
+      'Explicar ao Game Master como o sensor ultrassônico decide quando virar.'
+    ]
+  },
+  {
+    id: 'tool-quest-fablab-emblema',
+    title: 'Forja Digital: Emblema da Guilda',
+    description:
+      'Modele um emblema personalizado da sua guilda no Tinkercad e fabrique-o de verdade na impressora 3D ou na cortadora a laser do laboratório, transformando o design digital em um objeto físico.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['fablab_machining'],
+    sdgGoals: ['9'],
+    xpReward: 650,
+    coinReward: 170,
+    hardwareRequired: ['Tinkercad', 'Impressora 3D', 'Cortadora a Laser'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Apresentar o arquivo 3D/vetor já fatiado corretamente antes da fabricação.',
+      'Entregar ao Game Master a peça física fabricada com o emblema da guilda.'
+    ]
+  },
+  {
+    id: 'tool-quest-python-oraculo',
+    title: 'Oráculo de Dados: Relatório da Reciclagem',
+    description:
+      'Escreva um script em Python que leia uma planilha (CSV) com os dados de coleta seletiva da escola e calcule automaticamente qual material foi mais reciclado, gerando um pequeno relatório de texto.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['python_intro'],
+    sdgGoals: ['12'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['Python'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Executar o script com um arquivo CSV de exemplo e mostrar o relatório gerado.',
+      'Explicar ao Game Master qual biblioteca Python foi usada para ler os dados.'
+    ]
+  },
+  {
+    id: 'tool-quest-scratch-clima',
+    title: 'Guardiã do Clima: Corrida Contra o Aquecimento',
+    description:
+      'Crie um jogo de reflexo no Scratch onde o jogador precisa clicar em ícones de ações sustentáveis (economizar água, reciclar, plantar) antes que o termômetro do planeta suba demais.',
+    tier: 'BASIC',
+    requiredSkills: ['scratch_basics'],
+    sdgGoals: ['13'],
+    xpReward: 200,
+    coinReward: 55,
+    hardwareRequired: ['Scratch'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Demonstrar o jogo funcionando com pontuação e um termômetro que sobe com o tempo.',
+      'Explicar ao Game Master qual variável controla o aumento da temperatura no jogo.'
+    ]
+  },
+  {
+    id: 'tool-quest-raspberry-sentinela',
+    title: 'Sentinela Noturna do Laboratório',
+    description:
+      'Configure um Raspberry Pi com um módulo de câmera e um sensor de movimento (PIR) para tirar uma foto automaticamente sempre que detectar presença, funcionando como um sistema simples de vigilância do laboratório.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['raspberry_pi_avancado'],
+    sdgGoals: ['11'],
+    xpReward: 650,
+    coinReward: 170,
+    hardwareRequired: ['Raspberry Pi', 'Módulo de Câmera', 'Sensor PIR'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Demonstrar o sistema salvando uma foto ao detectar movimento diante do sensor.',
+      'Explicar ao Game Master onde as fotos ficam armazenadas no Raspberry Pi.'
+    ]
+  },
+  {
+    id: 'tool-quest-tinkercad-escudo',
+    title: 'Escudo Paramétrico da Guilda',
+    description:
+      'Projete no Tinkercad uma capinha protetora personalizada para um microcontrolador (Arduino ou micro:bit) da sala, usando formas paramétricas e encaixes que permitam abrir e fechar sem parafusos.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['modelagem_3d_tinkercad'],
+    sdgGoals: ['9'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['Tinkercad'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Mostrar o modelo 3D encaixando corretamente ao redor da placa real.',
+      'Explicar ao Game Master como os furos de ventilação/encaixe foram posicionados.'
+    ]
+  },
+  {
+    id: 'tool-quest-app-inventor-bussola',
+    title: 'Bússola do Voluntariado',
+    description:
+      'Desenvolva um aplicativo com App Inventor que ajude a organizar ações voluntárias da turma, permitindo cadastrar tarefas, marcar quem topou ajudar e ver a lista de atividades pendentes.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['app_inventor'],
+    sdgGoals: ['11'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['App Inventor', 'Smartphone Android'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Demonstrar o cadastro de uma tarefa voluntária e a marcação de um responsável.',
+      'Explicar ao Game Master como os dados das tarefas são guardados no app.'
+    ]
+  },
+  {
+    id: 'tool-quest-makey-orquestra',
+    title: 'Orquestra Viva',
+    description:
+      'Use o Makey Makey e objetos condutores do dia a dia (frutas, folhas de alumínio, água) para criar um instrumento musical tocável no Scratch, com pelo menos 4 notas diferentes.',
+    tier: 'BASIC',
+    requiredSkills: ['circuitos_makey_makey'],
+    sdgGoals: ['4'],
+    xpReward: 200,
+    coinReward: 55,
+    hardwareRequired: ['Makey Makey', 'Scratch'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Tocar uma sequência simples de notas usando os objetos condutores conectados.',
+      'Explicar ao Game Master por que alguns materiais conduzem eletricidade e outros não.'
+    ]
   }
 ];
 
