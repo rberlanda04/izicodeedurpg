@@ -171,6 +171,8 @@ export interface HardwareItem {
   coinCost: number;
   icon: string;
   pinoutDiagramUrl?: string;
+  tier?: SkillTier; // nível de projeto em que este material costuma entrar em cena
+  linkedQuestIds?: string[]; // ids de Quest (QUESTS/QUEST_TEMPLATES) que usam este material
   troubleshootingGuide?: {
     overview: string;
     commonErrors: Array<{ error: string; solution: string }>;

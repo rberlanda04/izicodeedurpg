@@ -1049,6 +1049,8 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     stockQuantity: 14,
     coinCost: 100,
     icon: '📟',
+    tier: 'SPECIALIST',
+    linkedQuestIds: ['tool-quest-esp8266-painel', 'proj-horta-iot-cloud', 'proj-alarme-cloud-iot'],
     pinoutDiagramUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=80',
     troubleshootingGuide: {
       overview: 'Guia de Interface e Resolução de Conflitos para ESP8266 & Módulos I2C (ex: Acelerômetro MMA845x).',
@@ -1082,6 +1084,8 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     stockQuantity: 22,
     coinCost: 80,
     icon: '🔌',
+    tier: 'BASIC',
+    linkedQuestIds: ['tool-quest-acender-led', 'proj-semaforo-inteligente', 'tool-quest-central-multissensor'],
     pinoutDiagramUrl: 'https://images.unsplash.com/photo-1553406830-ef2513450d76?w=500&auto=format&fit=crop&q=80',
     troubleshootingGuide: {
       overview: 'Guia de Interface Serial (USB), Upload de Sketch e Compatibilidade de Nível Lógico para Arduino Uno R3.',
@@ -1115,6 +1119,7 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     stockQuantity: 18,
     coinCost: 60,
     icon: '🧭',
+    tier: 'INTERMEDIATE',
     troubleshootingGuide: {
       overview: 'Guia de Diagnóstico para Sensores Inerciais I2C — cobre tanto o Acelerômetro MMA8451 quanto o IMU MPU6050 (Acelerômetro + Giroscópio), incluindo conflitos de endereço e escolha correta de biblioteca.',
       commonErrors: [
@@ -1152,6 +1157,8 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     stockQuantity: 8,
     coinCost: 40,
     icon: '🧵',
+    tier: 'INTERMEDIATE',
+    linkedQuestIds: ['proj-cidade-inteligente-tinkercad'],
     troubleshootingGuide: {
       overview: 'Guia rápido de armazenamento e diagnóstico de falhas de extrusão para Filamento PLA — o PLA é higroscópico e absorve umidade do ar, o que compromete a impressão.',
       commonErrors: [
@@ -1179,6 +1186,7 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     stockQuantity: 12,
     coinCost: 50,
     icon: '🚨',
+    tier: 'INTERMEDIATE',
     troubleshootingGuide: {
       overview: 'Guia de calibração e diagnóstico para o sensor infravermelho passivo HC-SR501, usado em projetos de alarme, contagem de pessoas e câmeras que só fotografam quando detectam presença.',
       commonErrors: [
@@ -1214,6 +1222,8 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
     stockQuantity: 6,
     coinCost: 70,
     icon: '🍌',
+    tier: 'BASIC',
+    linkedQuestIds: ['proj-piano-de-frutas', 'tool-quest-makey-orquestra'],
     troubleshootingGuide: {
       overview: 'Guia de conexão para o Makey Makey — uma placa que transforma qualquer material levemente condutor em teclado/mouse USB, sem precisar escrever nenhum código.',
       commonErrors: [
@@ -1234,6 +1244,176 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
       wiringDiagram: [
         { pinFrom: 'Fio EARTH', pinTo: 'Segurado pela mão da pessoa', note: 'Fecha o circuito através do corpo humano — sem isso, nenhuma entrada do Makey Makey funciona.' },
         { pinFrom: 'Entrada (SPACE/UP/DOWN/LEFT/RIGHT/CLICK)', pinTo: 'Objeto condutor (fruta, grafite, água, papel alumínio)', note: 'O Makey Makey aparece pro computador como um teclado/mouse comum — não precisa de driver nem código.' }
+      ]
+    }
+  },
+  // Materiais adicionados junto com a Trilha do Eletricista Iniciante
+  // (tool-quest-acender-led, sensor-som, radar-servo, central-multissensor)
+  // — fechavam o estoque do laboratório sem ter um item de inventário
+  // correspondente para o aluno requisitar.
+  {
+    id: 'hw-7',
+    name: 'Kit LED + Resistor 220Ω',
+    category: 'STATIONERY',
+    stockQuantity: 60,
+    coinCost: 20,
+    icon: '💡',
+    tier: 'BASIC',
+    linkedQuestIds: ['tool-quest-acender-led', 'proj-semaforo-inteligente', 'proj-jogo-reacao-leds'],
+    troubleshootingGuide: {
+      overview: 'Guia de polaridade e proteção de corrente para o par mais básico da eletrônica maker: um LED e o resistor que o protege de queimar.',
+      commonErrors: [
+        {
+          error: 'LED não acende de jeito nenhum',
+          solution: 'LED é um diodo: só conduz corrente em um sentido. Inverta as pernas — a perna longa (anodo) vai para o lado positivo/pino digital, a curta (catodo) vai para o GND.'
+        },
+        {
+          error: 'LED acende fraco ou "morre" depois de alguns minutos ligado',
+          solution: 'Resistor de valor alto demais (ex: 10kΩ no lugar de 220Ω) limita corrente demais. Confira as faixas coloridas do resistor ou meça com um multímetro antes de montar.'
+        },
+        {
+          error: 'LED queimou (ficou preto ou parou de acender de vez)',
+          solution: 'Circuito montado sem resistor em série, ou resistor com valor baixo demais (abaixo de 150Ω para 5V). O LED recebeu corrente acima do limite de ~20mA e queimou o filamento interno — substitua o LED, dessa vez com resistor de 220-330Ω.'
+        }
+      ],
+      compatibleLibraries: [],
+      wiringDiagram: [
+        { pinFrom: 'LED Anodo (perna longa)', pinTo: 'Pino digital do Arduino', note: 'O lado que recebe o sinal "HIGH" do código.' },
+        { pinFrom: 'LED Catodo (perna curta)', pinTo: 'Resistor 220-330Ω → GND', note: 'O resistor pode ficar antes ou depois do LED, desde que esteja em série no mesmo caminho.' }
+      ]
+    }
+  },
+  {
+    id: 'hw-8',
+    name: 'Sensor de Som KY-038',
+    category: 'SENSOR',
+    stockQuantity: 10,
+    coinCost: 45,
+    icon: '🎤',
+    tier: 'INTERMEDIATE',
+    linkedQuestIds: ['tool-quest-sensor-som-aplausos'],
+    troubleshootingGuide: {
+      overview: 'Guia de calibração para o módulo de microfone KY-038, usado em interruptores por palma, alarmes sonoros e medidores de volume.',
+      commonErrors: [
+        {
+          error: 'O LED indicador do próprio módulo acende com qualquer barulho (conversa, ventilador)',
+          solution: 'O potenciômetro azul no módulo ajusta a sensibilidade da saída digital (DO). Gire no sentido anti-horário até que só sons altos (palmas) disparem o LED do módulo.'
+        },
+        {
+          error: 'digitalRead(DO) sempre retorna o mesmo valor, nunca muda',
+          solution: 'Confira se está lendo o pino DO (saída digital de limiar) e não o AO (saída analógica contínua) — DO exige leitura com digitalRead(), AO exige analogRead() em um pino A0-A5.'
+        },
+        {
+          error: 'Um único som dispara vários eventos seguidos no código',
+          solution: 'O microfone capta a vibração sonora inteira, não um pulso único — sem um tempo de "debounce" por software (ignorar novas leituras por ~300-500ms após a primeira), uma palma pode ser lida como 3 ou 4 eventos.'
+        }
+      ],
+      compatibleLibraries: [],
+      wiringDiagram: [
+        { pinFrom: 'KY-038 VCC', pinTo: 'Arduino 5V', note: 'Alimentação do módulo.' },
+        { pinFrom: 'KY-038 GND', pinTo: 'Arduino GND', note: 'GND comum de referência.' },
+        { pinFrom: 'KY-038 DO', pinTo: 'Pino digital (ex: D2)', note: 'Pulso HIGH quando o som ultrapassa o limiar ajustado no potenciômetro.' },
+        { pinFrom: 'KY-038 AO', pinTo: 'Pino analógico (ex: A0)', note: 'Leitura contínua de intensidade sonora, útil para medidores de volume.' }
+      ]
+    }
+  },
+  {
+    id: 'hw-9',
+    name: 'Sensor de Temperatura e Umidade DHT11',
+    category: 'SENSOR',
+    stockQuantity: 10,
+    coinCost: 50,
+    icon: '🌡️',
+    tier: 'BASIC',
+    linkedQuestIds: ['proj-estacao-lcd-arduino', 'tool-quest-central-multissensor'],
+    troubleshootingGuide: {
+      overview: 'Guia de diagnóstico para o DHT11, o sensor digital de temperatura e umidade mais comum em projetos escolares.',
+      commonErrors: [
+        {
+          error: 'readTemperature() ou readHumidity() retornam "nan"',
+          solution: 'O DHT11 precisa de pelo menos 1-2 segundos entre leituras — se o loop() tentar ler mais rápido que isso (ou sem nenhum delay/controle de tempo), o sensor retorna "nan" (Not a Number). Use millis() para espaçar as leituras.'
+        },
+        {
+          error: 'Valores de temperatura/umidade sempre travados em 0 ou muito instáveis',
+          solution: 'Fiação solta no pino de dados é a causa mais comum. Em módulos sem o resistor pull-up embutido na placazinha (breakout), adicione um resistor de 10kΩ entre o pino de dados e o VCC.'
+        },
+        {
+          error: 'Erro de compilação "DHT11 not declared" ou biblioteca não reconhece o sensor',
+          solution: 'Confira se a biblioteca DHT.h (Adafruit) está instalada E se o tipo do sensor está definido corretamente no código como DHT11 — usar "DHT22" no código com um sensor DHT11 físico compila mas gera leituras erradas, pois a precisão/protocolo de tempo dos dois chips é diferente.'
+        }
+      ],
+      compatibleLibraries: ['DHT.h', 'Adafruit_Sensor.h'],
+      wiringDiagram: [
+        { pinFrom: 'DHT11 VCC', pinTo: 'Arduino 5V', note: 'Alimentação do sensor.' },
+        { pinFrom: 'DHT11 GND', pinTo: 'Arduino GND', note: 'GND comum de referência.' },
+        { pinFrom: 'DHT11 Data', pinTo: 'Pino digital (ex: D3)', note: 'Um único fio transmite temperatura e umidade por protocolo próprio — sem I2C.' }
+      ]
+    }
+  },
+  {
+    id: 'hw-10',
+    name: 'Sensor Ultrassônico HC-SR04',
+    category: 'SENSOR',
+    stockQuantity: 10,
+    coinCost: 55,
+    icon: '📏',
+    tier: 'INTERMEDIATE',
+    linkedQuestIds: ['proj-radar-ultrassonico', 'proj-alarme-distancia', 'tool-quest-radar-servo-ultrassonico', 'tool-quest-central-multissensor'],
+    troubleshootingGuide: {
+      overview: 'Guia de medição de distância por eco ultrassônico para o HC-SR04, usado em radares, alarmes de proximidade e robôs desviadores de obstáculo.',
+      commonErrors: [
+        {
+          error: 'pulseIn() trava o programa por vários segundos quando não há nada na frente',
+          solution: 'Por padrão, pulseIn() espera até 1 segundo pelo pulso de eco antes de desistir. Passe um terceiro argumento de timeout menor, ex: pulseIn(echoPin, HIGH, 25000) (25ms ≈ 4 metros), para o programa continuar fluindo mesmo sem detectar nada.'
+        },
+        {
+          error: 'Leituras muito instáveis ou distâncias absurdas (milhares de cm)',
+          solution: 'Superfícies muito próximas (< 2cm), muito inclinadas ou macias (tecido, espuma) absorvem ou desviam o eco em vez de refletir de volta. Aponte o sensor perpendicular a uma superfície rígida e mantenha ao menos 2-3cm de distância mínima.'
+        },
+        {
+          error: 'Sensor esquenta ou trava depois de ligado em uma placa de 3.3V (ex: ESP32 sem divisor)',
+          solution: 'O HC-SR04 opera em lógica de 5V. Em controladoras de 3.3V, o pino Echo devolve um sinal de 5V que pode danificar a entrada — use um divisor de tensão resistivo (ex: 1kΩ + 2kΩ) na linha Echo antes de ligar em uma placa de 3.3V.'
+        }
+      ],
+      compatibleLibraries: [],
+      wiringDiagram: [
+        { pinFrom: 'HC-SR04 VCC', pinTo: 'Arduino 5V', note: 'Alimentação do módulo.' },
+        { pinFrom: 'HC-SR04 GND', pinTo: 'Arduino GND', note: 'GND comum de referência.' },
+        { pinFrom: 'HC-SR04 Trig', pinTo: 'Pino digital de saída (ex: D9)', note: 'Recebe o pulso de 10μs que dispara a onda sonora.' },
+        { pinFrom: 'HC-SR04 Echo', pinTo: 'Pino digital de entrada (ex: D10)', note: 'Fica HIGH pelo tempo que a onda levou para ir e voltar — a distância é esse tempo dividido por 58.' }
+      ]
+    }
+  },
+  {
+    id: 'hw-11',
+    name: 'Servomotor SG90',
+    category: 'ACTUATOR',
+    stockQuantity: 8,
+    coinCost: 65,
+    icon: '⚙️',
+    tier: 'ADVANCED',
+    linkedQuestIds: ['proj-braco-robotico-servo', 'proj-cofre-eletronico-keypad', 'tool-quest-radar-servo-ultrassonico'],
+    troubleshootingGuide: {
+      overview: 'Guia de controle de ângulo e alimentação para o servomotor SG90, o atuador giratório mais usado em braços robóticos, radares e travas eletrônicas.',
+      commonErrors: [
+        {
+          error: 'Servo treme (jitter) constantemente, mesmo parado em um ângulo fixo',
+          solution: 'Alimentar o servo direto pelo pino 5V do Arduino é o suficiente para 1 servo, mas 2 ou mais servos juntos consomem mais corrente do que a placa consegue fornecer via USB. Use uma fonte externa de 5V para os servos, mantendo o GND comum com o Arduino.'
+        },
+        {
+          error: 'Servo não gira até 0° ou até 180° de verdade (para antes)',
+          solution: 'Cada unidade SG90 tem uma pequena variação de fábrica na largura de pulso mínima/máxima. Use servo.attach(pino, 500, 2400) (ajustando os microssegundos) em vez do attach() padrão para calibrar o curso real daquele servo específico.'
+        },
+        {
+          error: 'Movimento do servo é "brusco", pula direto para o ângulo final',
+          solution: 'servo.write(angulo) muda de posição o mais rápido que o motor conseguir. Para um movimento suave, incremente o ângulo em pequenos passos (ex: 1 grau por vez) dentro de um loop com um pequeno delay entre cada passo.'
+        }
+      ],
+      compatibleLibraries: ['Servo.h'],
+      wiringDiagram: [
+        { pinFrom: 'Servo fio marrom/preto (GND)', pinTo: 'Arduino GND', note: 'GND comum — obrigatório mesmo usando fonte externa para o servo.' },
+        { pinFrom: 'Servo fio vermelho (VCC)', pinTo: '5V (Arduino ou fonte externa)', note: 'Use fonte externa se estiver usando mais de 1 servo ao mesmo tempo.' },
+        { pinFrom: 'Servo fio laranja/amarelo (Sinal)', pinTo: 'Pino digital PWM (ex: D9)', note: 'Controlado pela biblioteca Servo.h, não precisa ser um pino com "~".' }
       ]
     }
   }
