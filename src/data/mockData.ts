@@ -535,6 +535,110 @@ const TOOL_QUESTS: Quest[] = [
       'Tocar uma sequência simples de notas usando os objetos condutores conectados.',
       'Explicar ao Game Master por que alguns materiais conduzem eletricidade e outros não.'
     ]
+  },
+  // --- Missões de síntese — combinam duas habilidades já desbloqueadas
+  // num projeto só, como um "desafio de chefe" no fim de uma trilha.
+  {
+    id: 'tool-quest-arduino-python-vinculo',
+    title: 'Vínculo Neural: Sensor Inteligente com Aprendizado',
+    description:
+      'Conecte um sensor analógico ao Arduino e envie as leituras pela porta serial para um script em Python que calcule a média móvel dos últimos 10 valores e dispare um alerta no terminal quando ultrapassar um limite definido.',
+    tier: 'ADVANCED',
+    requiredSkills: ['arduino_basico', 'python_intro'],
+    sdgGoals: ['9'],
+    xpReward: 500,
+    coinReward: 130,
+    hardwareRequired: ['Arduino Uno', 'Python'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Demonstrar o Arduino enviando dados e o Python calculando a média em tempo real.',
+      'Explicar ao Game Master como a comunicação serial entre as duas partes funciona.'
+    ]
+  },
+  {
+    id: 'tool-quest-microbit-appinventor-elo',
+    title: 'Elo Sem Fio: Controle Remoto Bluetooth',
+    description:
+      'Use o rádio ou Bluetooth do micro:bit para receber comandos enviados por um aplicativo criado no App Inventor, acendendo diferentes padrões na matriz de LEDs conforme o botão pressionado no celular.',
+    tier: 'ADVANCED',
+    requiredSkills: ['microbit_starter', 'app_inventor'],
+    sdgGoals: ['9'],
+    xpReward: 500,
+    coinReward: 130,
+    hardwareRequired: ['Micro:bit', 'App Inventor', 'Smartphone Android'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Demonstrar o app enviando pelo menos dois comandos diferentes que mudam o padrão de LEDs no micro:bit.',
+      'Explicar ao Game Master como a conexão sem fio entre o celular e a placa foi configurada.'
+    ]
+  },
+  {
+    id: 'tool-quest-tinkercad-arduino-armadura',
+    title: 'Armadura Sob Medida',
+    description:
+      'Projete no Tinkercad uma caixa sob medida para proteger um circuito com Arduino já funcionando, com furos precisos para os cabos e botões, e fabrique-a de verdade na impressora 3D.',
+    tier: 'ADVANCED',
+    requiredSkills: ['modelagem_3d_tinkercad', 'arduino_basico'],
+    sdgGoals: ['9'],
+    xpReward: 500,
+    coinReward: 130,
+    hardwareRequired: ['Tinkercad', 'Arduino Uno', 'Impressora 3D'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Mostrar o circuito Arduino funcionando dentro da caixa fabricada, com os cabos e botões acessíveis pelos furos certos.',
+      'Explicar ao Game Master como as medidas da caixa foram tiradas a partir do circuito real.'
+    ]
+  },
+  {
+    id: 'tool-quest-esp8266-painel',
+    title: 'Rede dos Guardiões: Painel de Monitoramento',
+    description:
+      'Programe um ESP8266 para ler um sensor e publicar as leituras periodicamente em uma página web simples hospedada na própria placa, acessível de qualquer celular conectado à mesma rede Wi-Fi.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['esp8266_advanced'],
+    sdgGoals: ['9'],
+    xpReward: 650,
+    coinReward: 170,
+    hardwareRequired: ['ESP8266', 'NodeMCU 1.0'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Acessar a página web hospedada no ESP8266 pelo celular e mostrar a leitura do sensor atualizada.',
+      'Explicar ao Game Master como o ESP8266 conseguiu se conectar à rede Wi-Fi da escola.'
+    ]
+  },
+  {
+    id: 'tool-quest-canva-portfolio',
+    title: 'Arquivo da Expedição: Portfólio de Missão',
+    description:
+      'Escolha uma missão que sua equipe já completou e monte, no Canva, uma página de portfólio de uma folha só, com fotos do processo, o problema resolvido e os materiais usados — pronta para apresentar numa feira de ciências.',
+    tier: 'BASIC',
+    requiredSkills: ['identidade_visual_canva'],
+    sdgGoals: ['4'],
+    xpReward: 200,
+    coinReward: 55,
+    hardwareRequired: ['Canva'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Apresentar a página de portfólio pronta, com pelo menos uma foto real do processo.',
+      'Explicar ao Game Master por que a missão escolhida foi importante para o portfólio.'
+    ]
+  },
+  {
+    id: 'tool-quest-drone-python-telemetria',
+    title: 'Olhos de Águia: Registro de Voo',
+    description:
+      'Após um voo controlado com o drone educacional, use Python para organizar os metadados das fotos aéreas (hora, ordem, quantidade) em uma lista simples que ajude a equipe a documentar o sobrevoo.',
+    tier: 'SPECIALIST',
+    requiredSkills: ['drone_intro', 'python_intro'],
+    sdgGoals: ['13'],
+    xpReward: 650,
+    coinReward: 170,
+    hardwareRequired: ['Drone Educacional', 'Python'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Mostrar a lista organizada pelo script Python com pelo menos 3 fotos do voo.',
+      'Explicar ao Game Master a diferença entre pilotar manualmente e uma missão autônoma programada.'
+    ]
   }
 ];
 
@@ -705,6 +809,71 @@ export const HARDWARE_CATALOG: HardwareItem[] = [
       compatibleLibraries: [],
       wiringDiagram: []
     }
+  },
+  {
+    id: 'hw-5',
+    name: 'Sensor de Movimento PIR (HC-SR501)',
+    category: 'SENSOR',
+    stockQuantity: 12,
+    coinCost: 50,
+    icon: '🚨',
+    troubleshootingGuide: {
+      overview: 'Guia de calibração e diagnóstico para o sensor infravermelho passivo HC-SR501, usado em projetos de alarme, contagem de pessoas e câmeras que só fotografam quando detectam presença.',
+      commonErrors: [
+        {
+          error: 'Sensor "disparando sozinho" sem ninguém por perto',
+          solution: 'Fontes de calor (ar-condicionado, luz solar direta, radiadores) enganam o PIR. Reposicione o sensor longe de janelas/saídas de ar, ou reduza a sensibilidade no trimmer "Sx" (giro anti-horário).'
+        },
+        {
+          error: 'Sensor não desliga o sinal de saída rápido depois de detectar',
+          solution: 'O trimmer "Tx" controla o tempo que o pino de saída fica em HIGH após a detecção (de ~3s a 5min de fábrica). Gire anti-horário para o menor tempo possível durante testes.'
+        },
+        {
+          error: 'Sensor parece "burro" logo ao ligar o circuito',
+          solution: 'O HC-SR501 precisa de 30 a 60 segundos de aquecimento após ser energizado para estabilizar as leituras infravermelhas — ignore os primeiros disparos aleatórios desse período.'
+        },
+        {
+          error: 'Sensor só detecta uma vez e não dispara de novo mesmo com movimento contínuo',
+          solution: 'Confira o jumper de modo: posição "L" é não-repetível (só reinicia a contagem depois do tempo Tx acabar), posição "H" é repetível (reinicia o tempo a cada novo movimento). Para alarmes contínuos, use "H".'
+        }
+      ],
+      compatibleLibraries: [],
+      wiringDiagram: [
+        { pinFrom: 'PIR VCC', pinTo: 'Placa 5V', note: 'Aceita de 4.5V a 20V graças ao regulador onboard, mas 5V é o padrão mais estável.' },
+        { pinFrom: 'PIR GND', pinTo: 'Placa GND', note: 'GND comum de referência.' },
+        { pinFrom: 'PIR OUT', pinTo: 'Pino digital (ex: D2 no Arduino, GPIO no Raspberry Pi)', note: 'Sinal digital: HIGH quando detecta movimento, LOW em repouso — não precisa de resistor pull-up.' }
+      ]
+    }
+  },
+  {
+    id: 'hw-6',
+    name: 'Makey Makey',
+    category: 'ACTUATOR',
+    stockQuantity: 6,
+    coinCost: 70,
+    icon: '🍌',
+    troubleshootingGuide: {
+      overview: 'Guia de conexão para o Makey Makey — uma placa que transforma qualquer material levemente condutor em teclado/mouse USB, sem precisar escrever nenhum código.',
+      commonErrors: [
+        {
+          error: 'Nada funciona, nenhuma tecla é acionada',
+          solution: 'O circuito só fecha se a pessoa estiver segurando o fio "EARTH" (aterramento) com uma mão enquanto toca o objeto conectado a uma entrada com a outra — sem isso, nenhuma entrada funciona, mesmo que os fios estejam certos.'
+        },
+        {
+          error: 'Um objeto específico não aciona a tecla dele, mas os outros funcionam',
+          solution: 'Confira se o jacaré está bem preso ao fio de cobre/alumínio que toca o objeto — contato solto é a causa mais comum. Objetos muito secos (algumas frutas, madeira) conduzem mal; umedeça levemente ou use grafite de lápis como alternativa.'
+        },
+        {
+          error: 'Várias teclas parecem acionar ao mesmo tempo sem querer',
+          solution: 'Isso costuma acontecer quando dois objetos conectados a entradas diferentes encostam um no outro (ou numa superfície metálica comum), fechando o circuito dos dois ao mesmo tempo. Separe fisicamente os objetos condutores.'
+        }
+      ],
+      compatibleLibraries: [],
+      wiringDiagram: [
+        { pinFrom: 'Fio EARTH', pinTo: 'Segurado pela mão da pessoa', note: 'Fecha o circuito através do corpo humano — sem isso, nenhuma entrada do Makey Makey funciona.' },
+        { pinFrom: 'Entrada (SPACE/UP/DOWN/LEFT/RIGHT/CLICK)', pinTo: 'Objeto condutor (fruta, grafite, água, papel alumínio)', note: 'O Makey Makey aparece pro computador como um teclado/mouse comum — não precisa de driver nem código.' }
+      ]
+    }
   }
 ];
 
@@ -738,6 +907,86 @@ export const CURIOSITY_CARDS: CuriosityCard[] = [
     labLocation: 'Lateral da Impressora 3D Ender-3',
     xpReward: 60,
     unlocked: true
+  },
+  {
+    id: 'curio-4',
+    code: 'LAB-ROBO-04',
+    title: 'O Primeiro Robô Industrial da História',
+    category: 'MAKER_HISTORY',
+    content: 'Em 1961, o Unimate começou a trabalhar numa fábrica da General Motors nos EUA, empilhando peças de metal quente — foi o primeiro robô industrial programável do mundo, abrindo caminho para toda a robótica que usamos hoje.',
+    labLocation: 'Perto do braço robótico da bancada de eletrônica',
+    xpReward: 55,
+    unlocked: false
+  },
+  {
+    id: 'curio-5',
+    code: 'LAB-LED-05',
+    title: 'Por Que o LED Só Acende de um Jeito?',
+    category: 'PHYSICS_HACK',
+    content: 'Um LED é um diodo — ele só deixa a corrente elétrica passar numa direção. Ligue ele ao contrário e simplesmente não acende (sem estragar nada): por dentro, os elétrons só conseguem "pular" a barreira do semicondutor num sentido só.',
+    labLocation: 'Caixa de componentes eletrônicos',
+    xpReward: 50,
+    unlocked: false
+  },
+  {
+    id: 'curio-6',
+    code: 'LAB-NET-06',
+    title: 'A Primeira Mensagem da Internet Travou no Meio',
+    category: 'CYBERPUNK',
+    content: 'Em 29 de outubro de 1969, pesquisadores tentaram enviar a palavra "LOGIN" entre dois computadores da ARPANET (a avó da internet). O sistema travou depois de transmitir só "LO" — essas duas letras entraram pra história como a primeira mensagem digital de longa distância.',
+    labLocation: 'Roteador de rede do laboratório',
+    xpReward: 70,
+    unlocked: false
+  },
+  {
+    id: 'curio-7',
+    code: 'LAB-GO-07',
+    title: 'Quando uma IA Venceu um Campeão Imbatível',
+    category: 'AI_FUTURE',
+    content: 'Em 2016, o programa AlphaGo (da DeepMind) venceu Lee Sedol, um dos melhores jogadores de Go do mundo, num jogo considerado bom demais pra máquinas — Go tem mais combinações possíveis que átomos no universo observável.',
+    labLocation: 'Monitor da bancada de programação',
+    xpReward: 65,
+    unlocked: false
+  },
+  {
+    id: 'curio-8',
+    code: 'LAB-OPEN-08',
+    title: 'O Arduino Nasceu Pra Ser Copiado',
+    category: 'MAKER_HISTORY',
+    content: 'Diferente da maioria da eletrônica comercial, o Arduino foi criado em 2005, na Itália, como hardware de código aberto: qualquer pessoa pode ver, copiar e modificar o design das placas livremente — é por isso que existem tantos clones e variações do Arduino no mundo todo.',
+    labLocation: 'Gaveta de placas Arduino',
+    xpReward: 55,
+    unlocked: false
+  },
+  {
+    id: 'curio-9',
+    code: 'LAB-FUSE-09',
+    title: 'O Herói Invisível Que Se Sacrifica Por Você',
+    category: 'PHYSICS_HACK',
+    content: 'Um fusível é um fiozinho fino projetado pra derreter e "queimar" de propósito quando passa corrente elétrica demais pelo circuito — sacrificando a si mesmo pra proteger o resto do equipamento de um curto-circuito ou incêndio.',
+    labLocation: 'Painel elétrico do laboratório',
+    xpReward: 50,
+    unlocked: false
+  },
+  {
+    id: 'curio-10',
+    code: 'LAB-MICROBIT-10',
+    title: 'Um Computador de Presente Pra Um País Inteiro',
+    category: 'MAKER_HISTORY',
+    content: 'Em 2016, a BBC distribuiu gratuitamente um micro:bit para cada aluno de 11 e 12 anos do Reino Unido — quase 1 milhão de placas — numa das maiores iniciativas de educação em tecnologia já feitas por uma emissora de TV.',
+    labLocation: 'Caixa de placas micro:bit',
+    xpReward: 55,
+    unlocked: false
+  },
+  {
+    id: 'curio-11',
+    code: 'LAB-IR-11',
+    title: 'A Luz Que Seus Olhos Não Conseguem Ver',
+    category: 'PHYSICS_HACK',
+    content: 'Sensores infravermelhos (como os de controle remoto e alguns sensores de presença) usam uma luz real, só que numa frequência abaixo do que o olho humano enxerga. Aponte a câmera de um celular pro LED de um controle remoto e aperte um botão: dá pra "ver" esse piscar através da tela!',
+    labLocation: 'Prateleira de sensores',
+    xpReward: 50,
+    unlocked: false
   }
 ];
 
