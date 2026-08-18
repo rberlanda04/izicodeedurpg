@@ -639,6 +639,368 @@ const TOOL_QUESTS: Quest[] = [
       'Mostrar a lista organizada pelo script Python com pelo menos 3 fotos do voo.',
       'Explicar ao Game Master a diferença entre pilotar manualmente e uma missão autônoma programada.'
     ]
+  },
+  // Trilha do Eletricista Iniciante (Maker Lab) — escada de 6 níveis pedida
+  // pelo usuário. Os níveis 2 e 4 já existiam no catálogo real (37 projetos)
+  // como 'proj-semaforo-inteligente' e 'proj-estacao-lcd-arduino' — não
+  // duplicados aqui de propósito. Os 4 abaixo (níveis 1, 3, 5 e 6) fecham a
+  // trilha: LED puro, sensor de som, radar giratório com servo (diferente
+  // do 'proj-radar-ultrassonico' estático já existente) e um capstone que
+  // sintetiza os quatro sensores num painel único.
+  {
+    id: 'tool-quest-acender-led',
+    title: 'Primeira Luz: Acendendo um LED',
+    description:
+      'A missão mais fundamental da eletrônica maker: monte o circuito de um LED com resistor de proteção e escreva o primeiro código que liga, desliga e faz piscar um componente físico pelo Arduino.',
+    tier: 'BASIC',
+    requiredSkills: ['arduino_basico'],
+    sdgGoals: ['4'],
+    xpReward: 200,
+    coinReward: 55,
+    hardwareRequired: ['Arduino', 'C++'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'O LED pisca no ritmo definido pelo código, sem ficar sempre aceso nem sempre apagado.',
+      'Explicar ao Game Master por que o resistor é obrigatório e o que aconteceria sem ele.'
+    ],
+    grade: 'Ensino Fundamental II (6º ano)',
+    duration: '1 aula',
+    guideContent: `
+# Primeira Luz: Acendendo um LED
+
+## 🎯 Visão Geral
+Todo maker começa aqui. Antes de robôs e sensores, é preciso entender a unidade mais básica da eletrônica programável: ligar e desligar um único componente por código. Este projeto é o "Nível 1" da trilha de eletrônica do laboratório — todas as missões seguintes (semáforo, sensores, radar) partem do que você aprender aqui.
+
+## 🎓 Objetivos de Aprendizagem
+- **Polaridade:** Identificar o anodo (perna longa, +) e o catodo (perna curta, -) de um LED.
+- **Lei de Ohm na prática:** Entender por que um resistor em série protege o LED de queimar.
+- **Ciclo Arduino:** Diferenciar o que roda uma vez (\`setup()\`) do que roda em loop infinito (\`loop()\`).
+
+## 🔩 Materiais
+- 1x Arduino Uno
+- 1x LED (qualquer cor)
+- 1x Resistor de 220Ω a 330Ω
+- 1x Protoboard
+- 2x Jumpers macho-macho
+
+## 🛠️ Montagem
+1. Espete o LED na protoboard: perna longa (anodo) numa linha, perna curta (catodo) em outra.
+2. Ligue um jumper do pino digital **13** do Arduino até o anodo do LED.
+3. Ligue o resistor entre o catodo do LED e o **GND** do Arduino — o resistor pode ficar de qualquer lado do LED, o que importa é estar em série no mesmo caminho.
+4. Confira: sem o resistor, a corrente que passa pelo LED não tem limite e ele pode queimar em segundos.
+
+## 💻 Código Base
+\`\`\`cpp
+const int pinoLED = 13;
+
+void setup() {
+  pinMode(pinoLED, OUTPUT); // define o pino como saída de energia
+}
+
+void loop() {
+  digitalWrite(pinoLED, HIGH); // liga o LED
+  delay(1000);                 // espera 1 segundo
+  digitalWrite(pinoLED, LOW);  // desliga o LED
+  delay(1000);                 // espera 1 segundo
+}
+\`\`\`
+
+## 📋 Plano de Execução Completo
+1. **Antes de programar (5 min):** monte o circuito e ligue o Arduino direto no pino 5V só para confirmar que o LED funciona fisicamente (retire depois).
+2. **Upload do código base (10 min):** digite o código, faça upload e confirme que o LED pisca 1x por segundo.
+3. **Ajuste de ritmo (10 min):** troque os dois \`delay(1000)\` para valores diferentes (ex: 200 e 800) e observe o novo ritmo.
+4. **Desafios em dupla (15 min):** escolha pelo menos um desafio abaixo e implemente.
+5. **Validação:** demonstre o circuito funcionando e explique a função do resistor ao Game Master.
+
+## 🏆 Desafios
+- **Nível 1 — Pisca-pisca de emergência:** faça o LED piscar bem rápido (100ms) por 3 segundos e depois voltar ao ritmo normal.
+- **Nível 2 — Código Morse:** programe o LED para "dizer" SOS em Morse (··· −−− ···, pontos curtos de 200ms e traços de 600ms).
+- **Nível 3 — Respiração suave (PWM):** troque o pino 13 por um pino com \`~\` (ex: 9) e use \`analogWrite()\` num loop \`for\` crescente e decrescente de 0 a 255 para simular um LED "respirando".
+`
+  },
+  {
+    id: 'tool-quest-sensor-som-aplausos',
+    title: 'Ronda Sonora: Detector de Palmas',
+    description:
+      'Monte um sensor de som e programe um interruptor que liga uma luz ao detectar uma palma, aprendendo a diferenciar sinal analógico de digital e a filtrar ruído de sinal real.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['arduino_basico'],
+    sdgGoals: ['9'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['Arduino', 'C++', 'Sensor de Som KY-038'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'O LED acende com uma palma e apaga com a próxima, sem disparar sozinho por ruído ambiente.',
+      'Explicar ao Game Master a diferença entre a saída digital (DO) e a analógica (AO) do módulo de som.'
+    ],
+    grade: 'Ensino Fundamental II (7º ano)',
+    duration: '2 aulas',
+    guideContent: `
+# Ronda Sonora: Detector de Palmas
+
+## 🎯 Visão Geral
+Depois de dominar o LED (Nível 1) e o semáforo (Nível 2), é hora do circuito ganhar "ouvidos". O módulo de som KY-038 tem um microfone de eletreto e um comparador que transforma o volume do ambiente em um pulso digital — a mesma ideia usada em interruptores "clap-on/clap-off" e em alarmes sonoros reais.
+
+## 🎓 Objetivos de Aprendizagem
+- **Sinal analógico vs. digital:** entender que o módulo entrega tanto uma leitura contínua (AO) quanto um pulso de limiar (DO).
+- **Debounce por software:** evitar que um único som seja lido como vários eventos.
+- **Máquina de estados simples:** alternar entre "luz ligada" e "luz desligada" a cada evento.
+
+## 🔩 Materiais
+- 1x Arduino Uno
+- 1x Módulo Sensor de Som KY-038 (com potenciômetro de sensibilidade)
+- 1x LED + 1x Resistor 220Ω (a "luz" controlada)
+- Protoboard e jumpers
+
+## ⚙️ Esquema de Ligação
+- **VCC** do módulo → 5V do Arduino
+- **GND** do módulo → GND do Arduino
+- **DO** (saída digital) → Pino 2 do Arduino
+- **LED** → Pino 13 (com resistor ao GND)
+
+## 💻 Código Base
+\`\`\`cpp
+const int pinoSom = 2;
+const int pinoLED = 13;
+bool luzLigada = false;
+unsigned long ultimoEvento = 0;
+const unsigned long debounce = 500; // ignora sons por 500ms após detectar um
+
+void setup() {
+  pinMode(pinoSom, INPUT);
+  pinMode(pinoLED, OUTPUT);
+}
+
+void loop() {
+  int leitura = digitalRead(pinoSom);
+  if (leitura == HIGH && millis() - ultimoEvento > debounce) {
+    luzLigada = !luzLigada;
+    digitalWrite(pinoLED, luzLigada ? HIGH : LOW);
+    ultimoEvento = millis();
+  }
+}
+\`\`\`
+
+## 📋 Plano de Execução Completo
+1. **Calibração física (10 min):** gire o potenciômetro do módulo até o LED de sinal dele acender só com sons altos (palma), não com conversa normal.
+2. **Montagem (10 min):** monte o circuito conforme o esquema de ligação.
+3. **Upload e teste isolado (10 min):** faça upload do código e teste só o "liga/desliga" com palmas.
+4. **Ajuste do debounce (10 min):** teste valores diferentes de \`debounce\` (100ms, 500ms, 1000ms) e discuta o que muda.
+5. **Desafios (20 min):** implemente pelo menos um desafio abaixo.
+6. **Validação:** demonstre o interruptor funcionando e explique DO vs. AO ao Game Master.
+
+## 🏆 Desafios
+- **Nível 1 — Duas palmas:** só liga a luz se detectar exatamente 2 palmas dentro de 1 segundo (contador + janela de tempo com \`millis()\`).
+- **Nível 2 — Medidor de volume:** troque \`digitalRead(DO)\` por \`analogRead(AO)\` e use 3 LEDs como um "barra de volume" (mais LEDs acesos = mais barulho).
+- **Nível 3 — Alarme residencial:** combine com um buzzer que dispara um alarme sonoro se detectar som muito alto (>800 na leitura analógica) fora de um horário programado.
+`
+  },
+  {
+    id: 'tool-quest-radar-servo-ultrassonico',
+    title: 'Radar Giratório: Vigia de 180°',
+    description:
+      'Combine um servomotor com um sensor ultrassônico para construir um radar giratório que varre 180° do ambiente e envia os dados de distância para o computador desenhar o mapa de obstáculos.',
+    tier: 'ADVANCED',
+    requiredSkills: ['arduino_basico'],
+    sdgGoals: ['9'],
+    xpReward: 500,
+    coinReward: 130,
+    hardwareRequired: ['Arduino', 'C++', 'Servo Motor SG90', 'Sensor Ultrassônico HC-SR04'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'O servo varre suavemente de 0° a 180° e volta, enquanto o sensor mede a distância em cada ângulo.',
+      'Mostrar ao Game Master os dados "ângulo,distância" aparecendo no Monitor Serial ou no Serial Plotter.'
+    ],
+    grade: 'Ensino Fundamental II (9º ano) e Ensino Médio',
+    duration: '4 aulas',
+    guideContent: `
+# Radar Giratório: Vigia de 180°
+
+## 🎯 Visão Geral
+Este é o projeto que une mecânica e sensoriamento: em vez de medir distância só para frente (como no Radar de Estacionamento, um sensor fixo), aqui o sensor ultrassônico HC-SR04 é montado em cima de um servomotor que varre 180° do ambiente, como o radar giratório de um navio ou aeroporto — só que de mesa.
+
+## 🎓 Objetivos de Aprendizagem
+- **Controle de servomotor:** usar a biblioteca \`Servo.h\` para posicionar um eixo em ângulos exatos (0° a 180°).
+- **Sincronização de sensores:** ler a distância em cada posição do servo, formando um "mapa" de obstáculos ao redor.
+- **Visualização de dados:** enviar dados estruturados via Serial para serem lidos por outro programa (Serial Plotter do Arduino IDE ou Processing).
+
+## 🔩 Materiais
+- 1x Arduino Uno
+- 1x Servomotor SG90
+- 1x Sensor Ultrassônico HC-SR04
+- 1x Suporte de acrílico ou papelão para fixar o sensor no eixo do servo
+- Protoboard e jumpers
+
+## ⚙️ Esquema de Ligação
+- **Servo:** fio de sinal (laranja/amarelo) → Pino 9 | VCC → 5V | GND → GND
+- **HC-SR04:** Trig → Pino 10 | Echo → Pino 11 | VCC → 5V | GND → GND
+- Fixe o HC-SR04 em cima da "chifre" (horn) do servo, para que ele gire junto com o eixo.
+
+## 💻 Código Base
+\`\`\`cpp
+#include <Servo.h>
+
+Servo radar;
+const int trigPin = 10;
+const int echoPin = 11;
+
+long medirDistancia() {
+  digitalWrite(trigPin, LOW); delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH); delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  long duracao = pulseIn(echoPin, HIGH);
+  return duracao / 58; // converte para centímetros
+}
+
+void setup() {
+  Serial.begin(9600);
+  radar.attach(9);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+void loop() {
+  for (int angulo = 0; angulo <= 180; angulo += 2) {
+    radar.write(angulo);
+    delay(30); // tempo para o servo chegar na posição
+    long distancia = medirDistancia();
+    Serial.print(angulo);
+    Serial.print(",");
+    Serial.println(distancia);
+  }
+  for (int angulo = 180; angulo >= 0; angulo -= 2) {
+    radar.write(angulo);
+    delay(30);
+    long distancia = medirDistancia();
+    Serial.print(angulo);
+    Serial.print(",");
+    Serial.println(distancia);
+  }
+}
+\`\`\`
+
+## 📋 Plano de Execução Completo
+1. **Montagem mecânica (30 min):** fixe o HC-SR04 no chifre do servo com cuidado para não desalinhar o eixo.
+2. **Teste isolado do servo (15 min):** rode só o código do servo (sem o sensor) e confirme que ele varre 0°-180° suavemente.
+3. **Teste isolado do sensor (15 min):** rode só a função \`medirDistancia()\` com o servo parado e confirme leituras coerentes (aproxime e afaste a mão).
+4. **Integração (20 min):** junte os dois códigos, faça upload e abra o Serial Plotter (Ferramentas → Serial Plotter) para ver o gráfico da varredura em tempo real.
+5. **Desafios (30 min):** implemente pelo menos um desafio abaixo.
+6. **Validação:** demonstre a varredura completa e explique como o \`delay(30)\` entre passos evita leituras erradas durante o movimento do servo.
+
+## 🏆 Desafios
+- **Nível 1 — Alarme de intrusão:** dispare um buzzer se qualquer ângulo da varredura detectar um objeto a menos de 15cm.
+- **Nível 2 — Memória do mais próximo:** ao final de cada varredura completa, imprima no Serial qual foi o ângulo com a menor distância medida ("objeto mais próximo detectado a X° e Ycm").
+- **Nível 3 — Visualização gráfica:** use um sketch em Processing (ou p5.js) para desenhar o radar na tela do computador, lendo os dados "ângulo,distância" pela porta serial.
+`
+  },
+  {
+    id: 'tool-quest-central-multissensor',
+    title: 'Central de Vigilância: Painel Multissensor',
+    description:
+      'Feche a trilha de eletrônica combinando tudo que você já construiu — LED, som, temperatura/umidade e distância — em um único painel de status que reage ao ambiente em tempo real.',
+    tier: 'ADVANCED',
+    requiredSkills: ['arduino_basico'],
+    sdgGoals: ['11'],
+    xpReward: 500,
+    coinReward: 130,
+    hardwareRequired: ['Arduino', 'C++', 'Sensor de Som KY-038', 'Sensor DHT11', 'Sensor Ultrassônico HC-SR04'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'O painel reflete corretamente pelo menos 3 dos 4 sensores combinados ao mesmo tempo, sem um sensor travar a leitura dos outros.',
+      'Explicar ao Game Master por que o código usa millis() em vez de delay() para ler vários sensores "ao mesmo tempo".'
+    ],
+    grade: 'Ensino Médio',
+    duration: '5 aulas',
+    guideContent: `
+# Central de Vigilância: Painel Multissensor
+
+## 🎯 Visão Geral
+Esta é a missão de síntese da Trilha do Eletricista Iniciante. Depois de aprender LED, semáforo, som, temperatura/umidade e radar em missões separadas, o desafio agora é integrar vários sensores no **mesmo** programa — o problema real de qualquer projeto de automação, onde nada pode "travar" esperando outro componente.
+
+## 🎓 Objetivos de Aprendizagem
+- **Multitarefa cooperativa:** ler vários sensores sem usar \`delay()\` bloqueante, usando \`millis()\` para controlar o tempo de cada leitura de forma independente.
+- **Integração de sistemas:** combinar saídas de sensores diferentes (som, temperatura, distância) em um painel de decisão único.
+- **Projeto real:** entender como sistemas de automação predial (ar-condicionado, iluminação, alarme) combinam vários sensores da mesma forma.
+
+## 🔩 Materiais
+- 1x Arduino Uno
+- 1x Sensor de Som KY-038 (saída digital)
+- 1x Sensor DHT11 (temperatura e umidade)
+- 1x Sensor Ultrassônico HC-SR04
+- 3x LEDs (Verde, Amarelo, Vermelho) + resistores 220Ω
+- 1x Buzzer
+- Protoboard e jumpers
+
+## ⚙️ Esquema de Ligação
+- **KY-038 (DO)** → Pino 2
+- **DHT11 (Data)** → Pino 3
+- **HC-SR04:** Trig → Pino 9 | Echo → Pino 10
+- **LEDs:** Verde → Pino 4, Amarelo → Pino 5, Vermelho → Pino 6
+- **Buzzer** → Pino 7
+
+## 💻 Código Base (estrutura sem bloqueio)
+\`\`\`cpp
+#include <DHT.h>
+#define DHTPIN 3
+#define DHTTYPE DHT11
+DHT dht(DHTPIN, DHTTYPE);
+
+unsigned long ultimaLeituraDHT = 0;
+const unsigned long intervaloDHT = 2000; // DHT11 só pode ser lido a cada 2s
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+  pinMode(2, INPUT);
+  pinMode(4, OUTPUT); pinMode(5, OUTPUT); pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  pinMode(9, OUTPUT); pinMode(10, INPUT);
+}
+
+long medirDistancia() {
+  digitalWrite(9, LOW); delayMicroseconds(2);
+  digitalWrite(9, HIGH); delayMicroseconds(10);
+  digitalWrite(9, LOW);
+  return pulseIn(10, HIGH) / 58;
+}
+
+void loop() {
+  // Som e distância podem ser lidos a cada volta do loop (são rápidos)
+  bool somAlto = digitalRead(2) == HIGH;
+  long distancia = medirDistancia();
+
+  digitalWrite(7, somAlto ? HIGH : LOW); // buzzer reage ao som na hora
+
+  if (distancia < 15) digitalWrite(6, HIGH); else digitalWrite(6, LOW); // vermelho: perigo perto
+  if (distancia >= 15 && distancia < 40) digitalWrite(5, HIGH); else digitalWrite(5, LOW); // amarelo
+  if (distancia >= 40) digitalWrite(4, HIGH); else digitalWrite(4, LOW); // verde: livre
+
+  // DHT11 só é lido a cada 2 segundos, sem travar o resto do loop
+  if (millis() - ultimaLeituraDHT > intervaloDHT) {
+    float temperatura = dht.readTemperature();
+    float umidade = dht.readHumidity();
+    Serial.print("Temp: "); Serial.print(temperatura);
+    Serial.print("C | Umidade: "); Serial.print(umidade); Serial.println("%");
+    ultimaLeituraDHT = millis();
+  }
+}
+\`\`\`
+
+## 📋 Plano de Execução Completo
+1. **Reaproveitar sensores (15 min):** monte cada sensor isoladamente primeiro, reaproveitando o código das missões anteriores para confirmar que cada um funciona sozinho.
+2. **Montagem completa (30 min):** monte todos os sensores e LEDs juntos no protoboard seguindo o esquema de ligação.
+3. **Upload do código integrado (15 min):** faça upload do código base e observe o Monitor Serial mostrando temperatura/umidade a cada 2 segundos.
+4. **Teste dos 3 LEDs (15 min):** aproxime e afaste a mão do HC-SR04 e confirme que o LED certo acende para cada faixa de distância.
+5. **Teste do buzzer (10 min):** bata palmas e confirme que o buzzer reage sem atrasar a leitura de distância.
+6. **Desafios (30 min):** implemente pelo menos um desafio abaixo.
+7. **Validação final:** demonstre os 4 sensores funcionando juntos e explique por que \`delay()\` não foi usado para ler o DHT11.
+
+## 🏆 Desafios
+- **Nível 1 — Modo silencioso:** use uma palma para alternar entre "painel normal" e "modo silencioso" (LEDs continuam, buzzer desativado).
+- **Nível 2 — Alerta de conforto térmico:** se a temperatura passar de 28°C, pisque o LED amarelo mesmo que a distância esteja segura, sinalizando "ambiente quente".
+- **Nível 3 — Log de eventos:** registre no Monitor Serial cada vez que a distância ficar abaixo de 15cm, com o valor de temperatura/umidade daquele momento — um mini "log de segurança ambiental".
+`
   }
 ];
 
