@@ -1,13 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { Wrench, AlertTriangle, BookOpen, Zap, Target, ArrowRight } from 'lucide-react';
+import { Wrench, AlertTriangle, BookOpen, Zap, Target, ArrowRight, GraduationCap, CheckCircle2 } from 'lucide-react';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
+import { WizardModal } from '../../components/stem/WizardModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { PROJECT_CATALOG } from '../../data/projectCatalog';
 import { QUESTS } from '../../data/mockData';
+import { LAB_WIZARDS } from '../../data/labWizards';
 import type { ClassOutletContext } from './ClassLayout';
-import type { HardwareItem, SkillTier } from '../../types';
+import type { HardwareItem, SkillTier, StudyWizard } from '../../types';
 
 const TIER_STYLES: Record<SkillTier, { label: string; badge: string; accent: 'teal' | 'violet' | 'amber' | 'coral' }> = {
   BASIC: { label: 'Nível 1 · Básico', badge: 'bg-stem-teal/15 text-stem-teal', accent: 'teal' },
@@ -26,24 +28,12 @@ const CATEGORY_LABELS: Record<HardwareItem['category'], string> = {
 
 const CATEGORY_ORDER: HardwareItem['category'][] = ['MICROCONTROLLER', 'SENSOR', 'ACTUATOR', 'STATIONERY', 'TOOLS'];
 
-// A escada de 6 projetos da Trilha do Eletricista Iniciante, mostrada como
-// um mapa visual fixo no topo do Maker Lab. Níveis 2 e 4 usam projetos que
-// já existem no catálogo real (não duplicados); os outros 4 foram escritos
-// junto com este material de laboratório.
-const BEGINNER_LADDER: Array<{ step: number; title: string; tier: SkillTier; icon: string; blurb: string }> = [
-  { step: 1, title: 'Primeira Luz: Acendendo um LED', tier: 'BASIC', icon: '💡', blurb: 'Polaridade, resistor e o primeiro digitalWrite().' },
-  { step: 2, title: 'Semáforo Inteligente', tier: 'BASIC', icon: '🚦', blurb: 'Sequência de 3 LEDs com tempos de espera.' },
-  { step: 3, title: 'Ronda Sonora: Detector de Palmas', tier: 'INTERMEDIATE', icon: '🎤', blurb: 'Primeiro sensor: som, debounce e sinal digital.' },
-  { step: 4, title: 'Monitor Ambiental com LCD', tier: 'BASIC', icon: '🌡️', blurb: 'Temperatura, umidade e um display físico.' },
-  { step: 5, title: 'Radar Giratório: Vigia de 180°', tier: 'ADVANCED', icon: '📡', blurb: 'Servo + ultrassônico varrendo o ambiente.' },
-  { step: 6, title: 'Central de Vigilância: Painel Multissensor', tier: 'ADVANCED', icon: '🛰️', blurb: 'Todos os sensores juntos, sem delay() bloqueante.' }
-];
-
 export const LabPage: React.FC = () => {
-  const { catalog, handleRequestHardware } = useOutletContext<ClassOutletContext>();
+  const { catalog, handleRequestHardware, handleCompleteWizard } = useOutletContext<ClassOutletContext>();
   const { profile } = useAuth();
   const [selectedId, setSelectedId] = useState(catalog[0]?.id ?? '');
   const [message, setMessage] = useState('');
+  const [openWizard, setOpenWizard] = useState<StudyWizard | null>(null);
   const selected = catalog.find((i) => i.id === selectedId) ?? catalog[0];
 
   const questInfoById = useMemo(() => {
@@ -82,13 +72,15 @@ export const LabPage: React.FC = () => {
     .map((id) => questInfoById.get(id))
     .filter((q): q is { title: string; tier: SkillTier } => Boolean(q));
 
+  const completedWizards = profile.completedWizards ?? [];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display font-extrabold text-2xl text-stem-ink">Maker Lab</h1>
           <p className="font-body-stem text-sm text-stem-ink-soft">
-            Inventário, trilha de projetos por nível e guia técnico de troubleshooting.
+            Estúdio de estudos, inventário e guia técnico de troubleshooting.
           </p>
         </div>
         <div className="bg-stem-mist rounded-xl px-4 py-2 text-sm font-display font-bold text-stem-amber">
@@ -102,28 +94,41 @@ export const LabPage: React.FC = () => {
 
       <Card accent="teal" className="space-y-4">
         <div className="flex items-center gap-2">
-          <Target className="w-4 h-4 text-stem-teal" />
-          <h2 className="font-display font-extrabold text-stem-ink">Trilha do Eletricista Iniciante</h2>
+          <GraduationCap className="w-4 h-4 text-stem-teal" />
+          <h2 className="font-display font-extrabold text-stem-ink">Estúdio de Estudos</h2>
         </div>
         <p className="font-body-stem text-sm text-stem-ink-soft -mt-2">
-          Seis projetos, do primeiro LED a um painel com quatro sensores ao mesmo tempo. Cada um destrava o material do próximo no laboratório.
+          Aprenda a teoria por trás de cada família de material antes de sair construindo. Cada wizard concede XP e Izicoins na primeira vez que é concluído.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-          {BEGINNER_LADDER.map((step) => (
-            <div key={step.step} className="relative rounded-2xl border-2 border-stem-line bg-stem-cloud p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">{step.icon}</span>
-                <span className={`text-[10px] font-display font-bold px-2 py-0.5 rounded-full ${TIER_STYLES[step.tier].badge}`}>
-                  Nível {step.step}
-                </span>
-              </div>
-              <p className="font-display font-bold text-xs text-stem-ink leading-snug">{step.title}</p>
-              <p className="text-[11px] font-body-stem text-stem-ink-soft leading-snug">{step.blurb}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {LAB_WIZARDS.map((wizard) => {
+            const done = completedWizards.includes(wizard.id);
+            return (
+              <button
+                key={wizard.id}
+                onClick={() => setOpenWizard(wizard)}
+                className={`text-left rounded-2xl border-2 p-3 space-y-2 transition-colors ${
+                  done ? 'border-stem-teal/40 bg-stem-teal/5' : 'border-stem-line bg-stem-cloud hover:border-stem-teal/40'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl">{wizard.icon}</span>
+                  {done ? (
+                    <CheckCircle2 className="w-4 h-4 text-stem-teal" />
+                  ) : (
+                    <span className="text-[10px] font-display font-bold px-2 py-0.5 rounded-full bg-stem-amber/15 text-stem-amber">
+                      +{wizard.xpReward} XP
+                    </span>
+                  )}
+                </div>
+                <p className="font-display font-bold text-xs text-stem-ink leading-snug">{wizard.title}</p>
+                <p className="text-[11px] font-body-stem text-stem-ink-soft leading-snug">{wizard.summary}</p>
+              </button>
+            );
+          })}
         </div>
         <Link to="../missoes" className="inline-flex items-center gap-1.5 text-sm font-display font-bold text-stem-teal hover:underline">
-          Ver missões no mural <ArrowRight className="w-3.5 h-3.5" />
+          Já sabe a teoria? Veja os projetos no Mural de Missões <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </Card>
 
@@ -257,6 +262,15 @@ export const LabPage: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {openWizard && (
+        <WizardModal
+          wizard={openWizard}
+          alreadyCompleted={completedWizards.includes(openWizard.id)}
+          onClose={() => setOpenWizard(null)}
+          onComplete={handleCompleteWizard}
+        />
+      )}
     </div>
   );
 };

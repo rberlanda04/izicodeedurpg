@@ -308,6 +308,23 @@ export function useClassLocalState(
     return true;
   };
 
+  // O "já concluído?" é decidido no chamador com o profile.completedWizards
+  // síncrono (igual ao padrão de handleUnlockCuriosityCard) — a checagem
+  // dentro da transação abaixo é só uma rede de segurança contra cliques
+  // duplos, não a fonte da verdade do botão.
+  const handleCompleteWizard = (wizardId: string, xpReward: number, coinReward: number) => {
+    soundEngine.playLevelUp();
+    triggerConfetti();
+    applyUserPatch((current) => {
+      if ((current.completedWizards ?? []).includes(wizardId)) return {};
+      return {
+        xp: current.xp + xpReward,
+        izicoins: current.izicoins + coinReward,
+        completedWizards: [...(current.completedWizards ?? []), wizardId]
+      };
+    });
+  };
+
   const handleAttackBoss = (damage: number, guildName: string) => {
     setCampaign((prev) => {
       const nextHp = Math.max(0, prev.bossCurrentHp - damage);
@@ -373,6 +390,7 @@ export function useClassLocalState(
     handleUnlockSecretQuest,
     handleRequestHardware,
     handleUnlockCuriosityCard,
+    handleCompleteWizard,
     handleAttackBoss,
     handleApproveQuest,
     handleTriggerQuickHack,

@@ -1,14 +1,34 @@
 import React, { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { Bot, PlusCircle, Globe, CheckCircle, BookOpen, Key } from 'lucide-react';
+import { Link, useOutletContext } from 'react-router-dom';
+import { Bot, PlusCircle, Globe, CheckCircle, BookOpen, Key, Target, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
-import type { Quest, SDGGoal } from '../../types';
+import type { Quest, SDGGoal, SkillTier } from '../../types';
 import { SDG_NAMES, SDG_COLORS, ALL_SDG_GOALS } from '../../data/sdgGoals';
 import { ToolBadgeRow } from '../../components/stem/ToolBadge';
 import { QuestGuideModal } from '../../components/stem/QuestGuideModal';
 import type { ClassOutletContext } from './ClassLayout';
+
+const TIER_BADGE: Record<SkillTier, string> = {
+  BASIC: 'bg-stem-teal/15 text-stem-teal',
+  INTERMEDIATE: 'bg-stem-violet/15 text-stem-violet',
+  ADVANCED: 'bg-stem-amber/15 text-stem-amber',
+  SPECIALIST: 'bg-stem-coral/15 text-stem-coral'
+};
+
+// A escada de 6 projetos da Trilha do Eletricista Iniciante. Níveis 2 e 4
+// usam projetos que já existem no catálogo real (Semáforo Inteligente,
+// Monitor Ambiental com LCD) — não duplicados aqui, só referenciados no
+// texto; os outros 4 têm quest própria no mural abaixo.
+const BEGINNER_LADDER: Array<{ step: number; title: string; tier: SkillTier; icon: string; blurb: string }> = [
+  { step: 1, title: 'Primeira Luz: Acendendo um LED', tier: 'BASIC', icon: '💡', blurb: 'Polaridade, resistor e o primeiro digitalWrite().' },
+  { step: 2, title: 'Semáforo Inteligente', tier: 'BASIC', icon: '🚦', blurb: 'Sequência de 3 LEDs com tempos de espera.' },
+  { step: 3, title: 'Ronda Sonora: Detector de Palmas', tier: 'INTERMEDIATE', icon: '🎤', blurb: 'Primeiro sensor: som, debounce e sinal digital.' },
+  { step: 4, title: 'Monitor Ambiental com LCD', tier: 'BASIC', icon: '🌡️', blurb: 'Temperatura, umidade e um display físico.' },
+  { step: 5, title: 'Radar Giratório: Vigia de 180°', tier: 'ADVANCED', icon: '📡', blurb: 'Servo + ultrassônico varrendo o ambiente.' },
+  { step: 6, title: 'Central de Vigilância: Painel Multissensor', tier: 'ADVANCED', icon: '🛰️', blurb: 'Todos os sensores juntos, sem delay() bloqueante.' }
+];
 
 export const MissoesPage: React.FC = () => {
   const { quests, handleAcceptQuest, handleValidateQuest, validationError, handleProposeQuest, handleGenerateAIQuest } =
@@ -52,6 +72,33 @@ export const MissoesPage: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      <Card accent="teal" className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Target className="w-4 h-4 text-stem-teal" />
+          <h2 className="font-display font-extrabold text-stem-ink">Trilha do Eletricista Iniciante</h2>
+        </div>
+        <p className="font-body-stem text-sm text-stem-ink-soft -mt-2">
+          Seis projetos, do primeiro LED a um painel com quatro sensores ao mesmo tempo. Cada um destrava o material do próximo no laboratório.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+          {BEGINNER_LADDER.map((step) => (
+            <div key={step.step} className="relative rounded-2xl border-2 border-stem-line bg-stem-cloud p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-2xl">{step.icon}</span>
+                <span className={`text-[10px] font-display font-bold px-2 py-0.5 rounded-full ${TIER_BADGE[step.tier]}`}>
+                  Nível {step.step}
+                </span>
+              </div>
+              <p className="font-display font-bold text-xs text-stem-ink leading-snug">{step.title}</p>
+              <p className="text-[11px] font-body-stem text-stem-ink-soft leading-snug">{step.blurb}</p>
+            </div>
+          ))}
+        </div>
+        <Link to="../lab" className="inline-flex items-center gap-1.5 text-sm font-display font-bold text-stem-teal hover:underline">
+          Aprender a teoria no Maker Lab <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </Card>
 
       <div className="flex flex-wrap gap-2">
         <button

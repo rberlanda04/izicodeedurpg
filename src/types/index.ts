@@ -44,6 +44,7 @@ export interface UserProfile {
   badges: Badge[];
   inventory: Array<{ itemId: string; name: string; qty: number; icon: string }>;
   unlockedCuriosities: string[];
+  completedWizards: string[];
   heroContractSigned: boolean;
 
   // --- Multi-tenant (escolas/turmas) ---
@@ -179,6 +180,28 @@ export interface HardwareItem {
     compatibleLibraries: string[];
     wiringDiagram: Array<{ pinFrom: string; pinTo: string; note: string }>;
   };
+}
+
+// As 5 famílias de material didático do Maker Lab. Diferente de HardwareItem
+// ['STATIONERY' | 'TOOLS' | ...] (categorias de inventário físico), esta é a
+// categoria de ESTUDO — por isso "Impressora 3D" existe como tema próprio
+// aqui mesmo sem ser uma categoria de estoque separada.
+export type WizardCategory = 'MICROCONTROLLER' | 'SENSOR' | 'ACTUATOR' | 'PRINTER_3D' | 'TOOLS';
+
+export interface StudyWizardStep {
+  title: string;
+  content: string; // markdown curto (MiniMarkdown)
+}
+
+export interface StudyWizard {
+  id: string;
+  category: WizardCategory;
+  title: string;
+  icon: string;
+  summary: string;
+  xpReward: number;
+  coinReward: number;
+  steps: StudyWizardStep[];
 }
 
 export interface CuriosityCard {
