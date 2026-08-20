@@ -20,6 +20,7 @@ export const ClassLayout: React.FC = () => {
   const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
   const [classError, setClassError] = useState<string | null>(null);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   useEffect(() => {
     if (!classId) return;
@@ -52,9 +53,14 @@ export const ClassLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-stem-mist">
-      <TopNav onOpenTerminal={() => setIsTerminalOpen(true)} />
+      <TopNav onOpenTerminal={() => setIsTerminalOpen(true)} onOpenMenu={() => setIsMobileNavOpen(true)} />
       <div className="max-w-6xl mx-auto px-4 flex">
-        <Sidebar classId={classId} />
+        <Sidebar
+          classId={classId}
+          mobileOpen={isMobileNavOpen}
+          onCloseMobile={() => setIsMobileNavOpen(false)}
+          onOpenTerminal={() => setIsTerminalOpen(true)}
+        />
         <main className="flex-1 py-6 min-w-0">
           <Outlet context={{ classRoom, ...classState } satisfies ClassOutletContext} />
         </main>

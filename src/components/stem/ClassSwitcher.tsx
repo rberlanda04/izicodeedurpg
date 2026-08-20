@@ -41,7 +41,7 @@ export const ClassSwitcher: React.FC = () => {
         className="flex items-center gap-2 bg-stem-mist border-2 border-stem-line rounded-xl px-3 py-2 text-sm font-display font-semibold text-stem-ink hover:border-stem-teal transition-colors"
       >
         <School className="w-4 h-4 text-stem-teal" />
-        <span className="max-w-[10rem] truncate">{activeClass?.name ?? 'Selecionar turma'}</span>
+        <span className="max-w-[5rem] sm:max-w-[10rem] truncate">{activeClass?.name ?? 'Selecionar turma'}</span>
         <ChevronDown className="w-4 h-4 text-stem-ink-soft" />
       </button>
 

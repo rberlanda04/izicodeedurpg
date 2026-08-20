@@ -1,11 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Terminal, Moon, Sun, LogOut, Globe2 } from 'lucide-react';
+import { Terminal, Moon, Sun, LogOut, Globe2, Menu } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ClassSwitcher } from './ClassSwitcher';
 
-export const TopNav: React.FC<{ onOpenTerminal?: () => void }> = ({ onOpenTerminal }) => {
+interface TopNavProps {
+  onOpenTerminal?: () => void;
+  onOpenMenu?: () => void;
+}
+
+export const TopNav: React.FC<TopNavProps> = ({ onOpenTerminal, onOpenMenu }) => {
   const { profile, signOut } = useAuth();
   const { mode, toggleMode } = useTheme();
 
@@ -15,10 +20,21 @@ export const TopNav: React.FC<{ onOpenTerminal?: () => void }> = ({ onOpenTermin
 
   return (
     <header className="sticky top-0 z-40 bg-stem-cloud/90 backdrop-blur border-b-2 border-stem-line">
-      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        <Link to="/app" className="flex items-center">
-          <img src="/marketing/rpgmaker-logo.png" alt="Izicode Maker RPG" className="h-9 w-auto object-contain" />
-        </Link>
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 min-w-0">
+          {onOpenMenu && (
+            <button
+              onClick={onOpenMenu}
+              aria-label="Abrir menu"
+              className="lg:hidden p-2 -ml-1 rounded-xl text-stem-ink-soft hover:bg-stem-mist hover:text-stem-ink transition-colors shrink-0"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
+          <Link to="/app" className="flex items-center shrink-0">
+            <img src="/marketing/rpgmaker-logo.png" alt="Izicode Maker RPG" className="h-8 sm:h-9 w-auto object-contain" />
+          </Link>
+        </div>
 
         <div className="hidden md:flex items-center gap-3 flex-1 max-w-xs">
           <span className="text-2xl">{profile.avatarConfig.head}</span>
@@ -33,38 +49,42 @@ export const TopNav: React.FC<{ onOpenTerminal?: () => void }> = ({ onOpenTermin
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <div className="hidden sm:flex items-center gap-1 bg-stem-mist rounded-xl px-3 py-1.5 text-sm font-display font-bold text-stem-amber">
             🪙 {profile.izicoins}
           </div>
 
           <ClassSwitcher />
 
-          <Link
-            to="/eventos"
-            title="Eventos Maker (hackathons)"
-            className="p-2 rounded-xl border-2 border-stem-line hover:border-stem-teal text-stem-ink-soft hover:text-stem-teal transition-colors"
-          >
-            <Globe2 className="w-4 h-4" />
-          </Link>
-
-          {onOpenTerminal && (
-            <button
-              onClick={onOpenTerminal}
-              title="Modo Hacker: Terminal CLI"
+          {/* Em telas < lg estes ficam na gaveta do menu (Sidebar) para não
+              lotar a barra — só o essencial (turma + sair) fica sempre à vista. */}
+          <div className="hidden lg:flex items-center gap-2">
+            <Link
+              to="/eventos"
+              title="Eventos Maker (hackathons)"
               className="p-2 rounded-xl border-2 border-stem-line hover:border-stem-teal text-stem-ink-soft hover:text-stem-teal transition-colors"
             >
-              <Terminal className="w-4 h-4" />
-            </button>
-          )}
+              <Globe2 className="w-4 h-4" />
+            </Link>
 
-          <button
-            onClick={toggleMode}
-            title={mode === 'stem' ? 'Ativar Modo Hacker' : 'Voltar ao visual padrão'}
-            className="p-2 rounded-xl border-2 border-stem-line hover:border-stem-teal text-stem-ink-soft hover:text-stem-teal transition-colors"
-          >
-            {mode === 'stem' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
+            {onOpenTerminal && (
+              <button
+                onClick={onOpenTerminal}
+                title="Modo Hacker: Terminal CLI"
+                className="p-2 rounded-xl border-2 border-stem-line hover:border-stem-teal text-stem-ink-soft hover:text-stem-teal transition-colors"
+              >
+                <Terminal className="w-4 h-4" />
+              </button>
+            )}
+
+            <button
+              onClick={toggleMode}
+              title={mode === 'stem' ? 'Ativar Modo Hacker' : 'Voltar ao visual padrão'}
+              className="p-2 rounded-xl border-2 border-stem-line hover:border-stem-teal text-stem-ink-soft hover:text-stem-teal transition-colors"
+            >
+              {mode === 'stem' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+          </div>
 
           <button
             onClick={() => signOut()}
