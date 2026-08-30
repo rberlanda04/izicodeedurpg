@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="badgeG6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8E2DE2" />
+      <stop offset="100%" stop-color="#4A00E0" />
+    </linearGradient>
+    <filter id="glowPurple" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#8E2DE2" flood-opacity="0.4" />
+    </filter>
+  </defs>
+  <polygon points="60,6 108,24 108,70 60,114 12,70 12,24" fill="url(#badgeG6)" filter="url(#glowPurple)" />
+  <polygon points="60,14 100,29 100,66 60,103 20,66 20,29" fill="#140b24" stroke="#8E2DE2" stroke-width="2" />
+  
+  <!-- Crown / Scrum Helm -->
+  <polygon points="40,68 40,48 50,56 60,42 70,56 80,48 80,68" fill="#FFD700" stroke="#FFA000" stroke-width="1.5" />
+  <circle cx="40" cy="48" r="2.5" fill="#00F0FF" />
+  <circle cx="60" cy="42" r="3" fill="#FF4081" />
+  <circle cx="80" cy="48" r="2.5" fill="#00F0FF" />
+  
+  <!-- Scrum Circular Sprint Arrow -->
+  <path d="M 42 78 A 20 20 0 1 0 78 78" fill="none" stroke="#00F0FF" stroke-width="3" stroke-linecap="round" />
+  <polygon points="78,74 84,79 78,84" fill="#00F0FF" />
+</svg>

@@ -8,6 +8,7 @@ import {
   QUICK_HACK_ALERT,
   QUEST_TEMPLATES
 } from '../data/mockData';
+import { BADGE_DEFINITIONS } from '../data/badgeDefinitions';
 import { SKILL_NODES } from '../data/mockData';
 import { generateAIQuest } from '../services/questEngine';
 import { generateQuestWithAI } from '../services/aiContentService';
@@ -135,6 +136,18 @@ export function useClassLocalState(
     });
   };
 
+  // Concede uma conquista do catálogo (idempotente — ignora se já possuída
+  // ou se o id não existe). profile.badges existia no tipo desde sempre mas
+  // nenhum fluxo do app o preenchia; este é o único lugar que escreve nele.
+  const grantBadge = (badgeId: string) => {
+    const definition = BADGE_DEFINITIONS.find((b) => b.id === badgeId);
+    if (!definition) return;
+    applyUserPatch((current) => {
+      if (current.badges.some((b) => b.id === badgeId)) return {};
+      return { badges: [...current.badges, { ...definition, unlockedAt: new Date().toISOString() }] };
+    });
+  };
+
   const handleSignContract = () => {
     soundEngine.playLevelUp();
     triggerConfetti();
@@ -166,10 +179,15 @@ export function useClassLocalState(
       profile.avatarConfig.head
     );
     applyUserPatch({ guildId: newGuild.id, guildRole: 'SCRUM_MASTER' });
+    grantBadge('scrum-leader');
   };
+
+  const ROBOTICS_SKILL_IDS = ['lego_wedo', 'lego_ev3', 'microbit_starter'];
 
   const handleUnlockSkill = (skillId: string) => {
     if (profile.unlockedSkills.includes(skillId)) return;
+    if (skillId === 'arduino_basico') grantBadge('circuit-master');
+    if (ROBOTICS_SKILL_IDS.includes(skillId)) grantBadge('bot-builder');
     soundEngine.playLevelUp();
     triggerConfetti();
     applyUserPatch((current) => {
@@ -208,6 +226,7 @@ export function useClassLocalState(
   /** Student "accepts" an ACTIVE quest — generates the code the GM will reveal in person once the work is done. */
   const handleAcceptQuest = (questId: string, xpReward: number, coinReward: number) => {
     void acceptQuestFs(classId, schoolId, questId, profile.uid, profile.adventureName, xpReward, coinReward);
+    grantBadge('first-code');
   };
 
   /** Student submits the code the GM told/showed them — grants XP/coins server-side only on a match. */
@@ -215,9 +234,18 @@ export function useClassLocalState(
     if (!firebaseUser) return;
     setValidationError('');
     try {
+      // Captura os ODS da missão ANTES do servidor limpar seus campos de
+      // validação — depois de COMPLETED não dá mais pra saber quem a
+      // concluiu, então esse registro por aluno só pode acontecer aqui.
+      const sdgGoals = quests.find((q) => q.id === questId)?.sdgGoals ?? [];
       await submitValidationCode(firebaseUser, questId, code);
       soundEngine.playLevelUp();
       triggerConfetti();
+      if (sdgGoals.length > 0) {
+        const merged = Array.from(new Set([...profile.completedQuestSdgGoals, ...sdgGoals]));
+        applyUserPatch({ completedQuestSdgGoals: merged });
+        if (merged.length >= 3) grantBadge('sdg-guardian');
+      }
     } catch (err) {
       soundEngine.playErrorBeep();
       setValidationError(err instanceof Error ? err.message : 'Código incorreto.');
@@ -336,6 +364,7 @@ export function useClassLocalState(
   };
 
   const handleAttackBoss = (damage: number, guildName: string) => {
+    grantBadge('hackathon-slayer');
     setCampaign((prev) => {
       const nextHp = Math.max(0, prev.bossCurrentHp - damage);
       return {

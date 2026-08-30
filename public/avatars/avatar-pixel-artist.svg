@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="bgArtist" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF512F" />
+      <stop offset="100%" stop-color="#DD2476" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="50" fill="url(#bgArtist)" stroke="#FFE066" stroke-width="3" />
+  
+  <!-- Head / Face -->
+  <rect x="34" y="32" width="32" height="34" rx="8" fill="#FAD0C4" />
+  
+  <!-- Cyber Beret / Headphones -->
+  <path d="M 28 32 C 28 18 42 14 56 14 C 70 14 74 24 74 32 Z" fill="#2B2D42" />
+  <!-- Headphones on ears -->
+  <rect x="26" y="36" width="6" height="16" rx="3" fill="#FFE066" />
+  <rect x="68" y="36" width="6" height="16" rx="3" fill="#FFE066" />
+  <path d="M 28 36 C 28 20 72 20 72 36" fill="none" stroke="#FFE066" stroke-width="3" />
+  
+  <!-- Hair -->
+  <path d="M 32 32 C 40 36 60 36 68 32 C 68 36 64 42 62 42 C 54 36 46 36 38 42 Z" fill="#8D99AE" />
+  
+  <!-- Star Eye / Creative Wink -->
+  <polygon points="42,43 43,46 46,46 44,48 45,51 42,49 39,51 40,48 38,46 41,46" fill="#FFE066" />
+  <circle cx="58" cy="47" r="2.5" fill="#2B2D42" />
+  <path d="M 46 55 Q 50 59 54 55" fill="none" stroke="#2B2D42" stroke-width="2" stroke-linecap="round" />
+  
+  <!-- Outfit -->
+  <path d="M 22 88 C 22 72 34 68 50 68 C 66 68 78 72 78 88 L 78 100 L 22 100 Z" fill="#8338EC" />
+  <!-- Pixel Palette brooch -->
+  <rect x="44" y="74" width="4" height="4" fill="#FF006E" />
+  <rect x="48" y="74" width="4" height="4" fill="#3A86FF" />
+  <rect x="52" y="74" width="4" height="4" fill="#FB5607" />
+  <rect x="48" y="78" width="4" height="4" fill="#FFBE0B" />
+</svg>

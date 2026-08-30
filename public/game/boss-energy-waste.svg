@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 360" width="100%" height="auto">
+  <defs>
+    <linearGradient id="wasteBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2B2410" />
+      <stop offset="50%" stop-color="#4A3D14" />
+      <stop offset="100%" stop-color="#1A1508" />
+    </linearGradient>
+    <linearGradient id="toxicLeak" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#C7FF00" />
+      <stop offset="100%" stop-color="#5B7A00" />
+    </linearGradient>
+    <radialGradient id="coreDrain" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFEE00" />
+      <stop offset="60%" stop-color="#8A6D00" />
+      <stop offset="100%" stop-color="#3A2E00" />
+    </radialGradient>
+    <filter id="toxicGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#C7FF00" flood-opacity="0.75" />
+    </filter>
+  </defs>
+
+  <!-- Nuvem de poluição ao fundo -->
+  <radialGradient id="smogAura" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#4A3D14" stop-opacity="0.45" />
+    <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+  </radialGradient>
+  <ellipse cx="250" cy="190" rx="235" ry="165" fill="url(#smogAura)" />
+  <ellipse cx="110" cy="90" rx="60" ry="26" fill="#3A3018" opacity="0.5" />
+  <ellipse cx="400" cy="105" rx="70" ry="30" fill="#3A3018" opacity="0.5" />
+  <ellipse cx="150" cy="310" rx="55" ry="20" fill="#3A3018" opacity="0.4" />
+
+  <!-- Corpo: pilha de lixo eletrônico compactado -->
+  <polygon points="250,95 315,140 300,255 250,295 200,255 185,140" fill="url(#wasteBody)" stroke="#C7FF00" stroke-width="3" />
+
+  <!-- Núcleo vazando energia (bateria estourando) -->
+  <rect x="220" y="150" width="60" height="90" rx="6" fill="#141008" stroke="#8A6D00" stroke-width="3" />
+  <circle cx="250" cy="195" r="26" fill="url(#coreDrain)" filter="url(#toxicGlow)" />
+  <path d="M 250 172 L 238 198 L 250 198 L 244 222 L 264 190 L 250 190 Z" fill="#1A1508" opacity="0.85" />
+
+  <!-- Vazamento tóxico escorrendo -->
+  <path d="M 232 240 Q 228 270 220 300 Q 216 320 226 335" fill="none" stroke="url(#toxicLeak)" stroke-width="7" stroke-linecap="round" opacity="0.9" />
+  <path d="M 268 240 Q 274 265 285 285 Q 296 305 288 325" fill="none" stroke="url(#toxicLeak)" stroke-width="6" stroke-linecap="round" opacity="0.85" />
+  <circle cx="226" cy="335" r="6" fill="#C7FF00" opacity="0.8" />
+  <circle cx="288" cy="325" r="5" fill="#C7FF00" opacity="0.8" />
+
+  <!-- Cabeça: monitor CRT quebrado com estática -->
+  <polygon points="250,35 292,70 285,120 250,140 215,120 208,70" fill="#1A1508" stroke="#C7FF00" stroke-width="3" />
+  <rect x="222" y="65" width="56" height="42" rx="4" fill="#0D0A04" stroke="#5B7A00" stroke-width="2" />
+  <!-- Olhos: estática de tela quebrada -->
+  <polygon points="232,80 244,84 234,90 246,94 230,98" fill="none" stroke="#C7FF00" stroke-width="2" />
+  <polygon points="268,80 256,84 266,90 254,94 270,98" fill="none" stroke="#C7FF00" stroke-width="2" />
+  <!-- Antenas de fios soltos -->
+  <path d="M 225 55 L 205 25" stroke="#8A6D00" stroke-width="3" stroke-linecap="round" />
+  <path d="M 275 55 L 295 25" stroke="#8A6D00" stroke-width="3" stroke-linecap="round" />
+  <circle cx="205" cy="25" r="4" fill="#C7FF00" />
+  <circle cx="295" cy="25" r="4" fill="#C7FF00" />
+
+  <!-- Braços: cabos e plugues emaranhados -->
+  <path d="M 195 165 Q 140 160 110 190 Q 85 215 95 250" fill="none" stroke="#4A3D14" stroke-width="10" stroke-linecap="round" />
+  <path d="M 95 250 L 80 245 L 85 265 L 65 255" fill="none" stroke="#8A6D00" stroke-width="4" stroke-linecap="round" />
+  <path d="M 305 165 Q 360 160 390 190 Q 415 215 405 250" fill="none" stroke="#4A3D14" stroke-width="10" stroke-linecap="round" />
+  <path d="M 405 250 L 420 245 L 415 265 L 435 255" fill="none" stroke="#8A6D00" stroke-width="4" stroke-linecap="round" />
+
+  <!-- Sinal de alerta ambiental no peito -->
+  <polygon points="250,255 262,278 238,278" fill="none" stroke="#FFEE00" stroke-width="2.5" />
+  <text x="250" y="274" font-family="Arial, sans-serif" font-weight="bold" font-size="12" fill="#FFEE00" text-anchor="middle">!</text>
+</svg>

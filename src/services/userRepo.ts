@@ -35,6 +35,7 @@ export function newUserProfile(uid: string, adventureName: string, realName = ''
     inventory: [],
     unlockedCuriosities: [],
     completedWizards: [],
+    completedQuestSdgGoals: [],
     heroContractSigned: false,
     schoolAdminOf: [],
     schoolIds: [],

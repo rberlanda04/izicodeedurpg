@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="bgCoder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f2027" />
+      <stop offset="50%" stop-color="#203a43" />
+      <stop offset="100%" stop-color="#2c5364" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="50" fill="url(#bgCoder)" stroke="#00F0FF" stroke-width="3" />
+  
+  <!-- Cyber Hair -->
+  <path d="M 28 38 C 28 22 42 16 54 16 C 68 16 76 26 76 38 C 76 42 74 46 72 48 C 66 40 50 36 32 46 Z" fill="#00D2FF" />
+  
+  <!-- Head / Face -->
+  <rect x="34" y="32" width="32" height="34" rx="8" fill="#FAD0C4" />
+  
+  <!-- Cyber VR Goggles / Visor -->
+  <rect x="30" y="38" width="40" height="14" rx="4" fill="#00F0FF" opacity="0.9" />
+  <line x1="32" y1="45" x2="68" y2="45" stroke="#FFFFFF" stroke-width="2" />
+  
+  <!-- Smile -->
+  <path d="M 44 56 Q 50 60 56 56" fill="none" stroke="#333333" stroke-width="2" stroke-linecap="round" />
+  
+  <!-- Cyber Jacket & Hoodie -->
+  <path d="M 22 88 C 22 72 34 68 50 68 C 66 68 78 72 78 88 L 78 100 L 22 100 Z" fill="#1A1F38" />
+  <path d="M 44 68 L 50 82 L 56 68 Z" fill="#00F0FF" />
+  <!-- Neon Circuit on shoulder -->
+  <circle cx="28" cy="80" r="2.5" fill="#00FFA3" />
+  <line x1="28" y1="80" x2="36" y2="86" stroke="#00FFA3" stroke-width="1.5" />
+</svg>

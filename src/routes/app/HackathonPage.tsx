@@ -22,34 +22,45 @@ export const HackathonPage: React.FC = () => {
       </div>
 
       <Card accent="coral">
-        <div className="flex items-center justify-between text-sm font-display font-bold mb-2">
-          <span className="text-stem-coral">HP do Boss</span>
-          <span className="text-stem-ink-soft">
-            {campaign.bossCurrentHp} / {campaign.bossMaxHp}
-          </span>
-        </div>
-        <div className="h-4 rounded-full bg-stem-mist overflow-hidden">
-          <div className="h-full bg-stem-coral rounded-full transition-all" style={{ width: `${hpPercent}%` }} />
-        </div>
+        <div className="flex flex-col md:flex-row items-center gap-6 mb-4">
+          <div className="w-full md:w-56 h-44 flex items-center justify-center bg-[#1a1508] rounded-2xl border-2 border-stem-coral/40 p-2 overflow-hidden shadow-inner relative group">
+            <img
+              src="/game/boss-energy-waste.svg"
+              alt={campaign.bossName}
+              className="w-full h-full object-contain filter drop-shadow-[0_0_12px_rgba(199,255,0,0.5)] transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+          <div className="flex-1 w-full">
+            <div className="flex items-center justify-between text-sm font-display font-bold mb-2">
+              <span className="text-stem-coral">HP do Boss</span>
+              <span className="text-stem-ink-soft">
+                {campaign.bossCurrentHp} / {campaign.bossMaxHp}
+              </span>
+            </div>
+            <div className="h-4 rounded-full bg-stem-mist overflow-hidden">
+              <div className="h-full bg-stem-coral rounded-full transition-all duration-300" style={{ width: `${hpPercent}%` }} />
+            </div>
 
-        <div className="flex items-center gap-6 mt-4 text-sm font-body-stem text-stem-ink-soft">
-          <span className="flex items-center gap-1.5">
-            <Users className="w-4 h-4" /> {campaign.participatingGuildsCount} guildas
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Flame className="w-4 h-4 text-stem-amber" /> {campaign.totalStudentsCount} aventureiros
-          </span>
-        </div>
+            <div className="flex items-center gap-6 mt-4 text-sm font-body-stem text-stem-ink-soft">
+              <span className="flex items-center gap-1.5">
+                <Users className="w-4 h-4" /> {campaign.participatingGuildsCount} guildas
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-stem-amber" /> {campaign.totalStudentsCount} aventureiros
+              </span>
+            </div>
 
-        {myGuild && (
-          <Button
-            className="mt-4"
-            variant="danger"
-            onClick={() => handleAttackBoss(250, myGuild.name)}
-          >
-            <Swords className="w-4 h-4" /> Atacar o Boss (Guilda {myGuild.name})
-          </Button>
-        )}
+            {myGuild && (
+              <Button
+                className="mt-4 w-full sm:w-auto"
+                variant="danger"
+                onClick={() => handleAttackBoss(250, myGuild.name)}
+              >
+                <Swords className="w-4 h-4" /> Atacar o Boss (Guilda {myGuild.name})
+              </Button>
+            )}
+          </div>
+        </div>
       </Card>
 
       <Card>

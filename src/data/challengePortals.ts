@@ -31,6 +31,7 @@ export const CHALLENGE_PORTALS: ChallengePortal[] = [
     audience: '4º ano do Fundamental ao Ensino Médio',
     calendar: 'Inscrições em março · Fase nacional em outubro',
     url: 'https://olimpiada.ic.unicamp.br',
+    logo: '/portal-logos/obi.jpg',
     icon: '💻'
   },
   {
@@ -54,6 +55,7 @@ export const CHALLENGE_PORTALS: ChallengePortal[] = [
     audience: '9 a 16 anos',
     calendar: 'Treinos a partir de fevereiro · Torneios em novembro/dezembro',
     url: 'https://www.firstlegoleague.org',
+    logo: '/portal-logos/fll.jpg',
     icon: '🧱'
   },
   {
@@ -65,6 +67,7 @@ export const CHALLENGE_PORTALS: ChallengePortal[] = [
     audience: 'Meninas de 8 a 18 anos',
     calendar: 'Inscrições em outubro · Submissão regional em abril',
     url: 'https://www.technovationchallenge.org',
+    logo: '/portal-logos/technovation.jpg',
     icon: '💜'
   },
   {
@@ -76,6 +79,7 @@ export const CHALLENGE_PORTALS: ChallengePortal[] = [
     audience: 'Todas as idades',
     calendar: 'Scratch Day em maio',
     url: 'https://scratch.mit.edu',
+    logo: '/portal-logos/scratch-day.jpg',
     icon: '🐈'
   },
   {

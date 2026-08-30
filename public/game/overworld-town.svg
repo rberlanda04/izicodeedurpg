@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" width="100%" height="auto">
+  <defs>
+    <linearGradient id="groundGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b132b" />
+      <stop offset="100%" stop-color="#1c2541" />
+    </linearGradient>
+    <linearGradient id="roadGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#7000ff" stop-opacity="0.25" />
+    </linearGradient>
+    <filter id="cityGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#00f0ff" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Ground Matrix -->
+  <rect width="800" height="480" fill="url(#groundGrad)" rx="16" />
+
+  <!-- Cyber Road Network / Bus Lines -->
+  <!-- Horizontal Main Avenue -->
+  <rect x="0" y="210" width="800" height="40" fill="url(#roadGrad)" />
+  <line x1="0" y1="230" x2="800" y2="230" stroke="#00f0ff" stroke-width="2" stroke-dasharray="16 12" />
+
+  <!-- Vertical Streets -->
+  <rect x="190" y="0" width="30" height="480" fill="url(#roadGrad)" />
+  <rect x="570" y="0" width="30" height="480" fill="url(#roadGrad)" />
+
+  <!-- Building 1: Torre das Habilidades (Top Left) -->
+  <g transform="translate(50, 25)" filter="url(#cityGlow)">
+    <rect width="140" height="110" rx="16" fill="#0c2438" stroke="#38b6ff" stroke-width="2.5" />
+    <text x="70" y="55" font-size="36" text-anchor="middle">🗼</text>
+    <text x="70" y="90" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="12" fill="#38b6ff" text-anchor="middle">Torre Habilidades</text>
+  </g>
+
+  <!-- Building 2: Mural de Missões (Top Center) -->
+  <g transform="translate(330, 20)" filter="url(#cityGlow)">
+    <rect width="140" height="110" rx="16" fill="#2d1c14" stroke="#c08347" stroke-width="2.5" />
+    <text x="70" y="55" font-size="36" text-anchor="middle">📜</text>
+    <text x="70" y="90" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="12" fill="#c08347" text-anchor="middle">Mural de Missões</text>
+  </g>
+
+  <!-- Building 3: Salão das Guildas (Top Right) -->
+  <g transform="translate(610, 25)" filter="url(#cityGlow)">
+    <rect width="140" height="110" rx="16" fill="#0d2818" stroke="#2f9e44" stroke-width="2.5" />
+    <text x="70" y="55" font-size="36" text-anchor="middle">🛡️</text>
+    <text x="70" y="90" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="12" fill="#2f9e44" text-anchor="middle">Salão das Guildas</text>
+  </g>
+
+  <!-- Building 4: Maker Lab (Center Left) -->
+  <g transform="translate(30, 190)" filter="url(#cityGlow)">
+    <rect width="140" height="110" rx="16" fill="#0c2438" stroke="#00d2ff" stroke-width="2.5" />
+    <text x="70" y="55" font-size="36" text-anchor="middle">🔧</text>
+    <text x="70" y="90" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="12" fill="#00d2ff" text-anchor="middle">Maker Lab</text>
+  </g>
+
+  <!-- Building 5: Portais de Desafios (Center Right) -->
+  <g transform="translate(630, 190)" filter="url(#cityGlow)">
+    <rect width="140" height="110" rx="16" fill="#1b1035" stroke="#a855f7" stroke-width="2.5" />
+    <text x="70" y="55" font-size="36" text-anchor="middle">🌐</text>
+    <text x="70" y="90" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="12" fill="#a855f7" text-anchor="middle">Portais de Desafio</text>
+  </g>
+
+  <!-- Building 6: Torre das Curiosidades (Bottom Left) -->
+  <g transform="translate(150, 340)" filter="url(#cityGlow)">
+    <rect width="140" height="100" rx="16" fill="#2d1c14" stroke="#f59e0b" stroke-width="2.5" />
+    <text x="70" y="50" font-size="32" text-anchor="middle">🧭</text>
+    <text x="70" y="82" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="11" fill="#f59e0b" text-anchor="middle">Curiosidades</text>
+  </g>
+
+  <!-- Building 7: Arena Hackathon (Bottom Right) -->
+  <g transform="translate(510, 340)" filter="url(#cityGlow)">
+    <rect width="140" height="100" rx="16" fill="#2a0818" stroke="#ef4444" stroke-width="2.5" />
+    <text x="70" y="50" font-size="32" text-anchor="middle">⚔️</text>
+    <text x="70" y="82" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="11" fill="#ef4444" text-anchor="middle">Arena Hackathon</text>
+  </g>
+
+  <!-- Encounter Spots / Mystery Node -->
+  <circle cx="400" cy="150" r="16" fill="#f59e0b" opacity="0.3" />
+  <circle cx="400" cy="150" r="8" fill="#f59e0b" />
+  <text x="400" y="154" font-size="10" text-anchor="middle">❓</text>
+
+  <circle cx="250" cy="280" r="16" fill="#f59e0b" opacity="0.3" />
+  <circle cx="250" cy="280" r="8" fill="#f59e0b" />
+  <text x="250" y="284" font-size="10" text-anchor="middle">❓</text>
+
+  <circle cx="550" cy="280" r="16" fill="#f59e0b" opacity="0.3" />
+  <circle cx="550" cy="280" r="8" fill="#f59e0b" />
+  <text x="550" y="284" font-size="10" text-anchor="middle">❓</text>
+</svg>

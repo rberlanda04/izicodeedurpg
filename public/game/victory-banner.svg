@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="100%" height="auto">
+  <defs>
+    <linearGradient id="vicGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE000" />
+      <stop offset="100%" stop-color="#799F0C" />
+    </linearGradient>
+    <filter id="vicGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#FFE000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Starburst background -->
+  <g opacity="0.2" fill="#FFE000">
+    <polygon points="200,100 200,0 215,100 300,20 230,110 380,80 235,130 400,160 230,150 370,220 215,160 270,240 200,165 130,240 185,160 30,220 170,150 0,160 165,130 20,80 170,110 100,20 185,100" />
+  </g>
+
+  <!-- Golden Trophy -->
+  <g filter="url(#vicGlow)">
+    <!-- Cup Body -->
+    <path d="M 160 60 L 240 60 C 240 105 225 125 200 135 C 175 125 160 105 160 60 Z" fill="#FFD700" stroke="#B8860B" stroke-width="3" />
+    <!-- Cup Handles -->
+    <path d="M 160 70 C 135 70 135 100 160 105" fill="none" stroke="#FFD700" stroke-width="4" stroke-linecap="round" />
+    <path d="M 240 70 C 265 70 265 100 240 105" fill="none" stroke="#FFD700" stroke-width="4" stroke-linecap="round" />
+    <!-- Trophy Stem & Base -->
+    <rect x="192" y="135" width="16" height="25" fill="#DAA520" />
+    <polygon points="170,175 230,175 225,160 175,160" fill="#B8860B" />
+    <rect x="160" y="175" width="80" height="20" rx="4" fill="#333333" stroke="#FFD700" stroke-width="2" />
+    
+    <!-- Star on trophy -->
+    <polygon points="200,80 204,90 215,90 206,97 209,107 200,101 191,107 194,97 185,90 196,90" fill="#FFFFFF" />
+  </g>
+
+  <!-- Banner Ribbon -->
+  <polygon points="60,195 90,210 60,225 340,225 310,210 340,195" fill="#7000FF" />
+  <rect x="80" y="190" width="240" height="38" rx="6" fill="#00F0FF" stroke="#FFFFFF" stroke-width="2" />
+  <text x="200" y="216" font-family="'Space Grotesk', Impact, sans-serif" font-weight="extrabold" font-size="20" fill="#0A0E1A" text-anchor="middle" letter-spacing="2">MISSÃO CONCLUÍDA!</text>
+
+  <!-- Floating Izicoins & XP Stars -->
+  <circle cx="100" cy="80" r="14" fill="#FFD700" stroke="#DAA520" stroke-width="2" />
+  <text x="100" y="85" font-size="12" text-anchor="middle">🪙</text>
+  
+  <circle cx="300" cy="80" r="14" fill="#00FFA3" stroke="#00B894" stroke-width="2" />
+  <text x="300" y="85" font-size="11" font-weight="bold" fill="#0A0E1A" text-anchor="middle">XP</text>
+</svg>

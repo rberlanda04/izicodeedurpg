@@ -39,15 +39,25 @@ export const PerfilPage: React.FC = () => {
 
       <Card>
         <h3 className="font-display font-bold text-stem-ink mb-4">Galeria de badges ({profile.badges.length})</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {profile.badges.map((b) => (
-            <div key={b.id} className="rounded-2xl bg-stem-mist p-3 text-center">
-              <span className="text-2xl">{b.icon}</span>
-              <p className="text-xs font-display font-bold text-stem-ink mt-1">{b.name}</p>
-              <p className="text-[11px] font-body-stem text-stem-ink-soft">{b.description}</p>
-            </div>
-          ))}
-        </div>
+        {profile.badges.length === 0 ? (
+          <p className="text-sm font-body-stem text-stem-ink-soft text-center py-4">
+            Nenhuma conquista ainda — complete missões, desbloqueie habilidades e forme guildas para começar a coleção.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {profile.badges.map((b) => (
+              <div key={b.id} className="rounded-2xl bg-stem-mist p-3 text-center">
+                {b.icon.startsWith('/') ? (
+                  <img src={b.icon} alt={b.name} className="w-12 h-12 mx-auto" />
+                ) : (
+                  <span className="text-2xl">{b.icon}</span>
+                )}
+                <p className="text-xs font-display font-bold text-stem-ink mt-1">{b.name}</p>
+                <p className="text-[11px] font-body-stem text-stem-ink-soft">{b.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
 
       <Card accent="violet">

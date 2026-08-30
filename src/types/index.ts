@@ -45,6 +45,12 @@ export interface UserProfile {
   inventory: Array<{ itemId: string; name: string; qty: number; icon: string }>;
   unlockedCuriosities: string[];
   completedWizards: string[];
+  // ODS distintos entre as missões que ESTE aluno já validou — não dá pra
+  // derivar isso de Quest.status === 'COMPLETED' porque o campo de "quem
+  // validou" é limpo pelo servidor ao concluir (ver questValidationHandler.ts),
+  // então o board da turma não guarda autoria de conclusão. Usado só para
+  // conceder o badge "sdg-guardian".
+  completedQuestSdgGoals: string[];
   heroContractSigned: boolean;
 
   // --- Multi-tenant (escolas/turmas) ---

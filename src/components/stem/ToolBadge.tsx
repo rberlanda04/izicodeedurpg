@@ -29,10 +29,11 @@ const TOOLS: Record<string, ToolInfo> = {
   Gamma: { logo: '/tool-logos/gamma.jpg', url: 'https://gamma.app' },
   'Office 365': { logo: '/tool-logos/office365.png', url: 'https://www.office.com' },
   'Drone Educacional': { logo: '/tool-logos/dropefly.png' },
-  Python: { url: 'https://www.python.org', emoji: '🐍' },
-  'Modelagem 3D': { url: 'https://www.tinkercad.com', emoji: '🧊' },
-  'IoT Cloud': { emoji: '☁️', url: 'https://www.arduino.cc/en/iot/' },
-  'API Cloud': { emoji: '☁️', url: 'https://www.arduino.cc/en/iot/' }
+  Python: { logo: '/tool-logos/python.jpg', url: 'https://www.python.org' },
+  'Modelagem 3D': { logo: '/tool-logos/modelagem-3d.svg', url: 'https://www.tinkercad.com' },
+  'IoT Cloud': { logo: '/tool-logos/iot-cloud.svg', url: 'https://www.arduino.cc/en/iot/' },
+  'API Cloud': { logo: '/tool-logos/iot-cloud.svg', url: 'https://www.arduino.cc/en/iot/' },
+  'C++': { logo: '/tool-logos/cplusplus.svg', url: 'https://isocpp.org' }
 };
 
 const SIZES = {
