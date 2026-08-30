@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Terminal, Moon, Sun, LogOut, Globe2, Menu } from 'lucide-react';
+import { Terminal, Moon, Sun, LogOut, Globe2, Menu, Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { soundEngine } from '../../services/soundEngine';
 import { ClassSwitcher } from './ClassSwitcher';
 
 interface TopNavProps {
@@ -13,6 +14,7 @@ interface TopNavProps {
 export const TopNav: React.FC<TopNavProps> = ({ onOpenTerminal, onOpenMenu }) => {
   const { profile, signOut } = useAuth();
   const { mode, toggleMode } = useTheme();
+  const [soundOn, setSoundOn] = useState(soundEngine.soundEnabled);
 
   if (!profile) return null;
 
@@ -83,6 +85,14 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenTerminal, onOpenMenu }) =>
               className="p-2 rounded-xl border-2 border-stem-line hover:border-stem-teal text-stem-ink-soft hover:text-stem-teal transition-colors"
             >
               {mode === 'stem' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+
+            <button
+              onClick={() => setSoundOn(soundEngine.toggleSound())}
+              title={soundOn ? 'Desativar sons' : 'Ativar sons'}
+              className="p-2 rounded-xl border-2 border-stem-line hover:border-stem-teal text-stem-ink-soft hover:text-stem-teal transition-colors"
+            >
+              {soundOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
           </div>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Map,
@@ -15,10 +15,13 @@ import {
   Terminal,
   Moon,
   Sun,
-  LogOut
+  LogOut,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { soundEngine } from '../../services/soundEngine';
 
 const linkBase =
   'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-display font-semibold transition-colors';
@@ -35,6 +38,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ classId, mobileOpen, onCloseMobile, onOpenTerminal }) => {
   const { isGmOfClass, profile, signOut } = useAuth();
   const { mode, toggleMode } = useTheme();
+  const [soundOn, setSoundOn] = useState(soundEngine.soundEnabled);
   const base = `/app/${classId}`;
   const adminSchoolId = profile?.schoolAdminOf[0];
 
@@ -157,6 +161,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ classId, mobileOpen, onCloseMo
               <button onClick={toggleMode} className={`${linkBase} ${linkInactive}`}>
                 {mode === 'stem' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                 {mode === 'stem' ? 'Ativar Modo Hacker' : 'Voltar ao visual padrão'}
+              </button>
+
+              <button onClick={() => setSoundOn(soundEngine.toggleSound())} className={`${linkBase} ${linkInactive}`}>
+                {soundOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+                {soundOn ? 'Desativar sons' : 'Ativar sons'}
               </button>
 
               <button onClick={() => signOut()} className={`${linkBase} text-stem-coral hover:bg-stem-coral/10`}>

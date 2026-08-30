@@ -23,6 +23,7 @@ export const TrilhaPage: React.FC = () => {
         quests={quests}
         unlockedSkillIds={profile.unlockedSkills}
         currentUid={profile.uid}
+        avatarHead={profile.avatarConfig.head}
         onUnlockSkill={handleUnlockSkill}
         onAcceptQuest={handleAcceptQuest}
       />

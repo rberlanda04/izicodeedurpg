@@ -16,7 +16,7 @@ interface TrailNodeProps {
 const statusClasses: Record<TrailNodeStatus, string> = {
   locked: 'bg-stem-line text-stem-ink-soft border-stem-line cursor-not-allowed',
   available:
-    'bg-stem-amber text-stem-ink border-[#8f5f2f] shadow-[0_5px_0_0_#8f5f2f] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none',
+    'bg-stem-amber text-stem-ink border-[#8f5f2f] shadow-[0_5px_0_0_#8f5f2f] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none [animation:pulseRing_2s_ease-out_infinite]',
   completed: 'bg-stem-teal text-white border-stem-teal-dark shadow-[0_5px_0_0_#1a8fd1] hover:-translate-y-0.5'
 };
 

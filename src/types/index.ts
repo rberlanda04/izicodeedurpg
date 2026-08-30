@@ -182,6 +182,13 @@ export interface HardwareItem {
   };
 }
 
+export interface SkillQuizQuestion {
+  skillId: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+}
+
 // As 5 famílias de material didático do Maker Lab. Diferente de HardwareItem
 // ['STATIONERY' | 'TOOLS' | ...] (categorias de inventário físico), esta é a
 // categoria de ESTUDO — por isso "Impressora 3D" existe como tema próprio

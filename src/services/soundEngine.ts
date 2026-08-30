@@ -1,8 +1,29 @@
 // Synthesizer using Web Audio API for 8-bit sound effects without external audio files
 
+const SOUND_PREF_KEY = 'izicode:soundEnabled';
+
+function loadSoundPreference(): boolean {
+  try {
+    const stored = localStorage.getItem(SOUND_PREF_KEY);
+    return stored === null ? true : stored === '1';
+  } catch {
+    return true;
+  }
+}
+
 class RetroSoundEngine {
   private audioCtx: AudioContext | null = null;
-  public soundEnabled: boolean = true;
+  public soundEnabled: boolean = loadSoundPreference();
+
+  public toggleSound(): boolean {
+    this.soundEnabled = !this.soundEnabled;
+    try {
+      localStorage.setItem(SOUND_PREF_KEY, this.soundEnabled ? '1' : '0');
+    } catch {
+      // localStorage indisponível (modo privado, etc.) — não é crítico
+    }
+    return this.soundEnabled;
+  }
 
   private initCtx() {
     if (!this.audioCtx) {
@@ -83,6 +104,48 @@ class RetroSoundEngine {
     setTimeout(() => {
       this.playBeep(90, 'sawtooth', 0.25, 0.3);
     }, 80);
+  }
+
+  /** Curto "whoosh" de deslocamento — usado quando o avatar viaja pela Trilha. */
+  public playWhoosh() {
+    if (!this.soundEnabled) return;
+    if (!this.audioCtx) this.initCtx();
+    if (!this.audioCtx) return;
+    try {
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+      osc.type = 'sine';
+      const now = this.audioCtx.currentTime;
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(660, now + 0.18);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+      osc.start();
+      osc.stop(now + 0.2);
+    } catch {
+      // ignore
+    }
+  }
+
+  /** Tap curto e neutro — seleção de nó/opção, sem carga de sucesso/erro. */
+  public playClick() {
+    if (!this.soundEnabled) return;
+    this.playBeep(600, 'square', 0.04, 0.06);
+  }
+
+  /** Resposta certa num minigame — mais alegre que playItemCollect, mais curto que playQuestComplete. */
+  public playCorrect() {
+    if (!this.soundEnabled) return;
+    this.playBeep(880, 'triangle', 0.09, 0.15);
+    setTimeout(() => this.playBeep(1174.66, 'triangle', 0.14, 0.15), 70);
+  }
+
+  /** Resposta errada num minigame — mais suave que playErrorBeep (não deve soar punitivo). */
+  public playWrong() {
+    if (!this.soundEnabled) return;
+    this.playBeep(220, 'sine', 0.12, 0.12);
   }
 }
 

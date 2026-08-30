@@ -8,6 +8,8 @@ import type { Quest, SDGGoal, SkillTier } from '../../types';
 import { SDG_NAMES, SDG_COLORS, ALL_SDG_GOALS } from '../../data/sdgGoals';
 import { ToolBadgeRow } from '../../components/stem/ToolBadge';
 import { QuestGuideModal } from '../../components/stem/QuestGuideModal';
+import { QuizChallenge } from '../../components/trail/QuizChallenge';
+import { SKILL_QUIZZES } from '../../data/skillQuizzes';
 import type { ClassOutletContext } from './ClassLayout';
 
 const TIER_BADGE: Record<SkillTier, string> = {
@@ -168,11 +170,21 @@ export const MissoesPage: React.FC = () => {
                     Aguardando aprovação
                   </Button>
                 )}
-                {q.status === 'ACTIVE' && (
-                  <Button fullWidth variant="secondary" onClick={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}>
-                    Aceitar desafio
-                  </Button>
-                )}
+                {q.status === 'ACTIVE' &&
+                  (() => {
+                    const quiz = SKILL_QUIZZES.find((s) => q.requiredSkills.includes(s.skillId));
+                    return quiz ? (
+                      <QuizChallenge
+                        question={quiz}
+                        actionLabel="aceitar"
+                        onSuccess={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}
+                      />
+                    ) : (
+                      <Button fullWidth variant="secondary" onClick={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}>
+                        Aceitar desafio
+                      </Button>
+                    );
+                  })()}
                 {q.status === 'PENDING_VALIDATION' &&
                   (q.pendingValidationStudentUid === profile?.uid ? (
                     <form

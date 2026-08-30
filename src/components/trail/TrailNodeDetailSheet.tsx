@@ -4,7 +4,9 @@ import { X, Zap, Gift, BookOpen, Key } from 'lucide-react';
 import { Button } from '../stem/Button';
 import { ToolBadgeRow } from '../stem/ToolBadge';
 import { QuestGuideModal } from '../stem/QuestGuideModal';
+import { QuizChallenge } from './QuizChallenge';
 import { SDG_NAMES } from '../../data/sdgGoals';
+import { SKILL_QUIZZES } from '../../data/skillQuizzes';
 import type { SkillNode, Quest } from '../../types';
 import type { TrailNodeStatus } from './TrailNode';
 
@@ -91,9 +93,16 @@ export const TrailNodeDetailSheet: React.FC<TrailNodeDetailSheetProps> = (props)
             Complete os pré-requisitos para desbloquear.
           </div>
         ) : props.kind === 'skill' ? (
-          <Button fullWidth onClick={props.onUnlock}>
-            Desbloquear habilidade
-          </Button>
+          (() => {
+            const quiz = SKILL_QUIZZES.find((q) => q.skillId === props.data.id);
+            return quiz ? (
+              <QuizChallenge question={quiz} actionLabel="desbloquear" onSuccess={props.onUnlock} />
+            ) : (
+              <Button fullWidth onClick={props.onUnlock}>
+                Desbloquear habilidade
+              </Button>
+            );
+          })()
         ) : props.data.status === 'PENDING_VALIDATION' ? (
           props.data.pendingValidationStudentUid === props.currentUid ? (
             <Link to="../missoes">
@@ -107,9 +116,16 @@ export const TrailNodeDetailSheet: React.FC<TrailNodeDetailSheetProps> = (props)
             </div>
           )
         ) : (
-          <Button fullWidth onClick={props.onAccept}>
-            Aceitar desafio
-          </Button>
+          (() => {
+            const quiz = SKILL_QUIZZES.find((q) => props.kind === 'quest' && props.data.requiredSkills.includes(q.skillId));
+            return quiz ? (
+              <QuizChallenge question={quiz} actionLabel="aceitar" onSuccess={props.onAccept} />
+            ) : (
+              <Button fullWidth onClick={props.onAccept}>
+                Aceitar desafio
+              </Button>
+            );
+          })()
         )}
       </div>
 
