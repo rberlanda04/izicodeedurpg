@@ -325,6 +325,16 @@ export function useClassLocalState(
     });
   };
 
+  // Recompensa dos pontos de encontro do Mundo (Overworld) — puzzle de
+  // sequência resolvido ao esbarrar em um marcador no mapa andável.
+  // "Já coletado?" fica a cargo do estado local do próprio Overworld (um Set
+  // por sessão de navegação), então aqui é só conceder e comemorar.
+  const handleCollectEncounter = (xpReward: number, coinReward: number) => {
+    soundEngine.playCorrect();
+    triggerConfetti();
+    grantXpAndCoins(xpReward, coinReward);
+  };
+
   const handleAttackBoss = (damage: number, guildName: string) => {
     setCampaign((prev) => {
       const nextHp = Math.max(0, prev.bossCurrentHp - damage);
@@ -391,6 +401,7 @@ export function useClassLocalState(
     handleRequestHardware,
     handleUnlockCuriosityCard,
     handleCompleteWizard,
+    handleCollectEncounter,
     handleAttackBoss,
     handleApproveQuest,
     handleTriggerQuickHack,

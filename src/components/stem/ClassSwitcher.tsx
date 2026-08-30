@@ -31,7 +31,7 @@ export const ClassSwitcher: React.FC = () => {
   const handlePick = (classId: string) => {
     setActiveClassId(classId);
     setOpen(false);
-    navigate(`/app/${classId}/trilha`);
+    navigate(`/app/${classId}/mundo`);
   };
 
   return (

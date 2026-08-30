@@ -35,7 +35,7 @@ export const OnboardingView: React.FC = () => {
     setBusy(true);
     try {
       const classRoom = await joinClassByPasscode(profile.uid, passcode.trim());
-      navigate(`/app/${classRoom.id}/trilha`);
+      navigate(`/app/${classRoom.id}/mundo`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Código inválido.');
     } finally {

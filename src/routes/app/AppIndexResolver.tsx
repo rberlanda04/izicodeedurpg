@@ -7,7 +7,7 @@ import { Card } from '../../components/stem/Card';
 
 /**
  * Resolves which turma to land on: 0 turmas -> onboarding, 1 -> straight
- * to its trilha, 2+ -> a picker (a Game Master/Admin with several classes).
+ * to its Mundo (overworld), 2+ -> a picker (a GM/Admin with several classes).
  */
 export const AppIndexResolver: React.FC = () => {
   const { profile, activeClassId, setActiveClassId } = useAuth();
@@ -27,9 +27,9 @@ export const AppIndexResolver: React.FC = () => {
   if (!profile) return null;
   if (allClassIds.length === 0) return <Navigate to="/onboarding" replace />;
   if (activeClassId && allClassIds.includes(activeClassId)) {
-    return <Navigate to={`/app/${activeClassId}/trilha`} replace />;
+    return <Navigate to={`/app/${activeClassId}/mundo`} replace />;
   }
-  if (allClassIds.length === 1) return <Navigate to={`/app/${allClassIds[0]}/trilha`} replace />;
+  if (allClassIds.length === 1) return <Navigate to={`/app/${allClassIds[0]}/mundo`} replace />;
 
   if (classes === null) return null;
 
@@ -47,7 +47,7 @@ export const AppIndexResolver: React.FC = () => {
               className="w-full text-left"
               onClick={() => {
                 setActiveClassId(c.id);
-                navigate(`/app/${c.id}/trilha`);
+                navigate(`/app/${c.id}/mundo`);
               }}
             >
               <p className="font-display font-bold text-stem-ink">{c.name}</p>

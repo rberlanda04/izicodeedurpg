@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { Bot, PlusCircle, Globe, CheckCircle, BookOpen, Key, Target, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,7 +9,7 @@ import { SDG_NAMES, SDG_COLORS, ALL_SDG_GOALS } from '../../data/sdgGoals';
 import { ToolBadgeRow } from '../../components/stem/ToolBadge';
 import { QuestGuideModal } from '../../components/stem/QuestGuideModal';
 import { QuizChallenge } from '../../components/trail/QuizChallenge';
-import { SKILL_QUIZZES } from '../../data/skillQuizzes';
+import { SKILL_QUIZZES, pickSkillQuiz } from '../../data/skillQuizzes';
 import type { ClassOutletContext } from './ClassLayout';
 
 const TIER_BADGE: Record<SkillTier, string> = {
@@ -31,6 +31,116 @@ const BEGINNER_LADDER: Array<{ step: number; title: string; tier: SkillTier; ico
   { step: 5, title: 'Radar Giratório: Vigia de 180°', tier: 'ADVANCED', icon: '📡', blurb: 'Servo + ultrassônico varrendo o ambiente.' },
   { step: 6, title: 'Central de Vigilância: Painel Multissensor', tier: 'ADVANCED', icon: '🛰️', blurb: 'Todos os sensores juntos, sem delay() bloqueante.' }
 ];
+
+interface QuestCardProps {
+  quest: Quest;
+  currentUid?: string;
+  validationError: string | null;
+  codeInput: string;
+  onCodeInputChange: (value: string) => void;
+  onShowGuide: () => void;
+  onAccept: () => void;
+  onValidate: () => void;
+}
+
+const QuestCard: React.FC<QuestCardProps> = ({
+  quest: q,
+  currentUid,
+  validationError,
+  codeInput,
+  onCodeInputChange,
+  onShowGuide,
+  onAccept,
+  onValidate
+}) => {
+  const completed = q.status === 'COMPLETED';
+  // Sorteado uma vez por missão (não a cada re-render do mural) para a
+  // pergunta não trocar debaixo do aluno enquanto ele responde.
+  const quiz = useMemo(() => pickSkillQuiz(SKILL_QUIZZES.filter((s) => q.requiredSkills.includes(s.skillId))), [q.id]);
+
+  return (
+    <Card accent={completed ? 'teal' : 'amber'} className="flex flex-col justify-between">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-display font-bold text-stem-ink">{q.title}</h3>
+          <div className="text-right shrink-0">
+            <p className="text-xs font-display font-bold text-stem-violet">+{q.xpReward} XP</p>
+            <p className="text-xs font-display font-bold text-stem-amber">🪙 {q.coinReward}</p>
+          </div>
+        </div>
+        <p className="text-sm font-body-stem text-stem-ink-soft">{q.description}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {q.sdgGoals.map((s) => (
+            <span key={s} className={`text-xs font-display font-bold ${SDG_COLORS[s]}`}>
+              ODS {s} · {SDG_NAMES[s]}
+            </span>
+          ))}
+        </div>
+        {q.hardwareRequired.length > 0 && <ToolBadgeRow tools={q.hardwareRequired} size="sm" />}
+        {(q.grade || q.duration) && (
+          <p className="text-xs font-body-stem text-stem-ink-soft/80">
+            {q.grade}
+            {q.grade && q.duration ? ' · ' : ''}
+            {q.duration}
+          </p>
+        )}
+      </div>
+      <div className="pt-4 space-y-2">
+        {q.guideContent && (
+          <Button fullWidth variant="ghost" onClick={onShowGuide}>
+            <BookOpen className="w-4 h-4" /> Ver tutorial completo
+          </Button>
+        )}
+        {completed && (
+          <div className="flex items-center justify-center gap-2 text-stem-teal font-display font-bold text-sm py-2">
+            <CheckCircle className="w-4 h-4" /> Concluída
+          </div>
+        )}
+        {q.status === 'PROPOSED' && (
+          <Button fullWidth variant="secondary" disabled>
+            Aguardando aprovação
+          </Button>
+        )}
+        {q.status === 'ACTIVE' &&
+          (quiz ? (
+            <QuizChallenge question={quiz} actionLabel="aceitar" onSuccess={onAccept} />
+          ) : (
+            <Button fullWidth variant="secondary" onClick={onAccept}>
+              Aceitar desafio
+            </Button>
+          ))}
+        {q.status === 'PENDING_VALIDATION' &&
+          (q.pendingValidationStudentUid === currentUid ? (
+            <form
+              className="flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                onValidate();
+              }}
+            >
+              <input
+                required
+                placeholder="Código do professor"
+                value={codeInput}
+                onChange={(e) => onCodeInputChange(e.target.value)}
+                className="flex-1 min-w-0 rounded-xl border-2 border-stem-line px-3 py-2.5 text-center font-display font-bold tracking-widest outline-none focus:border-stem-teal"
+              />
+              <Button type="submit">
+                <Key className="w-4 h-4" /> Validar
+              </Button>
+            </form>
+          ) : (
+            <Button fullWidth variant="ghost" disabled>
+              {q.pendingValidationStudentName ?? 'Um colega'} está validando com o Game Master
+            </Button>
+          ))}
+        {q.status === 'PENDING_VALIDATION' && q.pendingValidationStudentUid === currentUid && validationError && (
+          <p className="text-xs text-stem-coral font-body-stem text-center">{validationError}</p>
+        )}
+      </div>
+    </Card>
+  );
+};
 
 export const MissoesPage: React.FC = () => {
   const { quests, handleAcceptQuest, handleValidateQuest, validationError, handleProposeQuest, handleGenerateAIQuest } =
@@ -125,98 +235,19 @@ export const MissoesPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filtered.map((q) => {
-          const completed = q.status === 'COMPLETED';
-          return (
-            <Card key={q.id} accent={completed ? 'teal' : 'amber'} className="flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-display font-bold text-stem-ink">{q.title}</h3>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-display font-bold text-stem-violet">+{q.xpReward} XP</p>
-                    <p className="text-xs font-display font-bold text-stem-amber">🪙 {q.coinReward}</p>
-                  </div>
-                </div>
-                <p className="text-sm font-body-stem text-stem-ink-soft">{q.description}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {q.sdgGoals.map((s) => (
-                    <span key={s} className={`text-xs font-display font-bold ${SDG_COLORS[s]}`}>
-                      ODS {s} · {SDG_NAMES[s]}
-                    </span>
-                  ))}
-                </div>
-                {q.hardwareRequired.length > 0 && <ToolBadgeRow tools={q.hardwareRequired} size="sm" />}
-                {(q.grade || q.duration) && (
-                  <p className="text-xs font-body-stem text-stem-ink-soft/80">
-                    {q.grade}
-                    {q.grade && q.duration ? ' · ' : ''}
-                    {q.duration}
-                  </p>
-                )}
-              </div>
-              <div className="pt-4 space-y-2">
-                {q.guideContent && (
-                  <Button fullWidth variant="ghost" onClick={() => setGuideQuest(q)}>
-                    <BookOpen className="w-4 h-4" /> Ver tutorial completo
-                  </Button>
-                )}
-                {completed && (
-                  <div className="flex items-center justify-center gap-2 text-stem-teal font-display font-bold text-sm py-2">
-                    <CheckCircle className="w-4 h-4" /> Concluída
-                  </div>
-                )}
-                {q.status === 'PROPOSED' && (
-                  <Button fullWidth variant="secondary" disabled>
-                    Aguardando aprovação
-                  </Button>
-                )}
-                {q.status === 'ACTIVE' &&
-                  (() => {
-                    const quiz = SKILL_QUIZZES.find((s) => q.requiredSkills.includes(s.skillId));
-                    return quiz ? (
-                      <QuizChallenge
-                        question={quiz}
-                        actionLabel="aceitar"
-                        onSuccess={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}
-                      />
-                    ) : (
-                      <Button fullWidth variant="secondary" onClick={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}>
-                        Aceitar desafio
-                      </Button>
-                    );
-                  })()}
-                {q.status === 'PENDING_VALIDATION' &&
-                  (q.pendingValidationStudentUid === profile?.uid ? (
-                    <form
-                      className="flex gap-2"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleValidateQuest(q.id, codeInputs[q.id] ?? '');
-                      }}
-                    >
-                      <input
-                        required
-                        placeholder="Código do professor"
-                        value={codeInputs[q.id] ?? ''}
-                        onChange={(e) => setCodeInputs((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                        className="flex-1 min-w-0 rounded-xl border-2 border-stem-line px-3 py-2.5 text-center font-display font-bold tracking-widest outline-none focus:border-stem-teal"
-                      />
-                      <Button type="submit">
-                        <Key className="w-4 h-4" /> Validar
-                      </Button>
-                    </form>
-                  ) : (
-                    <Button fullWidth variant="ghost" disabled>
-                      {q.pendingValidationStudentName ?? 'Um colega'} está validando com o Game Master
-                    </Button>
-                  ))}
-                {q.status === 'PENDING_VALIDATION' && q.pendingValidationStudentUid === profile?.uid && validationError && (
-                  <p className="text-xs text-stem-coral font-body-stem text-center">{validationError}</p>
-                )}
-              </div>
-            </Card>
-          );
-        })}
+        {filtered.map((q) => (
+          <QuestCard
+            key={q.id}
+            quest={q}
+            currentUid={profile?.uid}
+            validationError={validationError}
+            codeInput={codeInputs[q.id] ?? ''}
+            onCodeInputChange={(value) => setCodeInputs((prev) => ({ ...prev, [q.id]: value }))}
+            onShowGuide={() => setGuideQuest(q)}
+            onAccept={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}
+            onValidate={() => handleValidateQuest(q.id, codeInputs[q.id] ?? '')}
+          />
+        ))}
       </div>
 
       {showPropose && (

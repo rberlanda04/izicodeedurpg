@@ -67,10 +67,10 @@ export const GmDashboardPage: React.FC = () => {
             </h1>
           </div>
           <Link
-            to={`/app/${classId}/trilha`}
+            to={`/app/${classId}/mundo`}
             className="flex items-center gap-1.5 text-sm font-display font-semibold text-stem-teal hover:underline"
           >
-            <ArrowLeft className="w-4 h-4" /> Voltar à trilha
+            <ArrowLeft className="w-4 h-4" /> Voltar ao Mundo
           </Link>
         </div>
       </header>

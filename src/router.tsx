@@ -6,6 +6,7 @@ import { OnboardingView } from './routes/auth/OnboardingView';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { AppIndexResolver } from './routes/app/AppIndexResolver';
 import { ClassLayout } from './routes/app/ClassLayout';
+import { OverworldPage } from './routes/app/OverworldPage';
 import { TrilhaPage } from './routes/app/TrilhaPage';
 import { MissoesPage } from './routes/app/MissoesPage';
 import { GuildasPage } from './routes/app/GuildasPage';
@@ -39,7 +40,8 @@ export const router = createBrowserRouter([
         path: '/app/:classId',
         element: <ClassLayout />,
         children: [
-          { index: true, element: <TrilhaPage /> },
+          { index: true, element: <OverworldPage /> },
+          { path: 'mundo', element: <OverworldPage /> },
           { path: 'trilha', element: <TrilhaPage /> },
           { path: 'missoes', element: <MissoesPage /> },
           { path: 'guildas', element: <GuildasPage /> },

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Map,
+  GitBranch,
   Scroll,
   Users,
   Wrench,
@@ -43,7 +44,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ classId, mobileOpen, onCloseMo
   const adminSchoolId = profile?.schoolAdminOf[0];
 
   const items = [
-    { to: `${base}/trilha`, label: 'Trilha', icon: Map },
+    { to: `${base}/mundo`, label: 'Mundo', icon: Map },
+    { to: `${base}/trilha`, label: 'Trilha', icon: GitBranch },
     { to: `${base}/missoes`, label: 'Missões', icon: Scroll },
     { to: `${base}/guildas`, label: 'Guildas', icon: Users },
     { to: `${base}/lab`, label: 'Maker Lab', icon: Wrench },

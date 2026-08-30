@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { X, Zap, Gift, BookOpen, Key } from 'lucide-react';
 import { Button } from '../stem/Button';
@@ -6,7 +6,7 @@ import { ToolBadgeRow } from '../stem/ToolBadge';
 import { QuestGuideModal } from '../stem/QuestGuideModal';
 import { QuizChallenge } from './QuizChallenge';
 import { SDG_NAMES } from '../../data/sdgGoals';
-import { SKILL_QUIZZES } from '../../data/skillQuizzes';
+import { SKILL_QUIZZES, pickSkillQuiz } from '../../data/skillQuizzes';
 import type { SkillNode, Quest } from '../../types';
 import type { TrailNodeStatus } from './TrailNode';
 
@@ -30,6 +30,16 @@ type TrailNodeDetailSheetProps = (SkillSheet | QuestSheet) & { onClose: () => vo
 export const TrailNodeDetailSheet: React.FC<TrailNodeDetailSheetProps> = (props) => {
   const { onClose, status } = props;
   const [showGuide, setShowGuide] = useState(false);
+
+  // Sorteado uma vez por nó selecionado (não a cada re-render incidental do
+  // pai) para a pergunta não trocar debaixo do aluno enquanto ele responde.
+  const quiz = useMemo(() => {
+    const pool =
+      props.kind === 'skill'
+        ? SKILL_QUIZZES.filter((q) => q.skillId === props.data.id)
+        : SKILL_QUIZZES.filter((q) => props.data.requiredSkills.includes(q.skillId));
+    return pickSkillQuiz(pool);
+  }, [props.kind, props.data.id]);
 
   return (
     <div className="fixed inset-0 z-50 bg-stem-ink/40 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -93,16 +103,13 @@ export const TrailNodeDetailSheet: React.FC<TrailNodeDetailSheetProps> = (props)
             Complete os pré-requisitos para desbloquear.
           </div>
         ) : props.kind === 'skill' ? (
-          (() => {
-            const quiz = SKILL_QUIZZES.find((q) => q.skillId === props.data.id);
-            return quiz ? (
-              <QuizChallenge question={quiz} actionLabel="desbloquear" onSuccess={props.onUnlock} />
-            ) : (
-              <Button fullWidth onClick={props.onUnlock}>
-                Desbloquear habilidade
-              </Button>
-            );
-          })()
+          quiz ? (
+            <QuizChallenge question={quiz} actionLabel="desbloquear" onSuccess={props.onUnlock} />
+          ) : (
+            <Button fullWidth onClick={props.onUnlock}>
+              Desbloquear habilidade
+            </Button>
+          )
         ) : props.data.status === 'PENDING_VALIDATION' ? (
           props.data.pendingValidationStudentUid === props.currentUid ? (
             <Link to="../missoes">
@@ -115,17 +122,12 @@ export const TrailNodeDetailSheet: React.FC<TrailNodeDetailSheetProps> = (props)
               {props.data.pendingValidationStudentName ?? 'Um colega'} está validando esta missão com o Game Master.
             </div>
           )
+        ) : quiz ? (
+          <QuizChallenge question={quiz} actionLabel="aceitar" onSuccess={props.onAccept} />
         ) : (
-          (() => {
-            const quiz = SKILL_QUIZZES.find((q) => props.kind === 'quest' && props.data.requiredSkills.includes(q.skillId));
-            return quiz ? (
-              <QuizChallenge question={quiz} actionLabel="aceitar" onSuccess={props.onAccept} />
-            ) : (
-              <Button fullWidth onClick={props.onAccept}>
-                Aceitar desafio
-              </Button>
-            );
-          })()
+          <Button fullWidth onClick={props.onAccept}>
+            Aceitar desafio
+          </Button>
         )}
       </div>
 

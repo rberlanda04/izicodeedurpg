@@ -189,6 +189,16 @@ export interface SkillQuizQuestion {
   correctIndex: number;
 }
 
+export interface SequencePuzzle {
+  id: string;
+  icon: string;
+  title: string;
+  instruction: string;
+  steps: string[]; // já na ORDEM correta — o componente embaralha para exibir
+  xpReward: number;
+  coinReward: number;
+}
+
 // As 5 famílias de material didático do Maker Lab. Diferente de HardwareItem
 // ['STATIONERY' | 'TOOLS' | ...] (categorias de inventário físico), esta é a
 // categoria de ESTUDO — por isso "Impressora 3D" existe como tema próprio

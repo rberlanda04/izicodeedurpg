@@ -1001,6 +1001,254 @@ void loop() {
 - **Nível 2 — Alerta de conforto térmico:** se a temperatura passar de 28°C, pisque o LED amarelo mesmo que a distância esteja segura, sinalizando "ambiente quente".
 - **Nível 3 — Log de eventos:** registre no Monitor Serial cada vez que a distância ficar abaixo de 15cm, com o valor de temperatura/umidade daquele momento — um mini "log de segurança ambiental".
 `
+  },
+  // Missões da trilha "Mundo Maker 2D" — quatro projetos originais que
+  // conectam o tema de jogos 2D (o Overworld do app, o game loop) com as
+  // ferramentas já existentes na árvore de habilidades. Diferente do já
+  // existente 'proj-jogo-pong-scratch' (BASIC, replica um clássico), estas
+  // são desafios de síntese com lógica própria — não duplicam conteúdo já
+  // no catálogo.
+  {
+    id: 'tool-quest-scratch-jogo-2d',
+    title: 'Primeira Fase: Construa um Jogo 2D do Zero',
+    description:
+      'Crie, do zero, um jogo 2D de desviar-e-coletar no Scratch: um personagem que o jogador controla, obstáculos que caem e uma dificuldade que aumenta com o tempo — o mesmo "game loop" (desenhar, ler entrada, atualizar, checar colisão) usado no Mundo Maker do app.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['scratch_basics'],
+    sdgGoals: ['4'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['Scratch', 'Blocos'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'O jogo tem um placar que aumenta com o tempo/itens coletados e a dificuldade sobe conforme o placar cresce.',
+      'Demonstrar o funcionamento do projeto ao Game Master.'
+    ],
+    grade: 'Ensino Fundamental II (7º e 8º ano)',
+    duration: '3 aulas',
+    guideContent: `
+# Primeira Fase: Construa um Jogo 2D do Zero
+
+## 🎯 Visão Geral
+Todo jogo 2D — do mais simples ao mais complexo — roda em cima do mesmo ciclo repetido dezenas de vezes por segundo: **desenhar a tela, ler a entrada do jogador, atualizar posições, checar colisões**. Neste projeto você constrói esse ciclo do zero no Scratch, no estilo "desviar e coletar": um personagem anda pelos lados enquanto objetos caem do topo da tela.
+
+## 🎓 Objetivos de Aprendizagem
+- **Game loop:** entender e implementar as 4 etapas que rodam em todo jogo, sempre na mesma ordem.
+- **Clones:** gerar vários obstáculos sem precisar desenhar um ator para cada um.
+- **Dificuldade progressiva:** usar uma variável para acelerar o jogo conforme o placar sobe.
+
+## 🛠️ Passo a Passo
+1. **Personagem do jogador:** um sprite que se move para a esquerda/direita com as setas do teclado, sempre na mesma altura (só o eixo X muda).
+2. **Objetos que caem:** um segundo sprite ("item") que usa "criar clone de mim mesmo" repetidamente, cada clone nascendo em uma posição X aleatória no topo e descendo até sair da tela.
+3. **Colisão:** cada clone verifica "se tocar no jogador" — se tocar, some o clone e aumente o placar (item bom) ou reduza uma vida (obstáculo ruim).
+4. **Dificuldade:** a cada 10 pontos no placar, reduza o tempo de espera entre a criação de clones (eles caem mais rápido e mais seguido).
+5. **Fim de jogo:** quando as vidas chegarem a zero, pare todos os scripts e mostre a tela de "Game Over" com o placar final.
+
+## 📋 Plano de Execução Completo
+1. **Personagem e movimento (20 min):** monte o sprite do jogador e o controle de movimento lateral.
+2. **Clones caindo (20 min):** implemente o sprite de item com clones e queda.
+3. **Colisão e placar (20 min):** ligue a detecção de toque ao placar/vidas.
+4. **Dificuldade progressiva (15 min):** adicione a variável de velocidade crescente.
+5. **Tela de Game Over (15 min):** finalize com a tela de encerramento.
+6. **Validação:** demonstre uma partida completa, do início ao Game Over, ao Game Master.
+
+## 🏆 Desafios
+- **Nível 1 — Dois tipos de item:** adicione um segundo tipo de objeto que cai (ex: "bônus" que dá pontos extras) diferenciado por cor ou forma.
+- **Nível 2 — Power-up temporário:** um item especial que deixa o jogador mais rápido por 5 segundos.
+- **Nível 3 — Recorde salvo:** use uma variável "para todos os sprites" chamada recorde que só atualiza se o placar da partida atual for maior que ela.
+`
+  },
+  {
+    id: 'tool-quest-appinventor-jogo-sensores',
+    title: 'Labirinto de Inclinação',
+    description:
+      'Use o acelerômetro do próprio celular no App Inventor para controlar uma bolinha em um labirinto 2D — inclinando o aparelho para os lados em vez de tocar na tela, mostrando como um sensor físico vira um controle de jogo.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['app_inventor'],
+    sdgGoals: ['4'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['App Inventor', 'Smartphone'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'A bolinha se move corretamente na direção em que o celular é inclinado, sem input por toque.',
+      'Demonstrar o funcionamento do projeto ao Game Master.'
+    ],
+    grade: 'Ensino Fundamental II (8º e 9º ano)',
+    duration: '3 aulas',
+    guideContent: `
+# Labirinto de Inclinação
+
+## 🎯 Visão Geral
+Jogos de celular nem sempre são controlados por toque — muitos usam o **acelerômetro**, o mesmo sensor que detecta quando você gira a tela. Neste projeto, esse sensor vira o controle de um jogo: incline o celular e uma bolinha se move na tela, como em um labirinto de equilíbrio físico.
+
+## 🎓 Objetivos de Aprendizagem
+- **Sensor como controle:** usar um componente físico do celular (AccelerometerSensor) como entrada de um jogo, em vez de botões na tela.
+- **Mapeamento de valores:** converter a inclinação (eixos X/Y do sensor) em movimento de um objeto na Canvas.
+- **Limites de tela:** impedir que o objeto controlado saia da área jogável.
+
+## 🛠️ Passo a Passo
+1. **Tela do jogo:** adicione um componente Canvas ocupando a tela e, dentro dele, um ImageSprite (a "bolinha").
+2. **Sensor:** adicione um AccelerometerSensor (é um componente "não visível", fica embaixo da tela de design).
+3. **Bloco principal:** no evento AccelerometerSensor.AccelerationChanged, use os valores xAccel e yAccel para mover a bolinha: bolinha.X + xAccel e bolinha.Y + yAccel.
+4. **Limites:** antes de mover, verifique se a nova posição continua dentro dos limites do Canvas — se não, mantenha a posição atual.
+5. **Objetivo do labirinto:** adicione um segundo ImageSprite fixo (a "meta"). Use o evento CollidedWith para detectar quando a bolinha chega até ela.
+
+## 📋 Plano de Execução Completo
+1. **Tela e sprites (20 min):** monte o Canvas, a bolinha e a meta no Designer.
+2. **Leitura do sensor (20 min):** implemente o bloco AccelerationChanged movendo a bolinha.
+3. **Teste no celular (15 min):** use o app MIT AI2 Companion para testar em tempo real, sem precisar exportar o APK a cada mudança.
+4. **Limites e colisão com paredes (20 min):** adicione ImageSprites como "paredes" do labirinto e trate a colisão com elas.
+5. **Vitória (15 min):** implemente a tela/mensagem de "Você chegou!" ao colidir com a meta.
+6. **Validação:** demonstre o labirinto sendo percorrido só por inclinação, sem tocar na tela.
+
+## 🏆 Desafios
+- **Nível 1 — Cronômetro:** mostre quanto tempo o jogador levou para chegar até a meta.
+- **Nível 2 — Obstáculos móveis:** adicione um ImageSprite que se move sozinho (com Clock) e que a bolinha precisa desviar.
+- **Nível 3 — Vibração de alerta:** use o componente Sound/Player para vibrar o celular quando a bolinha encostar em uma parede.
+`
+  },
+  {
+    id: 'tool-quest-joystick-arduino-python',
+    title: 'Joystick Físico: Do Potenciômetro à Tela',
+    description:
+      'Construa um joystick físico com dois potenciômetros no Arduino e use Python para ler os valores via porta Serial e mover um personagem em uma janela 2D — o elo entre eletrônica e o "input" de um jogo de verdade.',
+    tier: 'ADVANCED',
+    requiredSkills: ['arduino_basico', 'python_intro'],
+    sdgGoals: ['9'],
+    xpReward: 500,
+    coinReward: 130,
+    hardwareRequired: ['Arduino', 'Python', 'Módulo Joystick KY-023'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'Mover o joystick físico move corretamente um objeto na janela do Python, em tempo real e sem travamentos.',
+      'Explicar ao Game Master como os dados analógicos do Arduino chegam até o Python pela porta Serial.'
+    ],
+    grade: 'Ensino Médio',
+    duration: '5 aulas',
+    guideContent: `
+# Joystick Físico: Do Potenciômetro à Tela
+
+## 🎯 Visão Geral
+Este projeto conecta dois mundos que normalmente ficam separados: a **eletrônica** (um joystick físico feito de dois potenciômetros) e o **software** (um jogo simples rodando no computador). O Arduino lê a posição do joystick e envia os números pela porta Serial; o Python lê esses números e move um personagem na tela — o mesmo princípio usado por controles de videogame de verdade.
+
+## 🎓 Objetivos de Aprendizagem
+- **Leitura analógica:** usar analogRead() para ler a posição X/Y de um joystick (0 a 1023 em cada eixo).
+- **Comunicação Serial:** enviar dados estruturados do Arduino para o computador via Serial.print().
+- **Ponte Arduino ↔ Python:** ler a porta Serial em Python (biblioteca pyserial) e usar os valores recebidos para atualizar uma janela gráfica.
+
+## 🔩 Materiais
+- 1x Arduino Uno
+- 1x Módulo Joystick KY-023 (2 potenciômetros + botão)
+- Computador com Python e a biblioteca \`pyserial\` instalada (\`pip install pyserial\`)
+- Uma biblioteca gráfica simples em Python, como \`turtle\` (já vem com o Python, sem instalar nada extra)
+
+## ⚙️ Esquema de Ligação
+- **Joystick VRx** → Arduino A0 | **VRy** → Arduino A1 | **SW (botão)** → Arduino D2
+- **+5V** → Arduino 5V | **GND** → Arduino GND
+
+## 💻 Código do Arduino (envia os dados)
+\`\`\`cpp
+void setup() {
+  Serial.begin(9600);
+  pinMode(2, INPUT_PULLUP);
+}
+
+void loop() {
+  int x = analogRead(A0);
+  int y = analogRead(A1);
+  Serial.print(x);
+  Serial.print(",");
+  Serial.println(y);
+  delay(50);
+}
+\`\`\`
+
+## 🐍 Código do Python (lê e desenha)
+\`\`\`python
+import serial
+import turtle
+
+arduino = serial.Serial('COM3', 9600)  # troque 'COM3' pela porta correta
+tela = turtle.Screen()
+personagem = turtle.Turtle()
+
+while True:
+    linha = arduino.readline().decode().strip()
+    if "," in linha:
+        x_bruto, y_bruto = linha.split(",")
+        # Mapeia 0-1023 para -200 a 200 (posição na tela)
+        x = (int(x_bruto) - 512) / 512 * 200
+        y = (int(y_bruto) - 512) / 512 * 200
+        personagem.goto(x, y)
+\`\`\`
+
+## 📋 Plano de Execução Completo
+1. **Montagem do joystick (15 min):** ligue o módulo KY-023 conforme o esquema.
+2. **Teste isolado do Arduino (15 min):** rode o código Arduino e observe os pares "x,y" no Monitor Serial.
+3. **Descobrir a porta Serial (10 min):** feche o Monitor Serial (ele bloqueia a porta) e identifique o nome da porta (ex: COM3 no Windows, /dev/ttyUSB0 no Linux).
+4. **Rodar o Python (20 min):** instale o pyserial, ajuste o nome da porta no código e rode o script.
+5. **Calibração (15 min):** se o personagem não centralizar quando o joystick está parado, ajuste o valor 512 no mapeamento para o valor real de repouso do seu joystick.
+6. **Desafios (30 min):** implemente pelo menos um desafio abaixo.
+7. **Validação:** demonstre o joystick físico controlando o personagem em tempo real.
+
+## 🏆 Desafios
+- **Nível 1 — Botão de ação:** leia o estado do botão do joystick (pino D2) e envie um terceiro valor pela Serial; no Python, mude a cor do personagem quando o botão for pressionado.
+- **Nível 2 — Limites de tela:** impeça que o personagem saia da área visível da janela do turtle.
+- **Nível 3 — Alvo para coletar:** desenhe um segundo objeto fixo na tela e detecte quando o personagem chega perto dele (distância euclidiana), como em um mini jogo de coleta.
+`
+  },
+  {
+    id: 'tool-quest-minecraft-fase-redstone',
+    title: 'Level Design: Fase de Obstáculos com Redstone',
+    description:
+      'Projete e programe, no Minecraft Education, uma fase de obstáculos com portas automáticas e armadilhas usando circuitos de redstone e o Code Builder — pensando como um "level designer" de jogos pensa.',
+    tier: 'INTERMEDIATE',
+    requiredSkills: ['minecraft_education'],
+    sdgGoals: ['4'],
+    xpReward: 350,
+    coinReward: 90,
+    hardwareRequired: ['Minecraft Education', 'Code Builder'],
+    status: 'ACTIVE',
+    validationSteps: [
+      'A fase tem pelo menos 2 mecanismos automáticos funcionais (porta, armadilha ou plataforma) construídos com redstone ou Code Builder.',
+      'Um colega consegue completar a fase do início ao fim sem travar em nenhum obstáculo quebrado.'
+    ],
+    grade: 'Ensino Fundamental II (6º e 7º ano)',
+    duration: '4 aulas',
+    guideContent: `
+# Level Design: Fase de Obstáculos com Redstone
+
+## 🎯 Visão Geral
+"Level design" é a arte de projetar as fases de um jogo — decidir onde ficam os obstáculos, o ritmo do desafio e como guiar o jogador sem precisar explicar tudo em texto. Neste projeto, você usa o Minecraft Education como uma ferramenta de prototipagem de fases, com mecanismos automáticos de verdade construídos com redstone.
+
+## 🎓 Objetivos de Aprendizagem
+- **Redstone como lógica:** entender que os circuitos de redstone funcionam como fios elétricos e portas lógicas dentro do jogo.
+- **Level design:** planejar uma sequência de desafios com dificuldade crescente, não obstáculos aleatórios.
+- **Code Builder:** usar blocos de programação para automatizar eventos que redstone puro não resolveria sozinho.
+
+## 🛠️ Passo a Passo
+1. **Planeje no papel primeiro:** desenhe um mapa simples da fase antes de construir — início, 3 a 4 obstáculos, e o fim.
+2. **Porta automática:** construa uma porta que abre com um botão ou placa de pressão, usando um bloco de pistão ligado a redstone.
+3. **Armadilha simples:** um piso de lava escondido sob um tapete de pressão, ou um dispensador de flechas ativado por um circuito temporizado (repetidor de redstone).
+4. **Automação com Code Builder:** use o Code Builder para programar um evento que redstone sozinho não faz facilmente, como teleportar o jogador de volta ao início se ele cair em uma área específica.
+5. **Playtest:** peça para um colega jogar sua fase sem explicar nada antes — observe onde ele trava ou se confunde.
+
+## 📋 Plano de Execução Completo
+1. **Planejamento no papel (15 min):** desenhe o mapa da fase com os obstáculos em ordem.
+2. **Construção da estrutura (40 min):** construa o cenário físico da fase (paredes, corredores, plataformas).
+3. **Primeiro mecanismo — porta (20 min):** implemente a porta automática com pistão + redstone.
+4. **Segundo mecanismo — armadilha (20 min):** implemente a armadilha temporizada.
+5. **Automação extra com Code Builder (20 min):** programe pelo menos um evento adicional.
+6. **Playtest com um colega (15 min):** observe e anote o que travou ou confundiu.
+7. **Ajustes finais (15 min):** corrija os pontos identificados no playtest.
+8. **Validação:** o Game Master (ou um colega) completa a fase do início ao fim.
+
+## 🏆 Desafios
+- **Nível 1 — Checkpoint:** adicione um ponto intermediário que salva o progresso do jogador, caso ele "morra" na segunda metade da fase.
+- **Nível 2 — Puzzle de sequência:** crie uma porta que só abre se 3 alavancas forem ativadas na ordem certa.
+- **Nível 3 — Fase cronometrada:** use o Code Builder para adicionar um cronômetro visível e um "recorde" da fase.
+`
   }
 ];
 
