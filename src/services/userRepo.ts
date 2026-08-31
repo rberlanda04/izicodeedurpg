@@ -9,17 +9,12 @@ import {
   type Unsubscribe
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { EMOJI_AVATAR_PRESETS } from '../data/avatarPresets';
 import type { UserProfile } from '../types';
 
-const AVATAR_PRESETS = [
-  { head: '🤖', body: '🛡️', accessory: '⚡', color: '#0E7C7B' },
-  { head: '🦊', body: '🎒', accessory: '🔧', color: '#F25C54' },
-  { head: '🐈', body: '🧪', accessory: '✨', color: '#6A4C93' },
-  { head: '👽', body: '🚀', accessory: '💡', color: '#F4A259' }
-];
-
 export function newUserProfile(uid: string, adventureName: string, realName = ''): UserProfile {
-  const avatarConfig = AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)];
+  const preset = EMOJI_AVATAR_PRESETS[Math.floor(Math.random() * EMOJI_AVATAR_PRESETS.length)];
+  const avatarConfig = { head: preset.head, body: preset.body, accessory: preset.accessory, color: preset.color };
   return {
     uid,
     adventureName,

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { X, ListOrdered, CheckCircle2, RotateCcw } from 'lucide-react';
+import { X, ListOrdered, RotateCcw } from 'lucide-react';
 import { Button } from '../stem/Button';
 import { soundEngine } from '../../services/soundEngine';
 import type { SequencePuzzle } from '../../types';
@@ -84,8 +84,8 @@ export const SequenceChallenge: React.FC<SequenceChallengeProps> = ({ puzzle, on
         </div>
 
         {succeeded ? (
-          <div className="flex flex-col items-center text-center gap-2 py-6">
-            <CheckCircle2 className="w-10 h-10 text-stem-teal" />
+          <div className="flex flex-col items-center text-center gap-1 py-4">
+            <img src="/trail/chest-reward.svg" alt="" className="w-24 h-24" />
             <p className="font-display font-bold text-stem-teal">Sequência correta!</p>
             <p className="text-sm font-body-stem text-stem-ink-soft">
               +{puzzle.xpReward} XP · 🪙 {puzzle.coinReward}

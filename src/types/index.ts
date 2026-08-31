@@ -39,6 +39,7 @@ export interface UserProfile {
     body: string;
     accessory: string;
     color: string;
+    imageUrl?: string; // avatar ilustrado (public/avatars/*.svg) — quando definido, algumas telas preferem esta imagem ao emoji de `head`
   };
   unlockedSkills: string[];
   badges: Badge[];

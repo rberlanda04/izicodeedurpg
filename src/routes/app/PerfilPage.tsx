@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { CheckCircle2, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Palette } from 'lucide-react';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
 import { useAuth } from '../../contexts/AuthContext';
+import { ALL_AVATAR_PRESETS } from '../../data/avatarPresets';
 import type { ClassOutletContext } from './ClassLayout';
 
 export const PerfilPage: React.FC = () => {
-  const { handleSignContract } = useOutletContext<ClassOutletContext>();
+  const { handleSignContract, handleUpdateAvatar } = useOutletContext<ClassOutletContext>();
   const { profile } = useAuth();
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   if (!profile) return null;
 
   const xpPercent = Math.min(100, Math.round((profile.xp / profile.xpToNextLevel) * 100));
@@ -17,7 +19,17 @@ export const PerfilPage: React.FC = () => {
     <div className="space-y-6">
       <Card accent="teal">
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          <span className="text-6xl bg-stem-mist rounded-3xl p-4">{profile.avatarConfig.head}</span>
+          <button
+            onClick={() => setShowAvatarPicker(true)}
+            className="relative shrink-0 rounded-3xl overflow-hidden bg-stem-mist hover:ring-4 hover:ring-stem-teal/30 transition-all"
+            title="Trocar avatar"
+          >
+            {profile.avatarConfig.imageUrl ? (
+              <img src={profile.avatarConfig.imageUrl} alt="Seu avatar" className="w-24 h-24 object-cover" />
+            ) : (
+              <span className="text-6xl p-4 block">{profile.avatarConfig.head}</span>
+            )}
+          </button>
           <div className="flex-1 text-center sm:text-left">
             <h1 className="font-display font-extrabold text-2xl text-stem-ink">{profile.adventureName}</h1>
             <p className="text-xs font-body-stem text-stem-ink-soft">
@@ -33,6 +45,9 @@ export const PerfilPage: React.FC = () => {
             <p className="text-xs font-body-stem text-stem-ink-soft mt-1">
               {profile.xp} / {profile.xpToNextLevel} XP
             </p>
+            <Button variant="ghost" className="mt-3" onClick={() => setShowAvatarPicker(true)}>
+              <Palette className="w-4 h-4" /> Trocar avatar
+            </Button>
           </div>
         </div>
       </Card>
@@ -81,6 +96,56 @@ export const PerfilPage: React.FC = () => {
           </Button>
         )}
       </Card>
+
+      {showAvatarPicker && (
+        <div className="fixed inset-0 z-50 bg-stem-ink/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <Card className="w-full max-w-lg space-y-4">
+            <h3 className="font-display font-bold text-stem-ink">Escolha seu avatar</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {ALL_AVATAR_PRESETS.map((preset) => {
+                const isImage = preset.kind === 'image';
+                const isSelected = isImage
+                  ? profile.avatarConfig.imageUrl === preset.imageUrl
+                  : !profile.avatarConfig.imageUrl && profile.avatarConfig.head === preset.head;
+                return (
+                  <button
+                    key={preset.label}
+                    onClick={() => {
+                      handleUpdateAvatar(
+                        isImage
+                          ? { ...profile.avatarConfig, imageUrl: preset.imageUrl }
+                          : {
+                              head: preset.head,
+                              body: preset.body,
+                              accessory: preset.accessory,
+                              color: preset.color,
+                              imageUrl: undefined
+                            }
+                      );
+                      setShowAvatarPicker(false);
+                    }}
+                    className={`rounded-2xl overflow-hidden border-2 transition-colors ${
+                      isSelected ? 'border-stem-teal' : 'border-stem-line hover:border-stem-teal/50'
+                    }`}
+                    title={preset.label}
+                  >
+                    {isImage ? (
+                      <img src={preset.imageUrl} alt={preset.label} className="w-full aspect-square object-cover" />
+                    ) : (
+                      <span className="w-full aspect-square flex items-center justify-center text-3xl bg-stem-mist">
+                        {preset.head}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <Button variant="ghost" fullWidth onClick={() => setShowAvatarPicker(false)}>
+              Cancelar
+            </Button>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

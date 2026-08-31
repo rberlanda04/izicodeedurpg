@@ -39,7 +39,11 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenTerminal, onOpenMenu }) =>
         </div>
 
         <div className="hidden md:flex items-center gap-3 flex-1 max-w-xs">
-          <span className="text-2xl">{profile.avatarConfig.head}</span>
+          {profile.avatarConfig.imageUrl ? (
+            <img src={profile.avatarConfig.imageUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+          ) : (
+            <span className="text-2xl">{profile.avatarConfig.head}</span>
+          )}
           <div className="flex-1">
             <div className="flex justify-between text-xs font-display font-semibold text-stem-ink-soft mb-1">
               <span>{profile.adventureName}</span>
