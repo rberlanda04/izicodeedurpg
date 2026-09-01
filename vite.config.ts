@@ -7,6 +7,7 @@ import { onboardSchool } from './server/onboardSchoolHandler.js'
 import { validateQuest } from './server/questValidationHandler.js'
 import { validateSkill } from './server/skillValidationHandler.js'
 import { completeSkillWithLink } from './server/skillLinkCompletionHandler.js'
+import { resolveHardwareRequest } from './server/hardwareRequestHandler.js'
 
 /**
  * Dev-only server-side proxy factory — mirrors, for local `npm run dev`,
@@ -109,6 +110,16 @@ export default defineConfig(({ mode }) => {
             throw new Error('Campos obrigatórios faltando.');
           }
           return completeSkillWithLink(idToken, classId, schoolId, studentName, skillId, skillTitle, projectLink, xpReward, coinReward);
+        }
+      ),
+      jsonProxyPlugin(
+        'resolve-hardware-request-proxy',
+        '/api/resolve-hardware-request',
+        async ({ idToken, requestId, decision }: { idToken?: string; requestId?: string; decision?: 'APPROVED' | 'DENIED' }) => {
+          if (!idToken || !requestId || (decision !== 'APPROVED' && decision !== 'DENIED')) {
+            throw new Error('idToken, requestId e decision (APPROVED/DENIED) são obrigatórios.');
+          }
+          return resolveHardwareRequest(idToken, requestId, decision);
         }
       )
     ]

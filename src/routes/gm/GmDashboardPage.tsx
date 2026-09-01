@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Crown, Key, Zap, CheckCircle, Copy, ArrowLeft, ShieldCheck, Sparkles, Link2, ListChecks } from 'lucide-react';
+import { Crown, Key, Zap, CheckCircle, Copy, ArrowLeft, ShieldCheck, Sparkles, Link2, ListChecks, Wrench, XCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { subscribeToClass } from '../../services/classRepo';
 import { subscribeToClassValidations } from '../../services/questRepo';
@@ -22,6 +22,7 @@ export const GmDashboardPage: React.FC = () => {
   const [skillTokens, setSkillTokens] = useState<SkillValidationToken[]>([]);
   const [xpAmount, setXpAmount] = useState(100);
   const [copied, setCopied] = useState(false);
+  const [resolvingRequestId, setResolvingRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!classId) return;
@@ -64,6 +65,18 @@ export const GmDashboardPage: React.FC = () => {
 
   const proposedQuests = classState.quests.filter((q) => q.status === 'PROPOSED');
   const pendingValidations = classState.quests.filter((q) => q.status === 'PENDING_VALIDATION');
+  const pendingHardwareRequests = classState.hardwareRequests.filter((r) => r.status === 'PENDING');
+
+  const handleResolveHardware = async (requestId: string, decision: 'APPROVED' | 'DENIED') => {
+    setResolvingRequestId(requestId);
+    try {
+      await classState.handleResolveHardwareRequest(requestId, decision);
+    } catch (err) {
+      console.error('Falha ao resolver pedido de material:', err);
+    } finally {
+      setResolvingRequestId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-stem-mist">
@@ -273,6 +286,51 @@ export const GmDashboardPage: React.FC = () => {
                   </Button>
                 </div>
               ))}
+            </div>
+          )}
+        </Card>
+
+        <Card accent="teal">
+          <h3 className="font-display font-bold text-stem-ink mb-3 flex items-center gap-2">
+            <Wrench className="w-4 h-4 text-stem-teal" /> Solicitações de Material ({pendingHardwareRequests.length})
+          </h3>
+          <p className="text-xs font-body-stem text-stem-ink-soft mb-3">
+            Um aluno pediu pra retirar um item do Maker Lab — aprovar debita os Izicoins e credita o item no
+            inventário dele.
+          </p>
+          {pendingHardwareRequests.length === 0 ? (
+            <p className="text-sm font-body-stem text-stem-ink-soft text-center py-4">
+              Nenhum pedido de material no momento.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {pendingHardwareRequests.map((r) => {
+                const busy = resolvingRequestId === r.id;
+                return (
+                  <div
+                    key={r.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-stem-mist rounded-xl p-4"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{r.itemIcon}</span>
+                      <div>
+                        <p className="font-display font-bold text-sm text-stem-ink">{r.itemName}</p>
+                        <p className="text-xs font-body-stem text-stem-ink-soft">
+                          {r.studentName} · 🪙{r.coinCost}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" disabled={busy} onClick={() => void handleResolveHardware(r.id, 'DENIED')}>
+                        <XCircle className="w-4 h-4" /> Negar
+                      </Button>
+                      <Button disabled={busy} onClick={() => void handleResolveHardware(r.id, 'APPROVED')}>
+                        <CheckCircle className="w-4 h-4" /> Aprovar
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </Card>

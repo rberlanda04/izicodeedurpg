@@ -29,7 +29,8 @@ const CATEGORY_LABELS: Record<HardwareItem['category'], string> = {
 const CATEGORY_ORDER: HardwareItem['category'][] = ['MICROCONTROLLER', 'SENSOR', 'ACTUATOR', 'STATIONERY', 'TOOLS'];
 
 export const LabPage: React.FC = () => {
-  const { catalog, handleRequestHardware, handleCompleteWizard } = useOutletContext<ClassOutletContext>();
+  const { catalog, myHardwareRequests, handleRequestHardware, handleCompleteWizard } =
+    useOutletContext<ClassOutletContext>();
   const { profile } = useAuth();
   const [selectedId, setSelectedId] = useState(catalog[0]?.id ?? '');
   const [message, setMessage] = useState('');
@@ -56,14 +57,16 @@ export const LabPage: React.FC = () => {
 
   if (!profile || !selected) return null;
 
-  const handleRequest = () => {
+  const pendingRequest = myHardwareRequests.find((r) => r.itemId === selected.id && r.status === 'PENDING');
+
+  const handleRequest = async () => {
     if (selected.stockQuantity <= 0) {
       setMessage('Item esgotado no laboratório.');
     } else if (profile.izicoins < selected.coinCost) {
       setMessage('Izicoins insuficientes.');
     } else {
-      handleRequestHardware(selected.id, selected.coinCost);
-      setMessage(`Requisitado! Retire com o Game Master: ${selected.name}`);
+      await handleRequestHardware(selected.id);
+      setMessage(`Pedido enviado! Aguarde a aprovação do Game Master: ${selected.name}`);
     }
     setTimeout(() => setMessage(''), 3000);
   };
@@ -190,9 +193,13 @@ export const LabPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <Button onClick={handleRequest} disabled={selected.stockQuantity <= 0}>
+              <Button onClick={() => void handleRequest()} disabled={selected.stockQuantity <= 0 || Boolean(pendingRequest)}>
                 <Wrench className="w-4 h-4" />
-                {selected.stockQuantity <= 0 ? 'Esgotado' : `Requisitar (🪙${selected.coinCost})`}
+                {pendingRequest
+                  ? 'Pedido enviado — aguardando o Game Master'
+                  : selected.stockQuantity <= 0
+                    ? 'Esgotado'
+                    : `Requisitar (🪙${selected.coinCost})`}
               </Button>
             </div>
 

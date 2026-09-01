@@ -31,6 +31,13 @@ import {
 } from '../services/skillValidationRepo';
 import { submitSkillValidationCode, completeSkillWithLink as completeSkillWithLinkApi } from '../services/skillValidationService';
 import { subscribeToClassGuilds, createGuild, joinGuild } from '../services/guildRepo';
+import {
+  requestHardware,
+  cancelHardwareRequest,
+  subscribeToClassHardwareRequests,
+  subscribeToMyHardwareRequests
+} from '../services/hardwareRequestRepo';
+import { resolveHardwareRequest as resolveHardwareRequestApi } from '../services/hardwareRequestService';
 import { saveSkillProfileAnswers, deleteSkillProfileAnswers } from '../services/skillProfileRepo';
 import {
   computeArchetype,
@@ -55,6 +62,7 @@ import type {
   SkillValidation,
   SkillCompletion,
   ActiveChallenge,
+  HardwareRequest,
   UserProfile
 } from '../types';
 
@@ -96,6 +104,11 @@ export function useClassLocalState(
   // que a BattleScreen usa pra saber "eu tenho uma habilidade pendente?"
   // mesmo depois de recarregar a página.
   const [myPendingSkillValidation, setMyPendingSkillValidation] = useState<SkillValidation | null>(null);
+  // Mesma dupla amplo/escopado dos pedidos de habilidade: hardwareRequests
+  // só popula de verdade pra GM/Admin (Painel), myHardwareRequests funciona
+  // pra qualquer papel e é o que o Maker Lab usa pra saber "já pedi este item?".
+  const [hardwareRequests, setHardwareRequests] = useState<HardwareRequest[]>([]);
+  const [myHardwareRequests, setMyHardwareRequests] = useState<HardwareRequest[]>([]);
   // Passo intermediário entre "quiz do Desafio Relâmpago acertado" e
   // "pedido de validação realmente criado no Firestore" — o aluno ainda
   // precisa escolher entre link de projeto ou validação do professor. Só
@@ -107,9 +120,7 @@ export function useClassLocalState(
     xpReward: number;
     coinReward: number;
   } | null>(null);
-  const [catalog, setCatalog] = useState<HardwareItem[]>(() =>
-    loadState(classKey(classId, 'catalog'), HARDWARE_CATALOG)
-  );
+  const [catalog] = useState<HardwareItem[]>(() => loadState(classKey(classId, 'catalog'), HARDWARE_CATALOG));
   const [curiosities, setCuriosities] = useState<CuriosityCard[]>(() =>
     loadState(classKey(classId, 'curiosities'), CURIOSITY_CARDS)
   );
@@ -144,12 +155,21 @@ export function useClassLocalState(
       (validations) => setMyPendingSkillValidation(validations[0] ?? null),
       (error) => console.error('Falha ao carregar validação de habilidade:', error)
     );
+    const unsubHardwareRequests = subscribeToClassHardwareRequests(classId, setHardwareRequests, () => {});
+    const unsubMyHardwareRequests = subscribeToMyHardwareRequests(
+      classId,
+      profile.uid,
+      setMyHardwareRequests,
+      (error) => console.error('Falha ao carregar pedidos de material:', error)
+    );
     return () => {
       unsubQuests();
       unsubGuilds();
       unsubSkillValidations();
       unsubSkillCompletions();
       unsubMySkillValidation();
+      unsubHardwareRequests();
+      unsubMyHardwareRequests();
     };
   }, [classId, profile.uid]);
 
@@ -529,17 +549,27 @@ export function useClassLocalState(
     return true;
   };
 
-  const handleRequestHardware = (itemId: string, cost: number) => {
+  /**
+   * Antes decrementava o estoque local e concedia o item na hora — o Game
+   * Master nunca via nada, porque tudo isso vivia só no localStorage do
+   * navegador do aluno. Agora só cria um pedido PENDING no Firestore; quem
+   * de fato debita Izicoins/concede o item é handleResolveHardwareRequest
+   * (via server, quando o GM aprova) — ver hardwareRequestHandler.ts.
+   */
+  const handleRequestHardware = async (itemId: string) => {
     const item = catalog.find((i) => i.id === itemId);
     if (!item || item.stockQuantity <= 0) return;
-    setCatalog((prev) => prev.map((i) => (i.id === itemId ? { ...i, stockQuantity: i.stockQuantity - 1 } : i)));
-    applyUserPatch((current) => {
-      const alreadyOwned = current.inventory.find((inv) => inv.itemId === itemId);
-      const nextInventory = alreadyOwned
-        ? current.inventory.map((inv) => (inv.itemId === itemId ? { ...inv, qty: inv.qty + 1 } : inv))
-        : [...current.inventory, { itemId: item.id, name: item.name, qty: 1, icon: item.icon }];
-      return { izicoins: current.izicoins - cost, inventory: nextInventory };
-    });
+    await requestHardware(classId, schoolId, profile.uid, profile.adventureName, item);
+  };
+
+  const handleCancelHardwareRequest = async (requestId: string) => {
+    await cancelHardwareRequest(requestId);
+  };
+
+  /** Painel do Mestre: aprova (concede Izicoins/item via server) ou nega um pedido pendente. */
+  const handleResolveHardwareRequest = async (requestId: string, decision: 'APPROVED' | 'DENIED') => {
+    if (!firebaseUser) return;
+    await resolveHardwareRequestApi(firebaseUser, requestId, decision);
   };
 
   const handleUnlockCuriosityCard = (code: string): boolean => {
@@ -639,6 +669,8 @@ export function useClassLocalState(
     activeChallenge,
     skillValidations,
     skillCompletions,
+    hardwareRequests,
+    myHardwareRequests,
     handleSignContract,
     handleUpdateAvatar,
     handleCompleteSkillSurvey,
@@ -658,6 +690,8 @@ export function useClassLocalState(
     handleGenerateAIQuest,
     handleUnlockSecretQuest,
     handleRequestHardware,
+    handleCancelHardwareRequest,
+    handleResolveHardwareRequest,
     handleUnlockCuriosityCard,
     handleCompleteWizard,
     handleCollectEncounter,

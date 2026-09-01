@@ -355,6 +355,24 @@ export interface ResourceBooking {
   timeSlot: string; // e.g. '13:00-13:30'
 }
 
+// Pedido de retirada de material no Maker Lab — só a resolução (APPROVED,
+// que credita/debita UserProfile) passa por server/hardwareRequestHandler.ts,
+// nunca pelo cliente diretamente (mesmo motivo de SkillValidation).
+export interface HardwareRequest {
+  id: string;
+  classId: string;
+  schoolId: string;
+  studentUid: string;
+  studentName: string;
+  itemId: string;
+  itemName: string;
+  itemIcon: string;
+  coinCost: number;
+  status: 'PENDING' | 'APPROVED' | 'DENIED';
+  createdAt: string;
+  resolvedAt?: string;
+}
+
 // --- Módulo EcoGuardians: hackathon de justiça climática, cross-turma/escola ---
 // Coleções próprias no nível raiz (não aninhadas em classes/schools) porque um
 // evento reúne equipes de qualquer turma/escola — ver PLANO em

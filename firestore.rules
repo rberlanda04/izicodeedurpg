@@ -260,6 +260,21 @@ service cloud.firestore {
       allow delete: if isSelf(studentUid);
     }
 
+    // Pedido de retirada de material no Maker Lab — mesmo padrão de
+    // skillValidations: o aluno cria como PENDING, só GM/Admin/o próprio
+    // aluno leem, e a resolução (que credita/debita Izicoins e inventário)
+    // é bloqueada no cliente — só server/hardwareRequestHandler.ts pode.
+    match /hardwareRequests/{id} {
+      allow read: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
+        || (isStudentOfClass(resource.data.classId) && resource.data.studentUid == uid());
+      allow create: if isStudentOfClass(request.resource.data.classId)
+        && request.resource.data.studentUid == uid() && request.resource.data.status == 'PENDING';
+      allow update: if false;
+      allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
+        || (isStudentOfClass(resource.data.classId) && resource.data.studentUid == uid()
+            && resource.data.status == 'PENDING');
+    }
+
     match /quickHacks/{hackId} {
       allow read: if isMemberOfClass(resource.data.classId);
       allow write: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
