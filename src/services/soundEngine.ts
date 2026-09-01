@@ -147,6 +147,43 @@ class RetroSoundEngine {
     if (!this.soundEnabled) return;
     this.playBeep(220, 'sine', 0.12, 0.12);
   }
+
+  /** Som de início de batalha RPG épico */
+  public playBattleStart() {
+    if (!this.soundEnabled) return;
+    const notes = [220, 277.18, 329.63, 440, 554.37, 659.25];
+    notes.forEach((freq, idx) => {
+      setTimeout(() => {
+        this.playBeep(freq, 'sawtooth', 0.08, 0.15);
+      }, idx * 45);
+    });
+  }
+
+  /** Som de sucesso / vitória */
+  public playSuccess() {
+    this.playQuestComplete();
+  }
+
+  /** Som de colheita/pop estilo Sunflower Land */
+  public playHarvest() {
+    if (!this.soundEnabled) return;
+    this.playBeep(523.25, 'sine', 0.08, 0.15);
+    setTimeout(() => this.playBeep(659.25, 'sine', 0.1, 0.18), 50);
+  }
+
+  /** Som de forja/crafting de item */
+  public playCraft() {
+    if (!this.soundEnabled) return;
+    this.playBeep(330, 'square', 0.06, 0.15);
+    setTimeout(() => this.playBeep(440, 'triangle', 0.08, 0.18), 60);
+    setTimeout(() => this.playBeep(587.33, 'triangle', 0.15, 0.2), 120);
+  }
+
+  /** Som de colocação de bloco/tile na ilha */
+  public playPlace() {
+    if (!this.soundEnabled) return;
+    this.playBeep(400, 'triangle', 0.05, 0.12);
+  }
 }
 
 export const soundEngine = new RetroSoundEngine();

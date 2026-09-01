@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { computeTrailLayout } from './useTrailLayout';
 import { TrailNode, type TrailNodeStatus } from './TrailNode';
-import { TrailNodeDetailSheet } from './TrailNodeDetailSheet';
+import { TrailDialogueGameModal } from './TrailDialogueGameModal';
+import { SKILL_QUIZZES, pickSkillQuiz } from '../../data/skillQuizzes';
 import { soundEngine } from '../../services/soundEngine';
 import type { SkillNode, Quest } from '../../types';
 import type { TrailNodePosition } from './useTrailLayout';
@@ -77,12 +78,21 @@ export const Trail: React.FC<TrailProps> = ({
 
   return (
     <div
-      className="relative mx-auto max-w-lg rounded-3xl overflow-hidden"
+      className="relative w-full"
       style={{
         height: layout.height,
-        backgroundImage: 'radial-gradient(circle, var(--color-stem-line) 1.5px, transparent 1.5px)',
-        backgroundSize: '22px 22px',
-        backgroundColor: 'color-mix(in srgb, var(--color-stem-mist) 60%, transparent)'
+        // A trilha cresce com o número de nós (75 fases = ~11.250px) — bem
+        // além dos 1600px nativos da arte de fundo. Esticar UMA cópia pra
+        // cobrir a altura toda (background-size: 100% 100% ou <img> com
+        // object-fit: fill) renderiza de forma incompleta no Chromium: só
+        // uma faixa no meio pinta, o resto fica em branco — um bug real de
+        // rasterização em superfícies muito esticadas, não um erro de CSS.
+        // Repetir a arte no tamanho nativo (escalado só pela largura) evita
+        // isso: cada ladrilho é uma superfície de pintura normal, e o efeito
+        // visual (terrenos variando conforme sobe a trilha) continua igual.
+        backgroundImage: 'url(/trail/trail-bg-world.svg)',
+        backgroundSize: '100% auto',
+        backgroundRepeat: 'repeat-y'
       }}
     >
       <svg
@@ -161,26 +171,26 @@ export const Trail: React.FC<TrailProps> = ({
       })}
 
       {selectedSkill && (
-        <TrailNodeDetailSheet
+        <TrailDialogueGameModal
           kind="skill"
-          data={selectedSkill}
+          skill={selectedSkill}
+          quiz={pickSkillQuiz(SKILL_QUIZZES.filter((q) => q.skillId === selectedSkill.id))}
           status={skillStatus(selectedSkill)}
-          onUnlock={() => {
+          onSuccessUnlock={() => {
             onUnlockSkill(selectedSkill.id);
-            setSelectedId(null);
           }}
           onClose={() => setSelectedId(null)}
         />
       )}
+
       {selectedQuest && (
-        <TrailNodeDetailSheet
+        <TrailDialogueGameModal
           kind="quest"
-          data={selectedQuest}
+          quest={selectedQuest}
+          quiz={pickSkillQuiz(SKILL_QUIZZES.filter((q) => selectedQuest.requiredSkills.includes(q.skillId)))}
           status={questStatus(selectedQuest)}
-          currentUid={currentUid}
-          onAccept={() => {
+          onSuccessUnlock={() => {
             onAcceptQuest(selectedQuest.id, selectedQuest.xpReward, selectedQuest.coinReward);
-            setSelectedId(null);
           }}
           onClose={() => setSelectedId(null)}
         />
@@ -188,3 +198,4 @@ export const Trail: React.FC<TrailProps> = ({
     </div>
   );
 };
+

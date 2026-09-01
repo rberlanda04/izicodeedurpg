@@ -230,3 +230,191 @@
 .glitch-effect:hover {
   animation: glitch-anim 0.2s infinite;
 }
+
+/* JRPG Classic Window Frame (9-slice styled) */
+.rpg-box {
+  background: linear-gradient(180deg, #101728 0%, #0a0d18 100%);
+  border: 4px solid #4a5d8a;
+  outline: 2px solid #000;
+  box-shadow: 
+    inset 0 0 0 2px #263352,
+    0 6px 0 0 rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(0, 225, 255, 0.15);
+  border-radius: 4px;
+  position: relative;
+}
+
+.rpg-box-gold {
+  border-color: #ffb700;
+  box-shadow: 
+    inset 0 0 0 2px #b28000,
+    0 6px 0 0 rgba(0, 0, 0, 0.5),
+    0 0 25px rgba(255, 183, 0, 0.25);
+}
+
+.rpg-box-cyan {
+  border-color: #00e1ff;
+  box-shadow: 
+    inset 0 0 0 2px #008899,
+    0 6px 0 0 rgba(0, 0, 0, 0.5),
+    0 0 25px rgba(0, 225, 255, 0.3);
+}
+
+/* RPG Dialogue Bubble */
+.rpg-dialogue {
+  background: #0f1423;
+  border: 3px solid #e2e8f0;
+  outline: 2px solid #000;
+  box-shadow: inset 0 0 0 2px #334155, 0 8px 0 rgba(0, 0, 0, 0.4);
+  position: relative;
+  font-family: var(--font-pixel);
+  line-height: 1.6;
+}
+
+/* RPG Floating Combat Numbers */
+@keyframes float-up-fade {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+  80% { transform: translateY(-25px) scale(1); opacity: 1; }
+  100% { transform: translateY(-40px) scale(0.9); opacity: 0; }
+}
+
+.rpg-floating-num {
+  animation: float-up-fade 1.4s ease-out forwards;
+  font-family: var(--font-pixel);
+  font-weight: bold;
+  text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+}
+
+/* Pixel Pulse for Interactables */
+@keyframes pixel-beacon {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px #00ffaa); }
+  50% { transform: scale(1.08); filter: drop-shadow(0 0 14px #00ffaa); }
+}
+
+.pixel-pulse {
+  animation: pixel-beacon 2s ease-in-out infinite;
+}
+
+/* Scanline and CRT flickering for Retro Battles */
+@keyframes crt-flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.98; }
+}
+
+.battle-crt {
+  animation: crt-flicker 0.15s infinite;
+}
+
+/* Sunflower Land Solarpunk & Crafting UI Tokens */
+.sunflower-box {
+  background: linear-gradient(180deg, #1b2838 0%, #101a26 100%);
+  border: 4px solid #c89b3c;
+  outline: 2px solid #141b22;
+  box-shadow: 
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.2),
+    inset 0 -3px 0 0 rgba(0, 0, 0, 0.5),
+    0 8px 0 0 #090e14,
+    0 12px 24px rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+}
+
+.sunflower-btn {
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%);
+  color: #062310;
+  border: 3px solid #1e8449;
+  box-shadow: 
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.35),
+    0 4px 0 0 #145a32;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  user-select: none;
+  text-transform: uppercase;
+  border-radius: 6px;
+  transition: all 0.08s ease;
+}
+
+.sunflower-btn:hover {
+  background: linear-gradient(180deg, #3bf589 0%, #2ecc71 100%);
+  transform: translateY(-1px);
+  box-shadow: 
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.45),
+    0 5px 0 0 #145a32,
+    0 0 12px rgba(46, 204, 113, 0.4);
+}
+
+.sunflower-btn:active {
+  transform: translateY(3px);
+  box-shadow: 
+    inset 0 1px 0 0 rgba(0, 0, 0, 0.2),
+    0 1px 0 0 #145a32;
+}
+
+.sunflower-btn-gold {
+  background: linear-gradient(180deg, #f1c40f 0%, #d4ac0d 100%);
+  border-color: #b7950b;
+  color: #3e3000;
+  box-shadow: 
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.4),
+    0 4px 0 0 #7d6608;
+}
+
+.sunflower-btn-gold:hover {
+  background: linear-gradient(180deg, #f9e79f 0%, #f1c40f 100%);
+  box-shadow: 
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.5),
+    0 5px 0 0 #7d6608,
+    0 0 15px rgba(241, 196, 15, 0.5);
+}
+
+.sunflower-btn-cyber {
+  background: linear-gradient(180deg, #00e1ff 0%, #0099cc 100%);
+  border-color: #007799;
+  color: #002233;
+  box-shadow: 
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.4),
+    0 4px 0 0 #004455;
+}
+
+.sunflower-btn-cyber:hover {
+  background: linear-gradient(180deg, #66f0ff 0%, #00e1ff 100%);
+  box-shadow: 
+    inset 0 2px 0 0 rgba(255, 255, 255, 0.5),
+    0 5px 0 0 #004455,
+    0 0 15px rgba(0, 225, 255, 0.6);
+}
+
+.sunflower-slot {
+  width: 52px;
+  height: 52px;
+  background: #0f1622;
+  border: 3px solid #2d3e56;
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  position: relative;
+}
+
+.sunflower-slot:hover {
+  border-color: #00ffaa;
+  background: #172437;
+  transform: scale(1.06);
+  box-shadow: 0 0 12px rgba(0, 255, 170, 0.4);
+}
+
+.sunflower-slot-selected {
+  border-color: #ffd700;
+  background: #253347;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+

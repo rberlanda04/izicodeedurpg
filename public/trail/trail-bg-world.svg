@@ -1,75 +1,199 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1200" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1600" width="800" height="1600">
   <defs>
-    <linearGradient id="cyberSky" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#0b0e14" />
-      <stop offset="30%" stop-color="#111827" />
-      <stop offset="70%" stop-color="#0d1b2a" />
-      <stop offset="100%" stop-color="#06121e" />
+    <!-- Gradientes de Céu & Terrenos -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#050b14" />
+      <stop offset="25%" stop-color="#0a1829" />
+      <stop offset="50%" stop-color="#12251b" />
+      <stop offset="75%" stop-color="#1f180a" />
+      <stop offset="100%" stop-color="#0d1f14" />
     </linearGradient>
-    <linearGradient id="neonGrid" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.15" />
-      <stop offset="50%" stop-color="#7000ff" stop-opacity="0.25" />
-      <stop offset="100%" stop-color="#ff007f" stop-opacity="0.15" />
+
+    <linearGradient id="riverGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00b4d8" />
+      <stop offset="50%" stop-color="#90e0ef" />
+      <stop offset="100%" stop-color="#0077b6" />
     </linearGradient>
-    <radialGradient id="islandGlow1" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#00FFA3" stop-opacity="0.18" />
-      <stop offset="100%" stop-color="#00FFA3" stop-opacity="0" />
-    </radialGradient>
-    <radialGradient id="islandGlow2" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.22" />
-      <stop offset="100%" stop-color="#00F0FF" stop-opacity="0" />
-    </radialGradient>
-    <radialGradient id="islandGlow3" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#9D4EDD" stop-opacity="0.25" />
-      <stop offset="100%" stop-color="#9D4EDD" stop-opacity="0" />
-    </radialGradient>
+
+    <linearGradient id="goldBanner" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b8860b" />
+      <stop offset="50%" stop-color="#ffd700" />
+      <stop offset="100%" stop-color="#b8860b" />
+    </linearGradient>
+
+    <!-- Padrões de Pixel Art (Grama, Terra, Circuito, Nuvem) -->
+    <pattern id="pixelGrass" width="24" height="24" patternUnits="userSpaceOnUse">
+      <rect width="24" height="24" fill="#1b4332" />
+      <rect x="0" y="0" width="12" height="12" fill="#2d6a4f" />
+      <rect x="12" y="12" width="12" height="12" fill="#2d6a4f" />
+      <circle cx="6" cy="6" r="1.5" fill="#52b788" opacity="0.6" />
+      <circle cx="18" cy="18" r="1.5" fill="#74c69d" opacity="0.6" />
+    </pattern>
+
+    <pattern id="pixelCanyon" width="24" height="24" patternUnits="userSpaceOnUse">
+      <rect width="24" height="24" fill="#3d2612" />
+      <rect x="0" y="0" width="12" height="12" fill="#4d3017" />
+      <rect x="12" y="12" width="12" height="12" fill="#4d3017" />
+      <rect x="4" y="4" width="4" height="4" fill="#b08968" opacity="0.5" />
+    </pattern>
+
+    <pattern id="pixelCyber" width="24" height="24" patternUnits="userSpaceOnUse">
+      <rect width="24" height="24" fill="#0b1320" />
+      <line x1="0" y1="12" x2="24" y2="12" stroke="#1c2d42" stroke-width="1" />
+      <line x1="12" y1="0" x2="12" y2="24" stroke="#1c2d42" stroke-width="1" />
+      <circle cx="12" cy="12" r="1.5" fill="#00e1ff" opacity="0.4" />
+    </pattern>
+
+    <!-- Filtros de Glow Neon -->
+    <filter id="neonGlowCyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="neonGlowGold" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
   </defs>
 
-  <!-- Background Base -->
-  <rect width="600" height="1200" fill="url(#cyberSky)" />
+  <!-- 1. BASE BACKGROUND -->
+  <rect width="800" height="1600" fill="url(#bgGrad)" />
 
-  <!-- Digital Circuit Matrix Grid Lines -->
-  <g stroke="url(#neonGrid)" stroke-width="1.2">
-    <!-- Horizontal matrix lanes -->
-    <line x1="0" y1="150" x2="600" y2="150" />
-    <line x1="0" y1="350" x2="600" y2="350" />
-    <line x1="0" y1="600" x2="600" y2="600" />
-    <line x1="0" y1="850" x2="600" y2="850" />
-    <line x1="0" y1="1050" x2="600" y2="1050" />
+  <!-- 2. TERRENOS DOS 4 BIOMAS RPG -->
+
+  <!-- BIOMA 1 (Y: 0 a 400) - TIER I: SANTUÁRIO DA LÓGICA & ALGORITMOS -->
+  <g id="biome-logic">
+    <rect x="0" y="0" width="800" height="400" fill="url(#pixelCyber)" opacity="0.9" />
     
-    <!-- Vertical data buses -->
-    <line x1="100" y1="0" x2="100" y2="1200" stroke-dasharray="8 12" />
-    <line x1="300" y1="0" x2="300" y2="1200" stroke-dasharray="14 18" />
-    <line x1="500" y1="0" x2="500" y2="1200" stroke-dasharray="8 12" />
+    <!-- Montanhas Cibernéticas no Topo -->
+    <polygon points="0,180 80,60 160,180 240,40 340,190 460,50 580,200 680,70 800,200 800,0 0,0" fill="#0f1f33" opacity="0.8" />
+    <polygon points="0,140 100,50 200,150 320,30 440,160 560,40 680,150 800,40 800,0 0,0" fill="#152b47" opacity="0.6" />
+
+    <!-- Ilha Flutuante Central -->
+    <ellipse cx="400" cy="190" rx="300" ry="110" fill="#0d1b2a" stroke="#00e1ff" stroke-width="2" stroke-dasharray="6,4" filter="url(#neonGlowCyan)" />
+    
+    <!-- Grade Holográfica de Lógica -->
+    <line x1="150" y1="190" x2="650" y2="190" stroke="#00e1ff" stroke-width="1.5" opacity="0.4" />
+    <line x1="250" y1="120" x2="250" y2="260" stroke="#00e1ff" stroke-width="1.5" opacity="0.4" />
+    <line x1="400" y1="100" x2="400" y2="280" stroke="#00e1ff" stroke-width="1.5" opacity="0.4" />
+    <line x1="550" y1="120" x2="550" y2="260" stroke="#00e1ff" stroke-width="1.5" opacity="0.4" />
+
+    <!-- Banner do Bioma 1 -->
+    <g transform="translate(250, 40)">
+      <rect x="0" y="0" width="300" height="44" rx="8" fill="#0a121e" stroke="#00e1ff" stroke-width="3" />
+      <text x="150" y="27" fill="#00e1ff" font-family="'Press Start 2P', monospace, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">
+        ⚡ TIER I: LÓGICA &amp; CÓDIGO
+      </text>
+    </g>
   </g>
 
-  <!-- Biome 1 (Top / Tier 4): Cidadela da Nuvem IoT & IA -->
-  <circle cx="300" cy="180" r="180" fill="url(#islandGlow3)" />
-  <rect x="220" y="80" width="160" height="50" rx="14" fill="#1b1035" stroke="#9D4EDD" stroke-width="2" opacity="0.85" />
-  <text x="300" y="112" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="14" fill="#E0AAFF" text-anchor="middle">☁️ Tier IV: Nuvem IoT &amp; IA</text>
+  <!-- BIOMA 2 (Y: 400 a 800) - TIER II: PLANALTO DOS CIRCUITOS & MAKEY MAKEY -->
+  <g id="biome-circuits">
+    <rect x="0" y="400" width="800" height="400" fill="url(#pixelCanyon)" opacity="0.9" />
 
-  <!-- Biome 2 (Tier 3): Vale da Robótica & Automação -->
-  <circle cx="420" cy="480" r="160" fill="url(#islandGlow2)" />
-  <rect x="340" y="400" width="180" height="46" rx="14" fill="#082032" stroke="#00F0FF" stroke-width="2" opacity="0.85" />
-  <text x="430" y="429" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="13" fill="#A0E7E5" text-anchor="middle">🤖 Tier III: Robótica &amp; Motores</text>
+    <!-- Linhas de Cobre & Trilhas de PCB -->
+    <path d="M 0,550 Q 200,520 400,560 T 800,530" fill="none" stroke="#d4a373" stroke-width="18" opacity="0.4" />
+    <path d="M 0,650 Q 250,680 500,640 T 800,660" fill="none" stroke="#d4a373" stroke-width="14" opacity="0.4" />
 
-  <!-- Biome 3 (Tier 2): Planalto dos Circuitos & Sensores -->
-  <circle cx="180" cy="780" r="170" fill="url(#islandGlow1)" />
-  <rect x="70" y="710" width="190" height="46" rx="14" fill="#0b291e" stroke="#00FFA3" stroke-width="2" opacity="0.85" />
-  <text x="165" y="739" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="13" fill="#B7EFC5" text-anchor="middle">⚡ Tier II: Sensores &amp; LEDs</text>
+    <!-- Cristais de Energia / LEDs Gigantes no Cenário -->
+    <!-- Cristal Ciano -->
+    <polygon points="120,480 135,440 150,480 135,510" fill="#00f0ff" stroke="#ffffff" stroke-width="1.5" opacity="0.85" />
+    <!-- Cristal Ouro -->
+    <polygon points="680,520 695,475 710,520 695,555" fill="#ffd700" stroke="#ffffff" stroke-width="1.5" opacity="0.85" />
+    <!-- Cristal Magenta -->
+    <polygon points="180,720 195,680 210,720 195,750" fill="#ff007f" stroke="#ffffff" stroke-width="1.5" opacity="0.85" />
+    <!-- Cristal Esmeralda -->
+    <polygon points="620,700 635,660 650,700 635,730" fill="#00ffaa" stroke="#ffffff" stroke-width="1.5" opacity="0.85" />
 
-  <!-- Biome 4 (Bottom / Tier 1): Porto de Entrada / Fundamentos Hacker -->
-  <circle cx="300" cy="1080" r="180" fill="url(#islandGlow2)" />
-  <rect x="200" y="1030" width="200" height="46" rx="14" fill="#0a192f" stroke="#00F0FF" stroke-width="2" opacity="0.85" />
-  <text x="300" y="1059" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="13" fill="#64DFDF" text-anchor="middle">💻 Tier I: Lógica &amp; Algoritmos</text>
-
-  <!-- Floating Data Nodes / Pixels -->
-  <g fill="#00FFA3" opacity="0.6">
-    <circle cx="120" cy="220" r="3" />
-    <circle cx="480" cy="280" r="4" />
-    <circle cx="150" cy="520" r="3.5" />
-    <circle cx="530" cy="670" r="3" />
-    <circle cx="90" cy="940" r="4" />
-    <circle cx="490" cy="990" r="3" />
+    <!-- Banner do Bioma 2 -->
+    <g transform="translate(240, 420)">
+      <rect x="0" y="0" width="320" height="44" rx="8" fill="#1b1208" stroke="#ffb700" stroke-width="3" />
+      <text x="160" y="27" fill="#ffb700" font-family="'Press Start 2P', monospace, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">
+        🔌 TIER II: CIRCUITOS &amp; ARDUINO
+      </text>
+    </g>
   </g>
+
+  <!-- BIOMA 3 (Y: 800 a 1200) - TIER III: CIDADE MAKER & ROBÓTICA -->
+  <g id="biome-robotics">
+    <rect x="0" y="800" width="800" height="400" fill="url(#pixelGrass)" opacity="0.95" />
+
+    <!-- Rio que corta o vale com pontes -->
+    <path d="M 0,980 Q 200,920 400,980 T 800,940 L 800,1020 Q 600,1060 400,1020 T 0,1040 Z" fill="url(#riverGrad)" />
+
+    <!-- Árvores Pixel Art Espalhadas -->
+    <g fill="#1b4332">
+      <!-- Árvores Esquerda -->
+      <polygon points="60,860 80,820 100,860" fill="#2d6a4f" />
+      <polygon points="65,880 80,840 95,880" fill="#40916c" />
+      <rect x="76" y="880" width="8" height="14" fill="#582f0e" />
+
+      <polygon points="120,910 140,870 160,910" fill="#2d6a4f" />
+      <rect x="136" y="910" width="8" height="14" fill="#582f0e" />
+
+      <!-- Árvores Direita -->
+      <polygon points="680,870 700,830 720,870" fill="#2d6a4f" />
+      <rect x="696" y="870" width="8" height="14" fill="#582f0e" />
+
+      <polygon points="720,920 740,880 760,920" fill="#40916c" />
+      <rect x="736" y="920" width="8" height="14" fill="#582f0e" />
+    </g>
+
+    <!-- Engrenagens Industriais Gigantes (Pixel Mecha) -->
+    <circle cx="160" cy="1120" r="32" fill="#2b3a4a" stroke="#486581" stroke-width="6" stroke-dasharray="14,10" opacity="0.7" />
+    <circle cx="160" cy="1120" r="14" fill="#102a43" />
+
+    <circle cx="660" cy="1100" r="40" fill="#2b3a4a" stroke="#486581" stroke-width="8" stroke-dasharray="18,12" opacity="0.7" />
+    <circle cx="660" cy="1100" r="18" fill="#102a43" />
+
+    <!-- Banner do Bioma 3 -->
+    <g transform="translate(230, 820)">
+      <rect x="0" y="0" width="340" height="44" rx="8" fill="#081c15" stroke="#00ffaa" stroke-width="3" />
+      <text x="170" y="27" fill="#00ffaa" font-family="'Press Start 2P', monospace, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">
+        🤖 TIER III: ROBÓTICA &amp; WE DO
+      </text>
+    </g>
+  </g>
+
+  <!-- BIOMA 4 (Y: 1200 a 1600) - TIER IV: METRÓPOLE SOLARPUNK & IOT -->
+  <g id="biome-solarpunk">
+    <rect x="0" y="1200" width="800" height="400" fill="#0a1526" />
+    
+    <!-- Grade Hexagonal Solarpunk -->
+    <g stroke="#38b6ff" stroke-width="1" opacity="0.2" fill="none">
+      <polygon points="100,1320 130,1300 160,1320 160,1360 130,1380 100,1360" />
+      <polygon points="160,1320 190,1300 220,1320 220,1360 190,1380 160,1360" />
+      <polygon points="130,1380 160,1360 190,1380 190,1420 160,1440 130,1420" />
+      
+      <polygon points="600,1320 630,1300 660,1320 660,1360 630,1380 600,1360" />
+      <polygon points="660,1320 690,1300 720,1320 720,1360 690,1380 660,1360" />
+      <polygon points="630,1380 660,1360 690,1380 690,1420 660,1440 630,1420" />
+    </g>
+
+    <!-- Mini Turbinas Eólicas e Painéis Solares -->
+    <g transform="translate(180, 1480)" opacity="0.8">
+      <line x1="0" y1="0" x2="0" y2="40" stroke="#90e0ef" stroke-width="3" />
+      <circle cx="0" cy="0" r="4" fill="#ffffff" />
+      <line x1="0" y1="0" x2="16" y2="-10" stroke="#00e1ff" stroke-width="2" />
+      <line x1="0" y1="0" x2="-16" y2="-10" stroke="#00e1ff" stroke-width="2" />
+    </g>
+
+    <g transform="translate(620, 1480)" opacity="0.8">
+      <line x1="0" y1="0" x2="0" y2="40" stroke="#90e0ef" stroke-width="3" />
+      <circle cx="0" cy="0" r="4" fill="#ffffff" />
+      <line x1="0" y1="0" x2="16" y2="-10" stroke="#00e1ff" stroke-width="2" />
+      <line x1="0" y1="0" x2="-16" y2="-10" stroke="#00e1ff" stroke-width="2" />
+    </g>
+
+    <!-- Banner do Bioma 4 -->
+    <g transform="translate(220, 1220)">
+      <rect x="0" y="0" width="360" height="44" rx="8" fill="#140826" stroke="#c77dff" stroke-width="3" />
+      <text x="180" y="27" fill="#e0aaff" font-family="'Press Start 2P', monospace, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">
+        🌐 TIER IV: IOT, DRONES &amp; IA
+      </text>
+    </g>
+  </g>
+
+  <!-- 3. MOLDURA EXTERNA RETRÔ 16-BIT -->
+  <rect x="0" y="0" width="800" height="1600" fill="none" stroke="#24354c" stroke-width="8" />
+  <rect x="8" y="8" width="784" height="1584" fill="none" stroke="#00e1ff" stroke-width="1.5" opacity="0.4" />
 </svg>

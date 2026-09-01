@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet, useParams } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
+import { Menu } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { subscribeToClass } from '../../services/classRepo';
 import { useClassLocalState } from '../../hooks/useClassLocalState';
@@ -17,6 +18,10 @@ export interface ClassOutletContext extends ReturnType<typeof useClassLocalState
 
 export const ClassLayout: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
+  const location = useLocation();
+  // Trilha é a única rota em tela cheia por enquanto — sem sidebar fixa,
+  // cenário ilustrado edge-to-edge, HUD flutuante (ver TrilhaPage.tsx).
+  const isFullBleedRoute = location.pathname.endsWith('/trilha');
   const { profile, firebaseUser, isMemberOfClass, setActiveClassId } = useAuth();
   const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
   const [classError, setClassError] = useState<string | null>(null);
@@ -55,14 +60,24 @@ export const ClassLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-stem-mist">
       <TopNav onOpenTerminal={() => setIsTerminalOpen(true)} onOpenMenu={() => setIsMobileNavOpen(true)} />
-      <div className="max-w-6xl mx-auto px-4 flex">
+      <div className={isFullBleedRoute ? 'flex' : 'max-w-6xl mx-auto px-4 flex'}>
         <Sidebar
           classId={classId}
           mobileOpen={isMobileNavOpen}
           onCloseMobile={() => setIsMobileNavOpen(false)}
           onOpenTerminal={() => setIsTerminalOpen(true)}
+          hideDesktopColumn={isFullBleedRoute}
         />
-        <main className="flex-1 py-6 min-w-0">
+        <main className={isFullBleedRoute ? 'flex-1 min-w-0 relative' : 'flex-1 py-6 min-w-0'}>
+          {isFullBleedRoute && !classState.activeChallenge && (
+            <button
+              onClick={() => setIsMobileNavOpen(true)}
+              aria-label="Abrir menu de navegação"
+              className="fixed top-20 left-4 z-40 p-2.5 rounded-xl bg-stem-cloud/90 backdrop-blur border-2 border-stem-line shadow-lg hover:border-stem-teal transition-colors"
+            >
+              <Menu className="w-5 h-5 text-stem-ink" />
+            </button>
+          )}
           {classState.activeChallenge ? (
             // Trava a navegação de propósito: não importa qual link da
             // Sidebar o aluno clicar, a URL muda mas o ClassLayout continua

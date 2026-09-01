@@ -34,9 +34,19 @@ interface SidebarProps {
   mobileOpen: boolean;
   onCloseMobile: () => void;
   onOpenTerminal?: () => void;
+  // Rota em tela cheia (ex: Trilha): esconde a coluna fixa de desktop e
+  // libera a MESMA gaveta de navegação (que hoje só abre em `<lg` por causa
+  // do `lg:hidden` no wrapper) pra abrir em qualquer largura de tela.
+  hideDesktopColumn?: boolean;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ classId, mobileOpen, onCloseMobile, onOpenTerminal }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  classId,
+  mobileOpen,
+  onCloseMobile,
+  onOpenTerminal,
+  hideDesktopColumn = false
+}) => {
   const { isGmOfClass, profile, signOut } = useAuth();
   const { mode, toggleMode } = useTheme();
   const [soundOn, setSoundOn] = useState(soundEngine.soundEnabled);
@@ -101,15 +111,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ classId, mobileOpen, onCloseMo
 
   return (
     <>
-      {/* Desktop: coluna fixa ao lado do conteúdo */}
-      <nav className="w-56 shrink-0 hidden lg:flex flex-col gap-1 py-6 pr-4">{navList()}</nav>
+      {/* Desktop: coluna fixa ao lado do conteúdo — ausente por completo
+          numa rota em tela cheia (hideDesktopColumn). */}
+      {!hideDesktopColumn && (
+        <nav className="w-56 shrink-0 hidden lg:flex flex-col gap-1 py-6 pr-4">{navList()}</nav>
+      )}
 
-      {/* Mobile/tablet: menu em gaveta, aberto pelo botão hambúrguer do TopNav.
+      {/* Mobile/tablet: menu em gaveta, aberto pelo botão hambúrguer do TopNav
+          (ou pelo botão flutuante do ClassLayout numa rota em tela cheia).
           Sempre montado (não só quando aberto) para a transição de slide
           funcionar; pointer-events desliga quando fechado para não bloquear
-          cliques no conteúdo por trás do backdrop transparente. */}
+          cliques no conteúdo por trás do backdrop transparente. `lg:hidden`
+          só se aplica fora de hideDesktopColumn — numa rota em tela cheia a
+          MESMA gaveta precisa abrir em qualquer largura, já que não há
+          coluna fixa alternativa. */}
       <div
-        className={`fixed inset-0 z-[70] lg:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[70] ${hideDesktopColumn ? '' : 'lg:hidden'} transition-opacity duration-300 ${
           mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         role="dialog"
