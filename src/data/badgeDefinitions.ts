@@ -43,5 +43,11 @@ export const BADGE_DEFINITIONS: Array<Omit<Badge, 'unlockedAt'>> = [
     name: 'Guardião dos ODS',
     description: 'Completou missões alinhadas a 3 Objetivos de Desenvolvimento Sustentável diferentes.',
     icon: '/badges/sdg-guardian.svg'
+  },
+  {
+    id: 'self-aware',
+    name: 'Autoconhecimento',
+    description: 'Descobriu seu arquétipo de aventureiro no questionário de perfil.',
+    icon: '🧭'
   }
 ];

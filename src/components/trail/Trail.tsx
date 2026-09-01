@@ -12,6 +12,7 @@ interface TrailProps {
   unlockedSkillIds: string[];
   currentUid: string;
   avatarHead: string;
+  recommendedCategories?: SkillNode['category'][];
   onUnlockSkill: (skillId: string) => void;
   onAcceptQuest: (questId: string, xpReward: number, coinReward: number) => void;
 }
@@ -22,11 +23,19 @@ export const Trail: React.FC<TrailProps> = ({
   unlockedSkillIds,
   currentUid,
   avatarHead,
+  recommendedCategories = [],
   onUnlockSkill,
   onAcceptQuest
 }) => {
   const layout = useMemo(() => computeTrailLayout(skills, quests), [skills, quests]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Uma missão não tem categoria própria — herda das habilidades que exige.
+  const isQuestRecommended = (quest: Quest) =>
+    quest.requiredSkills.some((skillId) => {
+      const skill = skills.find((s) => s.id === skillId);
+      return skill && recommendedCategories.includes(skill.category);
+    });
 
   const skillStatus = (skill: SkillNode): TrailNodeStatus => {
     if (unlockedSkillIds.includes(skill.id)) return 'completed';
@@ -130,6 +139,7 @@ export const Trail: React.FC<TrailProps> = ({
               status={skillStatus(skill)}
               x={node.x}
               y={node.y}
+              isRecommended={recommendedCategories.includes(skill.category)}
               onClick={() => handleSelect(node.id)}
             />
           );
@@ -144,6 +154,7 @@ export const Trail: React.FC<TrailProps> = ({
             status={questStatus(quest)}
             x={node.x}
             y={node.y}
+            isRecommended={isQuestRecommended(quest)}
             onClick={() => handleSelect(node.id)}
           />
         );

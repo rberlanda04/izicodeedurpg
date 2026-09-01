@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { Bot, PlusCircle, Globe, CheckCircle, BookOpen, Target, ArrowRight } from 'lucide-react';
+import { Bot, PlusCircle, Globe, CheckCircle, BookOpen, Target, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
-import type { Quest, SDGGoal, SkillTier } from '../../types';
+import type { Quest, SDGGoal, SkillTier, SkillNode } from '../../types';
 import { SDG_NAMES, SDG_COLORS, ALL_SDG_GOALS } from '../../data/sdgGoals';
 import { ToolBadgeRow } from '../../components/stem/ToolBadge';
 import { QuestGuideModal } from '../../components/stem/QuestGuideModal';
 import { QuizChallenge } from '../../components/trail/QuizChallenge';
 import { SKILL_QUIZZES, pickSkillQuiz } from '../../data/skillQuizzes';
+import { getRecommendedCategories } from '../../data/skillProfileSurvey';
 import type { ClassOutletContext } from './ClassLayout';
 
 const TIER_BADGE: Record<SkillTier, string> = {
@@ -35,11 +36,12 @@ const BEGINNER_LADDER: Array<{ step: number; title: string; tier: SkillTier; ico
 interface QuestCardProps {
   quest: Quest;
   currentUid?: string;
+  isRecommended?: boolean;
   onShowGuide: () => void;
   onAccept: () => void;
 }
 
-const QuestCard: React.FC<QuestCardProps> = ({ quest: q, currentUid, onShowGuide, onAccept }) => {
+const QuestCard: React.FC<QuestCardProps> = ({ quest: q, currentUid, isRecommended, onShowGuide, onAccept }) => {
   const completed = q.status === 'COMPLETED';
   // Sorteado uma vez por missão (não a cada re-render do mural) para a
   // pergunta não trocar debaixo do aluno enquanto ele responde.
@@ -49,7 +51,14 @@ const QuestCard: React.FC<QuestCardProps> = ({ quest: q, currentUid, onShowGuide
     <Card accent={completed ? 'teal' : 'amber'} className="flex flex-col justify-between">
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-display font-bold text-stem-ink">{q.title}</h3>
+          <div>
+            <h3 className="font-display font-bold text-stem-ink">{q.title}</h3>
+            {isRecommended && !completed && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-display font-bold text-stem-violet mt-1">
+                <Sparkles className="w-3 h-3" /> Combina com você
+              </span>
+            )}
+          </div>
           <div className="text-right shrink-0">
             <p className="text-xs font-display font-bold text-stem-violet">+{q.xpReward} XP</p>
             <p className="text-xs font-display font-bold text-stem-amber">🪙 {q.coinReward}</p>
@@ -111,7 +120,7 @@ const QuestCard: React.FC<QuestCardProps> = ({ quest: q, currentUid, onShowGuide
 };
 
 export const MissoesPage: React.FC = () => {
-  const { quests, handleAcceptQuest, handleProposeQuest, handleGenerateAIQuest } =
+  const { quests, skills, handleAcceptQuest, handleProposeQuest, handleGenerateAIQuest } =
     useOutletContext<ClassOutletContext>();
   const { profile } = useAuth();
   const [filter, setFilter] = useState<SDGGoal | 'ALL'>('ALL');
@@ -122,7 +131,16 @@ export const MissoesPage: React.FC = () => {
   const [generating, setGenerating] = useState(false);
   const [guideQuest, setGuideQuest] = useState<Quest | null>(null);
 
-  const filtered = quests.filter((q) => filter === 'ALL' || q.sdgGoals.includes(filter));
+  const recommendedCategories = getRecommendedCategories(profile?.skillArchetype);
+  const isQuestRecommended = (quest: Quest) =>
+    quest.requiredSkills.some((skillId: string) => {
+      const skill = skills.find((s: SkillNode) => s.id === skillId);
+      return skill && recommendedCategories.includes(skill.category);
+    });
+
+  const filtered = quests
+    .filter((q) => filter === 'ALL' || q.sdgGoals.includes(filter))
+    .sort((a, b) => Number(isQuestRecommended(b)) - Number(isQuestRecommended(a)));
 
   const handleAiClick = async () => {
     setGenerating(true);
@@ -207,6 +225,7 @@ export const MissoesPage: React.FC = () => {
             key={q.id}
             quest={q}
             currentUid={profile?.uid}
+            isRecommended={isQuestRecommended(q)}
             onShowGuide={() => setGuideQuest(q)}
             onAccept={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}
           />

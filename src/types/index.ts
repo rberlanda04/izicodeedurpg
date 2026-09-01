@@ -4,6 +4,28 @@ export type ScrumRole = 'SCRUM_MASTER' | 'DEVELOPER' | 'MAKER' | 'PRODUCT_OWNER'
 
 export type SkillTier = 'BASIC' | 'INTERMEDIATE' | 'ADVANCED' | 'SPECIALIST';
 
+export type SkillArchetype = 'PROGRAMADOR' | 'ENGENHEIRO' | 'DESIGNER' | 'LIDER' | 'EXPLORADOR';
+
+export interface SkillArchetypeResult {
+  primary: SkillArchetype;
+  secondary?: SkillArchetype;
+  completedAt: string;
+  surveyVersion: number;
+}
+
+// Coleção separada (skillProfileAnswers/{uid}) — respostas cruas nunca ficam
+// no UserProfile, só o SkillArchetypeResult calculado (ver firestore.rules:
+// mesma visibilidade de realName, restrito ao próprio aluno e ao GM/Admin).
+export interface SkillProfileAnswers {
+  uid: string;
+  classIdsAsStudent: string[];
+  schoolIds: string[];
+  selections: Record<string, string>;
+  consentGivenAt: string;
+  completedAt: string;
+  surveyVersion: number;
+}
+
 // Números reais dos ODS da ONU que aparecem no catálogo de projetos
 // (src/data/projectCatalog.ts, importado de github.com/izicripto/izicode-landing).
 export type SDGGoal = '2' | '3' | '4' | '9' | '11' | '12' | '13' | '16';
@@ -53,6 +75,10 @@ export interface UserProfile {
   // conceder o badge "sdg-guardian".
   completedQuestSdgGoals: string[];
   heroContractSigned: boolean;
+  skillArchetype?: SkillArchetypeResult;
+  skillProfileSkippedAt?: string; // só esconde o banner de convite — não é dado sensível
+
+
 
   // --- Multi-tenant (escolas/turmas) ---
   // Denormalizados de propósito: as regras do Firestore não conseguem

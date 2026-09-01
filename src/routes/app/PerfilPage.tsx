@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { CheckCircle2, ShieldCheck, Palette } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Palette, Compass } from 'lucide-react';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { ALL_AVATAR_PRESETS } from '../../data/avatarPresets';
+import { ARCHETYPE_INFO } from '../../data/skillProfileSurvey';
+import { SkillProfileSurvey } from '../../components/survey/SkillProfileSurvey';
 import type { ClassOutletContext } from './ClassLayout';
 
 export const PerfilPage: React.FC = () => {
-  const { handleSignContract, handleUpdateAvatar } = useOutletContext<ClassOutletContext>();
+  const {
+    handleSignContract,
+    handleUpdateAvatar,
+    handleCompleteSkillSurvey,
+    handleSkipSkillSurvey,
+    handleDeleteSkillProfile
+  } = useOutletContext<ClassOutletContext>();
   const { profile } = useAuth();
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
   if (!profile) return null;
 
   const xpPercent = Math.min(100, Math.round((profile.xp / profile.xpToNextLevel) * 100));
@@ -97,6 +106,47 @@ export const PerfilPage: React.FC = () => {
         )}
       </Card>
 
+      <Card accent="violet">
+        <h3 className="font-display font-bold text-stem-ink flex items-center gap-2 mb-3">
+          <Compass className="w-5 h-5 text-stem-violet" /> Arquétipo de Aventureiro
+        </h3>
+        {profile.skillArchetype ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="w-12 h-12 rounded-full bg-stem-violet/10 flex items-center justify-center text-2xl shrink-0">
+                {ARCHETYPE_INFO[profile.skillArchetype.primary].icon}
+              </span>
+              <div>
+                <p className="font-display font-bold text-stem-ink">
+                  {ARCHETYPE_INFO[profile.skillArchetype.primary].label}
+                  {profile.skillArchetype.secondary &&
+                    ` + ${ARCHETYPE_INFO[profile.skillArchetype.secondary].label}`}
+                </p>
+                <p className="text-xs font-body-stem text-stem-ink-soft">
+                  {ARCHETYPE_INFO[profile.skillArchetype.primary].tagline}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="ghost" onClick={() => setShowSurvey(true)}>
+                Refazer questionário
+              </Button>
+              <Button variant="danger" onClick={() => void handleDeleteSkillProfile()}>
+                Apagar minhas respostas
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm font-body-stem text-stem-ink-soft">
+              Ainda não descobrimos seu arquétipo — responda um questionário rápido pra gente destacar as
+              habilidades e missões que mais combinam com você.
+            </p>
+            <Button onClick={() => setShowSurvey(true)}>Responder agora</Button>
+          </div>
+        )}
+      </Card>
+
       {showAvatarPicker && (
         <div className="fixed inset-0 z-50 bg-stem-ink/40 backdrop-blur-sm flex items-center justify-center p-4">
           <Card className="w-full max-w-lg space-y-4">
@@ -145,6 +195,17 @@ export const PerfilPage: React.FC = () => {
             </Button>
           </Card>
         </div>
+      )}
+
+      {showSurvey && (
+        <SkillProfileSurvey
+          onComplete={handleCompleteSkillSurvey}
+          onSkip={() => {
+            handleSkipSkillSurvey();
+            setShowSurvey(false);
+          }}
+          onClose={() => setShowSurvey(false)}
+        />
       )}
     </div>
   );

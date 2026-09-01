@@ -31,8 +31,16 @@ import {
 } from '../services/skillValidationRepo';
 import { submitSkillValidationCode, completeSkillWithLink as completeSkillWithLinkApi } from '../services/skillValidationService';
 import { subscribeToClassGuilds, createGuild, joinGuild } from '../services/guildRepo';
+import { saveSkillProfileAnswers, deleteSkillProfileAnswers } from '../services/skillProfileRepo';
+import {
+  computeArchetype,
+  SURVEY_VERSION,
+  SKILL_SURVEY_XP_REWARD,
+  SKILL_SURVEY_COIN_REWARD
+} from '../data/skillProfileSurvey';
 import { loadState, saveState, debounce, NAMESPACE } from '../services/persistence';
 import { soundEngine } from '../services/soundEngine';
+import { deleteField } from 'firebase/firestore';
 import type { ApplyUserPatch } from './useApplyUserPatch';
 import type {
   Guild,
@@ -207,6 +215,56 @@ export function useClassLocalState(
 
   const handleUpdateAvatar = (avatarConfig: UserProfile['avatarConfig']) => {
     applyUserPatch({ avatarConfig });
+  };
+
+  /**
+   * O arquétipo não concede vantagem de jogo replicável (ao contrário de
+   * XP de missão, que pode ser "farmado") — por isso essa gravação é
+   * client-side direta via applyUserPatch, igual handleSignContract, sem
+   * precisar de Cloud Function. As respostas cruas vão pra uma coleção
+   * separada (skillProfileAnswers) — minimização de dado (LGPD), só o
+   * resultado calculado entra no perfil.
+   */
+  const handleCompleteSkillSurvey = async (selections: Record<string, string>) => {
+    const result = computeArchetype(selections);
+    await saveSkillProfileAnswers(profile, selections);
+    soundEngine.playLevelUp();
+    triggerConfetti();
+    applyUserPatch((current) => {
+      const isFirstTime = !current.skillArchetype;
+      const badgeDef = BADGE_DEFINITIONS.find((b) => b.id === 'self-aware');
+      const alreadyHasBadge = current.badges.some((b) => b.id === 'self-aware');
+      return {
+        // Firestore rejeita um campo com valor `undefined` explícito (o SDK não
+        // descarta silenciosamente) — por isso `secondary` só entra no objeto
+        // quando existe, nunca como `secondary: undefined`.
+        skillArchetype: {
+          primary: result.primary,
+          ...(result.secondary ? { secondary: result.secondary } : {}),
+          completedAt: new Date().toISOString(),
+          surveyVersion: SURVEY_VERSION
+        },
+        ...(isFirstTime
+          ? { xp: current.xp + SKILL_SURVEY_XP_REWARD, izicoins: current.izicoins + SKILL_SURVEY_COIN_REWARD }
+          : {}),
+        ...(!alreadyHasBadge && badgeDef
+          ? { badges: [...current.badges, { ...badgeDef, unlockedAt: new Date().toISOString() }] }
+          : {})
+      };
+    });
+  };
+
+  const handleSkipSkillSurvey = () => {
+    applyUserPatch({ skillProfileSkippedAt: new Date().toISOString() });
+  };
+
+  /** Direito de exclusão (LGPD): apaga as respostas cruas e o resultado calculado do perfil. */
+  const handleDeleteSkillProfile = async () => {
+    await deleteSkillProfileAnswers(profile.uid);
+    // deleteField() é um FieldValue sentinel — não cabe no tipo Partial<UserProfile>
+    // de ApplyUserPatch sem esse cast pontual, mas é o jeito correto (não `undefined`)
+    // de remover um campo via updateDoc.
+    applyUserPatch({ skillArchetype: deleteField() } as unknown as Partial<UserProfile>);
   };
 
   const handleJoinGuild = (guildId: string, role: ScrumRole) => {
@@ -583,6 +641,9 @@ export function useClassLocalState(
     skillCompletions,
     handleSignContract,
     handleUpdateAvatar,
+    handleCompleteSkillSurvey,
+    handleSkipSkillSurvey,
+    handleDeleteSkillProfile,
     handleJoinGuild,
     handleCreateGuild,
     handleUnlockSkill,

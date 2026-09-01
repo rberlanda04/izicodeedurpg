@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, Check, Sparkles, Scroll } from 'lucide-react';
+import { Lock, Check, Sparkles, Scroll, Star } from 'lucide-react';
 import type { TrailNodeKind } from './useTrailLayout';
 
 export type TrailNodeStatus = 'locked' | 'available' | 'completed';
@@ -10,6 +10,7 @@ interface TrailNodeProps {
   status: TrailNodeStatus;
   x: number; // percent
   y: number; // px
+  isRecommended?: boolean;
   onClick: () => void;
 }
 
@@ -20,7 +21,7 @@ const statusClasses: Record<TrailNodeStatus, string> = {
   completed: 'bg-stem-teal text-white border-stem-teal-dark shadow-[0_5px_0_0_#1a8fd1] hover:-translate-y-0.5'
 };
 
-export const TrailNode: React.FC<TrailNodeProps> = ({ kind, icon, status, x, y, onClick }) => {
+export const TrailNode: React.FC<TrailNodeProps> = ({ kind, icon, status, x, y, isRecommended, onClick }) => {
   const badge =
     status === 'locked' ? (
       <Lock className="w-4 h-4" />
@@ -41,6 +42,14 @@ export const TrailNode: React.FC<TrailNodeProps> = ({ kind, icon, status, x, y, 
       title={kind === 'quest' ? 'Missão' : 'Habilidade'}
     >
       {status === 'available' ? <span>{icon}</span> : badge}
+      {isRecommended && status !== 'locked' && (
+        <span
+          className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-stem-amber border-2 border-stem-cloud flex items-center justify-center"
+          title="Combina com seu arquétipo"
+        >
+          <Star className="w-3 h-3 text-stem-ink" fill="currentColor" />
+        </span>
+      )}
     </button>
   );
 };

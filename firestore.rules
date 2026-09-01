@@ -245,6 +245,21 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Respostas cruas do questionário de arquétipo — só o aluno e o
+    // GM/Admin da(s) turma(s) dele veem (mesma visibilidade de realName).
+    // O aluno pode apagar a qualquer momento (direito de exclusão da LGPD)
+    // sem precisar de Cloud Function, porque não há recompensa/pontuação
+    // em jogo aqui — só o dado bruto que ele mesmo forneceu. classIdsAsStudent/
+    // schoolIds vêm denormalizados do UserProfile no momento da gravação
+    // (mesmo motivo do comentário em types/index.ts sobre UserProfile).
+    match /skillProfileAnswers/{studentUid} {
+      allow read: if isSelf(studentUid)
+        || resource.data.classIdsAsStudent.hasAny(me().classIdsAsGameMaster)
+        || resource.data.schoolIds.hasAny(me().schoolAdminOf);
+      allow create, update: if isSelf(studentUid) && request.resource.data.uid == studentUid;
+      allow delete: if isSelf(studentUid);
+    }
+
     match /quickHacks/{hackId} {
       allow read: if isMemberOfClass(resource.data.classId);
       allow write: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
