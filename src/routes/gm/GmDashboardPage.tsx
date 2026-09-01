@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Crown, Key, Zap, CheckCircle, Copy, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Crown, Key, Zap, CheckCircle, Copy, ArrowLeft, ShieldCheck, Sparkles, Link2, ListChecks } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { subscribeToClass } from '../../services/classRepo';
 import { subscribeToClassValidations } from '../../services/questRepo';
+import { subscribeToClassSkillValidationTokens } from '../../services/skillValidationRepo';
 import { useClassLocalState } from '../../hooks/useClassLocalState';
 import { useApplyUserPatch } from '../../hooks/useApplyUserPatch';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
 import { ErrorState } from '../../components/stem/ErrorState';
 import { ValidationCodeReveal } from '../../components/stem/ValidationCodeReveal';
-import type { ClassRoom, QuestValidation } from '../../types';
+import type { ClassRoom, QuestValidation, SkillValidationToken } from '../../types';
 
 export const GmDashboardPage: React.FC = () => {
   const { classId } = useParams<{ classId: string }>();
@@ -18,6 +19,7 @@ export const GmDashboardPage: React.FC = () => {
   const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
   const [classError, setClassError] = useState<string | null>(null);
   const [validations, setValidations] = useState<QuestValidation[]>([]);
+  const [skillTokens, setSkillTokens] = useState<SkillValidationToken[]>([]);
   const [xpAmount, setXpAmount] = useState(100);
   const [copied, setCopied] = useState(false);
 
@@ -32,12 +34,19 @@ export const GmDashboardPage: React.FC = () => {
 
   useEffect(() => {
     if (!classId) return;
-    // questValidations is rules-restricted to GM/Admin — a student's
-    // browser can never subscribe to this successfully, which is the whole
-    // point (the code only exists somewhere the class can't read).
-    return subscribeToClassValidations(classId, setValidations, (error) =>
+    // questValidations/skillValidationTokens são rules-restritos a GM/Admin
+    // — o navegador de um aluno nunca consegue assinar isso com sucesso, e
+    // é exatamente esse o ponto (o código só existe onde a turma não lê).
+    const unsubQuest = subscribeToClassValidations(classId, setValidations, (error) =>
       console.error('Falha ao carregar validações pendentes:', error)
     );
+    const unsubSkill = subscribeToClassSkillValidationTokens(classId, setSkillTokens, (error) =>
+      console.error('Falha ao carregar códigos de habilidade:', error)
+    );
+    return () => {
+      unsubQuest();
+      unsubSkill();
+    };
   }, [classId]);
 
   const applyUserPatch = useApplyUserPatch(profile);
@@ -167,6 +176,77 @@ export const GmDashboardPage: React.FC = () => {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </Card>
+
+        <Card accent="violet">
+          <h3 className="font-display font-bold text-stem-ink mb-3 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-stem-violet" /> Validações de habilidades ({classState.skillValidations.length})
+          </h3>
+          <p className="text-xs font-body-stem text-stem-ink-soft mb-3">
+            Um aluno pediu pra você validar uma habilidade pessoalmente (em vez de enviar um link de projeto).
+          </p>
+          {classState.skillValidations.length === 0 ? (
+            <p className="text-sm font-body-stem text-stem-ink-soft text-center py-4">
+              Nenhum pedido de validação de habilidade no momento.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {classState.skillValidations.map((v) => {
+                const tokenDoc = skillTokens.find((t) => t.id === v.id);
+                return (
+                  <div key={v.id} className="bg-stem-mist rounded-xl p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="font-display font-bold text-sm text-stem-ink">{v.skillTitle}</p>
+                        <p className="text-xs font-body-stem text-stem-ink-soft">{v.studentName} pediu validação</p>
+                      </div>
+                      {tokenDoc && <ValidationCodeReveal token={tokenDoc.token} />}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+
+        <Card>
+          <h3 className="font-display font-bold text-stem-ink mb-3 flex items-center gap-2">
+            <ListChecks className="w-4 h-4 text-stem-ink-soft" /> Atividades concluídas recentemente (
+            {classState.skillCompletions.length})
+          </h3>
+          {classState.skillCompletions.length === 0 ? (
+            <p className="text-sm font-body-stem text-stem-ink-soft text-center py-4">
+              Nenhuma habilidade concluída ainda nesta turma.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {[...classState.skillCompletions]
+                .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
+                .slice(0, 10)
+                .map((c) => (
+                  <div key={c.id} className="flex items-center justify-between gap-3 bg-stem-mist rounded-xl px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="font-display font-bold text-sm text-stem-ink truncate">{c.skillTitle}</p>
+                      <p className="text-xs font-body-stem text-stem-ink-soft">{c.studentName}</p>
+                    </div>
+                    {c.method === 'link' ? (
+                      <a
+                        href={c.projectLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs font-display font-bold text-stem-teal hover:underline shrink-0"
+                      >
+                        <Link2 className="w-3.5 h-3.5" /> ver projeto
+                      </a>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs font-display font-bold text-stem-violet shrink-0">
+                        <Key className="w-3.5 h-3.5" /> validado
+                      </span>
+                    )}
+                  </div>
+                ))}
             </div>
           )}
         </Card>

@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { X, Zap, Gift, BookOpen, Key } from 'lucide-react';
+import { X, Zap, Gift, BookOpen } from 'lucide-react';
 import { Button } from '../stem/Button';
 import { ToolBadgeRow } from '../stem/ToolBadge';
 import { QuestGuideModal } from '../stem/QuestGuideModal';
@@ -111,17 +110,12 @@ export const TrailNodeDetailSheet: React.FC<TrailNodeDetailSheetProps> = (props)
             </Button>
           )
         ) : props.data.status === 'PENDING_VALIDATION' ? (
-          props.data.pendingValidationStudentUid === props.currentUid ? (
-            <Link to="../missoes">
-              <Button fullWidth>
-                <Key className="w-4 h-4" /> Peça o código ao professor no Mural de Missões
-              </Button>
-            </Link>
-          ) : (
-            <div className="text-center font-body-stem text-sm text-stem-ink-soft py-2">
-              {props.data.pendingValidationStudentName ?? 'Um colega'} está validando esta missão com o Game Master.
-            </div>
-          )
+          // A própria missão do aluno nunca chega aqui: ClassLayout.tsx troca
+          // a página inteira pela BattleScreen assim que ele a aceita. Este
+          // card só é visto por outros alunos, vendo o colega em desafio.
+          <div className="text-center font-body-stem text-sm text-stem-ink-soft py-2">
+            {props.data.pendingValidationStudentName ?? 'Um colega'} está validando esta missão com o Game Master.
+          </div>
         ) : quiz ? (
           <QuizChallenge question={quiz} actionLabel="aceitar" onSuccess={props.onAccept} />
         ) : (

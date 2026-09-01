@@ -171,6 +171,15 @@ service cloud.firestore {
           && resource.data.status == 'ACTIVE' && request.resource.data.status == 'PENDING_VALIDATION'
           && request.resource.data.pendingValidationStudentUid == uid()
         )
+        || ( // aluno cancela o desafio em andamento (BattleScreen "Cancelar"):
+             // PENDING_VALIDATION -> ACTIVE de volta, só quem era o próprio
+             // aluno travado nela — o token em questValidations/{questId} é
+             // apagado à parte (ver questRepo.ts:cancelQuestAcceptance).
+          isStudentOfClass(resource.data.classId)
+          && onlyChanged(['status', 'pendingValidationStudentUid', 'pendingValidationStudentName'])
+          && resource.data.status == 'PENDING_VALIDATION' && request.resource.data.status == 'ACTIVE'
+          && resource.data.pendingValidationStudentUid == uid()
+        )
         || ( // quest secreta do Terminal Hacker: continua auto-validável — já
              // tem seu próprio mecanismo de código secreto (secretPasscode),
              // não passa pelo fluxo de validação presencial do professor.
@@ -192,7 +201,48 @@ service cloud.firestore {
       allow create: if isStudentOfClass(request.resource.data.classId)
         && request.resource.data.studentUid == uid();
       allow update: if false;
-      allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+      // GM/Admin apagam ao validar (server-side); o próprio aluno também pode
+      // apagar — é o "Cancelar desafio" da BattleScreen liberando o token.
+      allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
+        || (isStudentOfClass(resource.data.classId) && resource.data.studentUid == uid());
+    }
+
+    // A mesma lógica de questValidations, para o desbloqueio de habilidades
+    // na Trilha (o "código do professor" para uma atividade sem link online,
+    // ex: um circuito Arduino físico) — mas em DOIS documentos, porque aqui
+    // o próprio aluno também precisa LER de volta que tem um desafio
+    // pendente (pra BattleScreen sobreviver a um F5), o que os alunos nunca
+    // precisam fazer com quests. Ver types/index.ts:SkillValidation.
+    match /skillValidations/{id} {
+      allow read: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
+        || (isStudentOfClass(resource.data.classId) && resource.data.studentUid == uid());
+      allow create: if isStudentOfClass(request.resource.data.classId)
+        && request.resource.data.studentUid == uid();
+      allow update: if false;
+      allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
+        || (isStudentOfClass(resource.data.classId) && resource.data.studentUid == uid());
+    }
+
+    // O token em si — SEM a cláusula "|| studentUid == uid()" acima é
+    // exatamente o que impede o aluno de ler o próprio código de volta.
+    match /skillValidationTokens/{id} {
+      allow read: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId);
+      allow create: if isStudentOfClass(request.resource.data.classId)
+        && request.resource.data.studentUid == uid();
+      allow update: if false;
+      allow delete: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
+        || (isStudentOfClass(resource.data.classId) && uid() == resource.data.studentUid);
+    }
+
+    // Registro permanente (nunca apagado) de habilidades concluídas — via
+    // código do professor OU link de projeto — pro "dashboard de
+    // gerenciamento" do Game Master. Só escrito pelas Cloud Functions
+    // (Admin SDK): server/skillValidationHandler.ts e
+    // server/skillLinkCompletionHandler.ts.
+    match /skillCompletions/{id} {
+      allow read: if isGmOfClass(resource.data.classId) || isSchoolAdmin(resource.data.schoolId)
+        || (isStudentOfClass(resource.data.classId) && resource.data.studentUid == uid());
+      allow write: if false;
     }
 
     match /quickHacks/{hackId} {
@@ -246,6 +296,11 @@ service cloud.firestore {
           && request.resource.data.role == resource.data.role
           && request.resource.data.schoolAdminOf == resource.data.schoolAdminOf
           && request.resource.data.classIdsAsGameMaster == resource.data.classIdsAsGameMaster
+          // unlockedSkills só muda via server/skillValidationHandler.ts ou
+          // server/skillLinkCompletionHandler.ts (Admin SDK, que ignora esta
+          // regra) — sem isso, um aluno podia escrever o array direto pelo
+          // devtools e destravar qualquer habilidade sem validação nenhuma.
+          && request.resource.data.unlockedSkills == resource.data.unlockedSkills
         )
         || ( // promoção feita por Admin/GM (papel, vínculos, schoolAdminOf)
           resource.data.schoolIds.hasAny(me().schoolAdminOf)

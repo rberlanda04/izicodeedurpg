@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { Bot, PlusCircle, Globe, CheckCircle, BookOpen, Key, Target, ArrowRight } from 'lucide-react';
+import { Bot, PlusCircle, Globe, CheckCircle, BookOpen, Target, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/stem/Card';
 import { Button } from '../../components/stem/Button';
@@ -35,24 +35,11 @@ const BEGINNER_LADDER: Array<{ step: number; title: string; tier: SkillTier; ico
 interface QuestCardProps {
   quest: Quest;
   currentUid?: string;
-  validationError: string | null;
-  codeInput: string;
-  onCodeInputChange: (value: string) => void;
   onShowGuide: () => void;
   onAccept: () => void;
-  onValidate: () => void;
 }
 
-const QuestCard: React.FC<QuestCardProps> = ({
-  quest: q,
-  currentUid,
-  validationError,
-  codeInput,
-  onCodeInputChange,
-  onShowGuide,
-  onAccept,
-  onValidate
-}) => {
+const QuestCard: React.FC<QuestCardProps> = ({ quest: q, currentUid, onShowGuide, onAccept }) => {
   const completed = q.status === 'COMPLETED';
   // Sorteado uma vez por missão (não a cada re-render do mural) para a
   // pergunta não trocar debaixo do aluno enquanto ele responde.
@@ -109,33 +96,14 @@ const QuestCard: React.FC<QuestCardProps> = ({
               Aceitar desafio
             </Button>
           ))}
-        {q.status === 'PENDING_VALIDATION' &&
-          (q.pendingValidationStudentUid === currentUid ? (
-            <form
-              className="flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                onValidate();
-              }}
-            >
-              <input
-                required
-                placeholder="Código do professor"
-                value={codeInput}
-                onChange={(e) => onCodeInputChange(e.target.value)}
-                className="flex-1 min-w-0 rounded-xl border-2 border-stem-line px-3 py-2.5 text-center font-display font-bold tracking-widest outline-none focus:border-stem-teal"
-              />
-              <Button type="submit">
-                <Key className="w-4 h-4" /> Validar
-              </Button>
-            </form>
-          ) : (
-            <Button fullWidth variant="ghost" disabled>
-              {q.pendingValidationStudentName ?? 'Um colega'} está validando com o Game Master
-            </Button>
-          ))}
-        {q.status === 'PENDING_VALIDATION' && q.pendingValidationStudentUid === currentUid && validationError && (
-          <p className="text-xs text-stem-coral font-body-stem text-center">{validationError}</p>
+        {/* PENDING_VALIDATION da PRÓPRIA missão do aluno nunca aparece aqui de
+            verdade: ClassLayout.tsx troca a página inteira pela BattleScreen
+            assim que activeChallenge existe — o card só mostra o estado de
+            "outra pessoa está validando" (a missão é da turma toda). */}
+        {q.status === 'PENDING_VALIDATION' && q.pendingValidationStudentUid !== currentUid && (
+          <Button fullWidth variant="ghost" disabled>
+            {q.pendingValidationStudentName ?? 'Um colega'} está validando com o Game Master
+          </Button>
         )}
       </div>
     </Card>
@@ -143,7 +111,7 @@ const QuestCard: React.FC<QuestCardProps> = ({
 };
 
 export const MissoesPage: React.FC = () => {
-  const { quests, handleAcceptQuest, handleValidateQuest, validationError, handleProposeQuest, handleGenerateAIQuest } =
+  const { quests, handleAcceptQuest, handleProposeQuest, handleGenerateAIQuest } =
     useOutletContext<ClassOutletContext>();
   const { profile } = useAuth();
   const [filter, setFilter] = useState<SDGGoal | 'ALL'>('ALL');
@@ -153,7 +121,6 @@ export const MissoesPage: React.FC = () => {
   const [sdg, setSdg] = useState<SDGGoal>('4');
   const [generating, setGenerating] = useState(false);
   const [guideQuest, setGuideQuest] = useState<Quest | null>(null);
-  const [codeInputs, setCodeInputs] = useState<Record<string, string>>({});
 
   const filtered = quests.filter((q) => filter === 'ALL' || q.sdgGoals.includes(filter));
 
@@ -240,12 +207,8 @@ export const MissoesPage: React.FC = () => {
             key={q.id}
             quest={q}
             currentUid={profile?.uid}
-            validationError={validationError}
-            codeInput={codeInputs[q.id] ?? ''}
-            onCodeInputChange={(value) => setCodeInputs((prev) => ({ ...prev, [q.id]: value }))}
             onShowGuide={() => setGuideQuest(q)}
             onAccept={() => handleAcceptQuest(q.id, q.xpReward, q.coinReward)}
-            onValidate={() => handleValidateQuest(q.id, codeInputs[q.id] ?? '')}
           />
         ))}
       </div>

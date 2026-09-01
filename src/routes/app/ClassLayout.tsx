@@ -8,6 +8,7 @@ import { TopNav } from '../../components/stem/TopNav';
 import { Sidebar } from '../../components/stem/Sidebar';
 import { ErrorState } from '../../components/stem/ErrorState';
 import { HackerTerminalModal } from '../../components/HackerTerminalModal';
+import { BattleScreen } from '../../components/battle/BattleScreen';
 import type { ClassRoom } from '../../types';
 
 export interface ClassOutletContext extends ReturnType<typeof useClassLocalState> {
@@ -62,7 +63,24 @@ export const ClassLayout: React.FC = () => {
           onOpenTerminal={() => setIsTerminalOpen(true)}
         />
         <main className="flex-1 py-6 min-w-0">
-          <Outlet context={{ classRoom, ...classState } satisfies ClassOutletContext} />
+          {classState.activeChallenge ? (
+            // Trava a navegação de propósito: não importa qual link da
+            // Sidebar o aluno clicar, a URL muda mas o ClassLayout continua
+            // envolvendo TODAS as rotas filhas — então o conteúdo real só
+            // volta a aparecer quando activeChallenge some (cancelado ou
+            // concluído), nunca por navegação direta.
+            <BattleScreen
+              challenge={classState.activeChallenge}
+              validationError={classState.validationError}
+              onValidateQuestCode={classState.handleValidateQuest}
+              onValidateSkillCode={classState.handleValidateSkillToken}
+              onCompleteSkillWithLink={classState.handleCompleteSkillWithLink}
+              onRequestSkillTeacherValidation={classState.handleRequestSkillTeacherValidation}
+              onCancel={classState.handleCancelActiveChallenge}
+            />
+          ) : (
+            <Outlet context={{ classRoom, ...classState } satisfies ClassOutletContext} />
+          )}
         </main>
       </div>
 

@@ -18,9 +18,18 @@ import {
   createQuest,
   approveQuest as approveQuestFs,
   completeSecretQuest,
-  acceptQuest as acceptQuestFs
+  acceptQuest as acceptQuestFs,
+  cancelQuestAcceptance
 } from '../services/questRepo';
 import { submitValidationCode } from '../services/questValidationService';
+import {
+  requestSkillValidation,
+  cancelSkillValidation,
+  subscribeToClassSkillValidations,
+  subscribeToMySkillValidation,
+  subscribeToClassSkillCompletions
+} from '../services/skillValidationRepo';
+import { submitSkillValidationCode, completeSkillWithLink as completeSkillWithLinkApi } from '../services/skillValidationService';
 import { subscribeToClassGuilds, createGuild, joinGuild } from '../services/guildRepo';
 import { loadState, saveState, debounce, NAMESPACE } from '../services/persistence';
 import { soundEngine } from '../services/soundEngine';
@@ -35,6 +44,9 @@ import type {
   ResourceBooking,
   ScrumRole,
   SDGGoal,
+  SkillValidation,
+  SkillCompletion,
+  ActiveChallenge,
   UserProfile
 } from '../types';
 
@@ -67,6 +79,26 @@ export function useClassLocalState(
 ) {
   const [guilds, setGuilds] = useState<Guild[]>([]);
   const [quests, setQuests] = useState<Quest[]>([]);
+  // Amplo (toda a turma) — só realmente populado pra GM/Admin; para um
+  // aluno comum a query é rejeitada pela regra e fica vazio em silêncio
+  // (ver onError abaixo). Usado pelo Painel do Mestre.
+  const [skillValidations, setSkillValidations] = useState<SkillValidation[]>([]);
+  const [skillCompletions, setSkillCompletions] = useState<SkillCompletion[]>([]);
+  // Escopado ao próprio aluno — este SIM funciona pra qualquer papel, é o
+  // que a BattleScreen usa pra saber "eu tenho uma habilidade pendente?"
+  // mesmo depois de recarregar a página.
+  const [myPendingSkillValidation, setMyPendingSkillValidation] = useState<SkillValidation | null>(null);
+  // Passo intermediário entre "quiz do Desafio Relâmpago acertado" e
+  // "pedido de validação realmente criado no Firestore" — o aluno ainda
+  // precisa escolher entre link de projeto ou validação do professor. Só
+  // local porque nada precisa ser travado/lido por mais ninguém nesse meio
+  // tempo (ver ActiveChallenge em types/index.ts).
+  const [pendingSkillChoice, setPendingSkillChoice] = useState<{
+    skillId: string;
+    skillTitle: string;
+    xpReward: number;
+    coinReward: number;
+  } | null>(null);
   const [catalog, setCatalog] = useState<HardwareItem[]>(() =>
     loadState(classKey(classId, 'catalog'), HARDWARE_CATALOG)
   );
@@ -92,11 +124,26 @@ export function useClassLocalState(
     const unsubGuilds = subscribeToClassGuilds(classId, setGuilds, (error) =>
       console.error('Falha ao carregar guildas:', error)
     );
+    // As duas próximas retornam vazio (sem erro) para alunos comuns — a
+    // leitura é rules-restrita a GM/Admin, então isso é esperado, não uma
+    // falha real (é o Painel do Mestre que realmente usa esses dois).
+    const unsubSkillValidations = subscribeToClassSkillValidations(classId, setSkillValidations, () => {});
+    const unsubSkillCompletions = subscribeToClassSkillCompletions(classId, setSkillCompletions, () => {});
+    // Este sim funciona pra qualquer papel — escopado ao próprio uid.
+    const unsubMySkillValidation = subscribeToMySkillValidation(
+      classId,
+      profile.uid,
+      (validations) => setMyPendingSkillValidation(validations[0] ?? null),
+      (error) => console.error('Falha ao carregar validação de habilidade:', error)
+    );
     return () => {
       unsubQuests();
       unsubGuilds();
+      unsubSkillValidations();
+      unsubSkillCompletions();
+      unsubMySkillValidation();
     };
-  }, [classId]);
+  }, [classId, profile.uid]);
 
   const debouncedSaveRef = useRef(
     debounce(
@@ -183,31 +230,146 @@ export function useClassLocalState(
   };
 
   const ROBOTICS_SKILL_IDS = ['lego_wedo', 'lego_ev3', 'microbit_starter'];
+  const SKILL_XP_REWARD = 200;
+  const SKILL_COIN_REWARD = 40;
 
-  const handleUnlockSkill = (skillId: string) => {
-    if (profile.unlockedSkills.includes(skillId)) return;
+  const grantSkillBadges = (skillId: string) => {
     if (skillId === 'arduino_basico') grantBadge('circuit-master');
     if (ROBOTICS_SKILL_IDS.includes(skillId)) grantBadge('bot-builder');
-    soundEngine.playLevelUp();
-    triggerConfetti();
-    applyUserPatch((current) => {
-      if (current.unlockedSkills.includes(skillId)) return {};
-      const newXp = current.xp + 200;
-      let newLevel = current.level;
-      let nextLevelXp = current.xpToNextLevel;
-      if (newXp >= nextLevelXp) {
-        newLevel += 1;
-        nextLevelXp += 1000;
-      }
-      return {
-        unlockedSkills: [...current.unlockedSkills, skillId],
-        xp: newXp,
-        level: newLevel,
-        xpToNextLevel: nextLevelXp,
-        izicoins: current.izicoins + 40
-      };
-    });
   };
+
+  /**
+   * Passar no quiz do Desafio Relâmpago só ABRE o desafio — não desbloqueia
+   * mais nada sozinho. unlockedSkills não é auto-gravável pelo cliente (ver
+   * firestore.rules); a ClassLayout mostra a BattleScreen enquanto
+   * activeChallenge existir, e só sai de lá cancelando ou completando por
+   * link/código do professor (handleChooseSkill* abaixo).
+   */
+  const handleUnlockSkill = (skillId: string) => {
+    if (profile.unlockedSkills.includes(skillId)) return;
+    const skill = SKILL_NODES.find((s) => s.id === skillId);
+    if (!skill) return;
+    soundEngine.playWhoosh();
+    setPendingSkillChoice({ skillId, skillTitle: skill.title, xpReward: SKILL_XP_REWARD, coinReward: SKILL_COIN_REWARD });
+  };
+
+  /** BattleScreen: aluno escolhe "enviar link do projeto" — resolve na hora, sem precisar do professor. */
+  const handleCompleteSkillWithLink = async (projectLink: string) => {
+    if (!firebaseUser || !pendingSkillChoice) return;
+    setValidationError('');
+    try {
+      await completeSkillWithLinkApi(
+        firebaseUser,
+        classId,
+        schoolId,
+        profile.adventureName,
+        pendingSkillChoice.skillId,
+        pendingSkillChoice.skillTitle,
+        projectLink,
+        pendingSkillChoice.xpReward,
+        pendingSkillChoice.coinReward
+      );
+      soundEngine.playLevelUp();
+      triggerConfetti();
+      grantSkillBadges(pendingSkillChoice.skillId);
+      setPendingSkillChoice(null);
+    } catch (err) {
+      soundEngine.playErrorBeep();
+      setValidationError(err instanceof Error ? err.message : 'Não foi possível enviar o link.');
+    }
+  };
+
+  /** BattleScreen: aluno escolhe "pedir validação do professor" — cria o pedido pendente e o token que só o GM vê. */
+  const handleRequestSkillTeacherValidation = async () => {
+    if (!pendingSkillChoice) return;
+    await requestSkillValidation(
+      classId,
+      schoolId,
+      pendingSkillChoice.skillId,
+      pendingSkillChoice.skillTitle,
+      profile.uid,
+      profile.adventureName,
+      pendingSkillChoice.xpReward,
+      pendingSkillChoice.coinReward
+    );
+    soundEngine.playWhoosh();
+    // A partir daqui o desafio ativo passa a vir de myPendingSkillValidation
+    // (Firestore), não mais deste estado local.
+    setPendingSkillChoice(null);
+  };
+
+  /** Aluno digita o código que o professor falou/mostrou. */
+  const handleValidateSkillToken = async (skillId: string, token: string) => {
+    if (!firebaseUser) return;
+    setValidationError('');
+    try {
+      await submitSkillValidationCode(firebaseUser, classId, skillId, token);
+      soundEngine.playLevelUp();
+      triggerConfetti();
+      grantSkillBadges(skillId);
+    } catch (err) {
+      soundEngine.playErrorBeep();
+      setValidationError(err instanceof Error ? err.message : 'Código incorreto.');
+    }
+  };
+
+  /** BattleScreen: "Cancelar desafio" — larga a missão/habilidade em andamento, sem ganhar nada. */
+  const handleCancelActiveChallenge = async () => {
+    if (pendingSkillChoice) {
+      setPendingSkillChoice(null);
+      return;
+    }
+    if (myPendingSkillValidation) {
+      await cancelSkillValidation(classId, profile.uid, myPendingSkillValidation.skillId);
+      return;
+    }
+    const pendingQuest = quests.find(
+      (q) => q.status === 'PENDING_VALIDATION' && q.pendingValidationStudentUid === profile.uid
+    );
+    if (pendingQuest) {
+      await cancelQuestAcceptance(pendingQuest.id);
+    }
+  };
+
+  /**
+   * A "batalha" que trava a navegação (ver ClassLayout.tsx/BattleScreen.tsx)
+   * — uma missão aceita (PENDING_VALIDATION) ou uma habilidade em qualquer
+   * etapa (escolhendo método, ou já com um código pendente). Prioriza
+   * pendingSkillChoice (mais recente/local) sobre o Firestore por design:
+   * não faz sentido mostrar os dois ao mesmo tempo.
+   */
+  const activeChallenge: ActiveChallenge | null = pendingSkillChoice
+    ? {
+        kind: 'skill',
+        skillId: pendingSkillChoice.skillId,
+        title: pendingSkillChoice.skillTitle,
+        xpReward: pendingSkillChoice.xpReward,
+        coinReward: pendingSkillChoice.coinReward,
+        awaitingMethod: true
+      }
+    : myPendingSkillValidation
+      ? {
+          kind: 'skill',
+          skillId: myPendingSkillValidation.skillId,
+          title: myPendingSkillValidation.skillTitle,
+          xpReward: myPendingSkillValidation.xpReward,
+          coinReward: myPendingSkillValidation.coinReward,
+          awaitingMethod: false
+        }
+      : (() => {
+          const pendingQuest = quests.find(
+            (q) => q.status === 'PENDING_VALIDATION' && q.pendingValidationStudentUid === profile.uid
+          );
+          return pendingQuest
+            ? {
+                kind: 'quest' as const,
+                questId: pendingQuest.id,
+                title: pendingQuest.title,
+                xpReward: pendingQuest.xpReward,
+                coinReward: pendingQuest.coinReward
+              }
+            : null;
+        })();
 
   const handleBookResource = (machine: ResourceBooking['machine'], timeSlot: string): boolean => {
     const today = new Date().toISOString().slice(0, 10);
@@ -416,11 +578,18 @@ export function useClassLocalState(
     quickHackInput,
     setQuickHackInput,
     validationError,
+    activeChallenge,
+    skillValidations,
+    skillCompletions,
     handleSignContract,
     handleUpdateAvatar,
     handleJoinGuild,
     handleCreateGuild,
     handleUnlockSkill,
+    handleCompleteSkillWithLink,
+    handleRequestSkillTeacherValidation,
+    handleValidateSkillToken,
+    handleCancelActiveChallenge,
     handleBookResource,
     handleAcceptQuest,
     handleValidateQuest,

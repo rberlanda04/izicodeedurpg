@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { generateContent, type ContentKind } from './server/aiContentHandler.js'
 import { onboardSchool } from './server/onboardSchoolHandler.js'
 import { validateQuest } from './server/questValidationHandler.js'
+import { validateSkill } from './server/skillValidationHandler.js'
+import { completeSkillWithLink } from './server/skillLinkCompletionHandler.js'
 
 /**
  * Dev-only server-side proxy factory — mirrors, for local `npm run dev`,
@@ -64,7 +66,51 @@ export default defineConfig(({ mode }) => {
       jsonProxyPlugin('validate-quest-proxy', '/api/validate-quest', async ({ idToken, questId, token }: { idToken?: string; questId?: string; token?: string }) => {
         if (!idToken || !questId || !token) throw new Error('idToken, questId e token são obrigatórios.');
         return validateQuest(idToken, questId, token);
-      })
+      }),
+      jsonProxyPlugin('validate-skill-proxy', '/api/validate-skill', async ({ idToken, classId, skillId, token }: { idToken?: string; classId?: string; skillId?: string; token?: string }) => {
+        if (!idToken || !classId || !skillId || !token) throw new Error('idToken, classId, skillId e token são obrigatórios.');
+        return validateSkill(idToken, classId, skillId, token);
+      }),
+      jsonProxyPlugin(
+        'complete-skill-link-proxy',
+        '/api/complete-skill-link',
+        async ({
+          idToken,
+          classId,
+          schoolId,
+          studentName,
+          skillId,
+          skillTitle,
+          projectLink,
+          xpReward,
+          coinReward
+        }: {
+          idToken?: string;
+          classId?: string;
+          schoolId?: string;
+          studentName?: string;
+          skillId?: string;
+          skillTitle?: string;
+          projectLink?: string;
+          xpReward?: number;
+          coinReward?: number;
+        }) => {
+          if (
+            !idToken ||
+            !classId ||
+            !schoolId ||
+            !studentName ||
+            !skillId ||
+            !skillTitle ||
+            !projectLink ||
+            xpReward === undefined ||
+            coinReward === undefined
+          ) {
+            throw new Error('Campos obrigatórios faltando.');
+          }
+          return completeSkillWithLink(idToken, classId, schoolId, studentName, skillId, skillTitle, projectLink, xpReward, coinReward);
+        }
+      )
     ]
   };
 })

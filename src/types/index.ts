@@ -171,6 +171,62 @@ export interface QuestValidation {
   createdAt: string;
 }
 
+// skillValidations/{classId}_{studentUid}_{skillId} — a irmã de
+// QuestValidation, mas para o desbloqueio de habilidades na Trilha. Este doc
+// é o "público" (o próprio aluno o lê de volta, pra saber que tem um
+// desafio pendente mesmo depois de recarregar a página) — o `token` em si
+// mora SEPARADO em skillValidationTokens/{id}, legível só pelo Game
+// Master/Admin. Precisou virar 2 documentos porque o Firestore não tem
+// segurança por campo: um único doc legível pelo aluno também exporia o
+// token dentro dele, não importa o que a regra diga sobre "esconder" um
+// campo. A confirmação final acontece via server/skillValidationHandler.ts
+// (Admin SDK), nunca no cliente.
+export interface SkillValidation {
+  id: string;
+  classId: string;
+  schoolId: string;
+  studentUid: string;
+  studentName: string;
+  skillId: string;
+  skillTitle: string;
+  xpReward: number;
+  coinReward: number;
+  createdAt: string;
+}
+
+export interface SkillValidationToken {
+  id: string;
+  classId: string;
+  studentUid: string;
+  token: string;
+}
+
+// skillCompletions/{classId}_{studentUid}_{skillId} — registro permanente
+// (nunca apagado) escrito pelos handlers server-side ao concluir uma
+// habilidade, seja por código do professor ou por link de projeto. É o que
+// alimenta o "dashboard de gerenciamento" do Game Master.
+export interface SkillCompletion {
+  id: string;
+  classId: string;
+  schoolId: string;
+  studentUid: string;
+  studentName: string;
+  skillId: string;
+  skillTitle: string;
+  method: 'teacher_token' | 'link';
+  projectLink?: string;
+  xpReward: number;
+  coinReward: number;
+  completedAt: string;
+}
+
+// Descreve o "desafio ativo" de um aluno — uma missão aceita
+// (PENDING_VALIDATION) ou uma habilidade pendente de validação — usado
+// para travar a navegação na BattleScreen até ele cancelar ou concluir.
+export type ActiveChallenge =
+  | { kind: 'quest'; questId: string; title: string; xpReward: number; coinReward: number }
+  | { kind: 'skill'; skillId: string; title: string; xpReward: number; coinReward: number; awaitingMethod: boolean };
+
 export interface HardwareItem {
   id: string;
   name: string;

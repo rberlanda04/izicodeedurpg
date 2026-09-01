@@ -2,6 +2,7 @@ import {
   doc,
   setDoc,
   updateDoc,
+  deleteDoc,
   onSnapshot,
   collection,
   query,
@@ -124,6 +125,21 @@ export async function acceptQuest(
     pendingValidationStudentName: studentName
   });
   return token;
+}
+
+/**
+ * "Cancelar desafio" na BattleScreen — desiste de uma missão aceita, sem
+ * ganhar nada. Reverte PENDING_VALIDATION -> ACTIVE (liberando a missão de
+ * volta pro mural) e apaga o token pendente, senão ele ficaria órfão em
+ * questValidations pra sempre.
+ */
+export async function cancelQuestAcceptance(questId: string): Promise<void> {
+  await updateDoc(doc(db, 'quests', questId), {
+    status: 'ACTIVE',
+    pendingValidationStudentUid: null,
+    pendingValidationStudentName: null
+  });
+  await deleteDoc(doc(db, 'questValidations', questId));
 }
 
 /** GM-only in practice — questValidations read is rules-restricted to GM/Admin. */
