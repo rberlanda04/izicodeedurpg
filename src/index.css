@@ -64,10 +64,21 @@ body {
   100% { box-shadow: 0 0 0 0 rgba(56, 182, 255, 0); }
 }
 
-/* Balanço sutil do avatar parado na Trilha, para o mapa parecer "vivo". */
+/* Balanço sutil do avatar parado na Trilha, para o mapa parecer "vivo". O
+   translate(-50%,-100%) é o próprio posicionamento do avatar (ancorado
+   acima do nó) — específico desse uso; NÃO reaproveitar em outro lugar
+   (ver bobFloat abaixo para um "flutuar" simples sem esse deslocamento). */
 @keyframes bobIdle {
   0%, 100% { transform: translate(-50%, -100%) translateY(0); }
   50% { transform: translate(-50%, -100%) translateY(-6px); }
+}
+
+/* Balanço sutil sem deslocamento de âncora — pra retratos/ícones de
+   personagem (Ada, Tinker Byte, itens) que só precisam "flutuar" no
+   próprio lugar, ao contrário do avatar da Trilha acima. */
+@keyframes bobFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -228,7 +228,7 @@ export const TrailStageScreen: React.FC<TrailStageScreenProps> = ({
 
           {/* Destaque Central do Desafio */}
           <div className="text-center my-2 md:my-0">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-900 border-4 border-amber-400 text-3xl shadow-[0_0_25px_rgba(255,183,0,0.4)] animate-[bobIdle_2.4s_ease-in-out_infinite]">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-900 border-4 border-amber-400 text-3xl shadow-[0_0_25px_rgba(255,183,0,0.4)] animate-[bobFloat_2.4s_ease-in-out_infinite]">
               {kind === 'skill' ? (skill?.icon ?? '⚡') : '📜'}
             </div>
             <h2 className="font-pixel text-sm sm:text-base text-amber-300 mt-2">{title}</h2>

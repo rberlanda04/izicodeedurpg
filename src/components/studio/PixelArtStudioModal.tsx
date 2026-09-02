@@ -420,7 +420,7 @@ export const PixelArtStudioModal: React.FC<PixelArtStudioModalProps> = ({
               <span className="text-[10px] font-pixel text-slate-400 mb-2">PRÉVIA AO VIVO</span>
               
               {/* Mini display flutuante */}
-              <div className="w-20 h-20 bg-slate-900 border-2 border-amber-400 rounded-xl flex items-center justify-center p-2 shadow-[0_0_15px_rgba(255,183,0,0.3)] animate-[bobIdle_2.4s_ease-in-out_infinite]">
+              <div className="w-20 h-20 bg-slate-900 border-2 border-amber-400 rounded-xl flex items-center justify-center p-2 shadow-[0_0_15px_rgba(255,183,0,0.3)] animate-[bobFloat_2.4s_ease-in-out_infinite]">
                 <img
                   src={getRenderedDataUrl()}
                   alt="Preview"

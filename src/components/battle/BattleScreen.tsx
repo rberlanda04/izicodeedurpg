@@ -140,7 +140,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               <img
                 src="/game/npc_mage_ada.png"
                 alt="Maga Ada"
-                className="w-full h-full object-cover animate-[bobIdle_3s_ease-in-out_infinite]"
+                className="w-full h-full object-cover animate-[bobFloat_3s_ease-in-out_infinite]"
                 style={{ imageRendering: 'pixelated' }}
               />
             </div>

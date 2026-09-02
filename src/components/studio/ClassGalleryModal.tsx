@@ -115,7 +115,7 @@ export const ClassGalleryModal: React.FC<ClassGalleryModalProps> = ({
                     <img
                       src={art.dataUrl}
                       alt={art.title}
-                      className="w-20 h-20 object-contain animate-[bobIdle_3s_ease-in-out_infinite]"
+                      className="w-20 h-20 object-contain animate-[bobFloat_3s_ease-in-out_infinite]"
                       style={{ imageRendering: 'pixelated' }}
                     />
                     {art.featured && (

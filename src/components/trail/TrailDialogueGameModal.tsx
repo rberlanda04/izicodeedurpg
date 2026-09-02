@@ -229,7 +229,7 @@ export const TrailDialogueGameModal: React.FC<TrailDialogueGameModalProps> = ({
 
           {/* Centro: Ícone do Nó / Duelo de Ideias */}
           <div className="flex flex-col items-center justify-center z-10 px-2 text-center">
-            <div className="w-14 h-14 rounded-full bg-slate-900/90 border-2 border-amber-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(255,183,0,0.4)] animate-[bobIdle_2.4s_ease-in-out_infinite]">
+            <div className="w-14 h-14 rounded-full bg-slate-900/90 border-2 border-amber-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(255,183,0,0.4)] animate-[bobFloat_2.4s_ease-in-out_infinite]">
               {kind === 'skill' ? (skill?.icon ?? '⚡') : '📜'}
             </div>
             <div className="mt-2 flex items-center gap-2">
