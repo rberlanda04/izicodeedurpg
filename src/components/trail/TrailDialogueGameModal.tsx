@@ -13,6 +13,8 @@ interface TrailDialogueGameModalProps {
   authorName?: string;
   onSuccessUnlock: () => void;
   onClose: () => void;
+  quizStreak?: number;
+  onQuizAnswered?: (correct: boolean) => void;
 }
 
 type DialoguePhase = 'intro' | 'challenge' | 'solved' | 'failed';
@@ -52,7 +54,9 @@ export const TrailDialogueGameModal: React.FC<TrailDialogueGameModalProps> = ({
   status,
   authorName = 'Herói Maker',
   onSuccessUnlock,
-  onClose
+  onClose,
+  quizStreak = 0,
+  onQuizAnswered
 }) => {
   const [phase, setPhase] = useState<DialoguePhase>(status === 'completed' ? 'solved' : 'intro');
   const [activeSpeaker, setActiveSpeaker] = useState<'ada' | 'byte'>('ada');
@@ -140,10 +144,12 @@ export const TrailDialogueGameModal: React.FC<TrailDialogueGameModalProps> = ({
       soundEngine.playCorrect();
       soundEngine.playSuccess();
       setPhase('solved');
+      onQuizAnswered?.(true);
       onSuccessUnlock();
     } else {
       soundEngine.playWrong();
       setPhase('failed');
+      onQuizAnswered?.(false);
     }
   };
 
@@ -240,6 +246,11 @@ export const TrailDialogueGameModal: React.FC<TrailDialogueGameModalProps> = ({
                 🪙 +{coinReward} G
               </span>
             </div>
+            {quizStreak >= 2 && (
+              <span className="mt-1.5 font-pixel text-[9px] bg-orange-950/80 text-orange-300 border border-orange-500/60 px-2 py-0.5 rounded flex items-center gap-1 animate-pulse">
+                🔥 SEQUÊNCIA: {quizStreak}
+              </span>
+            )}
           </div>
 
           {/* Personagem 2: Tinker Byte */}

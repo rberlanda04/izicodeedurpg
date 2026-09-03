@@ -54,6 +54,8 @@ export interface UserProfile {
   xp: number;
   xpToNextLevel: number;
   izicoins: number;
+  quizStreak: number; // acertos seguidos no quiz da Trilha — zera a cada erro
+  bestQuizStreak: number;
   guildId?: string;
   guildRole?: ScrumRole;
   avatarConfig: {

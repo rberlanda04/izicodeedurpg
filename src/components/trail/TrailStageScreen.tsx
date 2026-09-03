@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ArrowLeft, ArrowRight, Map as MapIcon, Zap, Gift, Award, CheckCircle2, 
-  HelpCircle, BookOpen, Code2, Cpu, Wrench, Shield, Sparkles, Send, Lock, 
-  Volume2, ExternalLink, Play, RotateCcw
+  ArrowLeft, ArrowRight, Map as MapIcon, Zap, Gift, Award, CheckCircle2,
+  HelpCircle, BookOpen, Code2, Cpu, Wrench, Shield, Sparkles, Send, Lock,
+  Volume2, ExternalLink, Play, RotateCcw, Flame
 } from 'lucide-react';
 import { soundEngine } from '../../services/soundEngine';
 import { ToolBadgeRow } from '../stem/ToolBadge';
@@ -26,6 +26,8 @@ interface TrailStageScreenProps {
   onUnlockSkill: (skillId: string) => void;
   onAcceptQuest: (questId: string, xpReward: number, coinReward: number) => void;
   onBackToMap: () => void;
+  quizStreak?: number;
+  onQuizAnswered?: (correct: boolean) => void;
 }
 
 type TabKey = 'mission' | 'challenge' | 'workbench' | 'rewards';
@@ -44,7 +46,9 @@ export const TrailStageScreen: React.FC<TrailStageScreenProps> = ({
   onNextStage,
   onUnlockSkill,
   onAcceptQuest,
-  onBackToMap
+  onBackToMap,
+  quizStreak = 0,
+  onQuizAnswered
 }) => {
   const [activeTab, setActiveTab] = useState<TabKey>('mission');
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -122,6 +126,7 @@ export const TrailStageScreen: React.FC<TrailStageScreenProps> = ({
       soundEngine.playCorrect();
       soundEngine.playSuccess();
       setQuizFeedback('correct');
+      onQuizAnswered?.(true);
       if (kind === 'skill' && skill) {
         onUnlockSkill(skill.id);
       } else if (kind === 'quest' && quest) {
@@ -130,6 +135,7 @@ export const TrailStageScreen: React.FC<TrailStageScreenProps> = ({
     } else {
       soundEngine.playWrong();
       setQuizFeedback('wrong');
+      onQuizAnswered?.(false);
     }
   };
 
@@ -198,6 +204,13 @@ export const TrailStageScreen: React.FC<TrailStageScreenProps> = ({
             <span>+{xpReward} XP</span>
             <span>🪙 +{coinReward} G</span>
           </div>
+
+          {quizStreak >= 2 && (
+            <div className="flex items-center gap-1.5 bg-orange-950/80 px-2.5 py-1.5 rounded-lg border border-orange-500/60 font-pixel text-[10px] text-orange-300 animate-pulse">
+              <Flame className="w-3.5 h-3.5" />
+              <span>SEQUÊNCIA: {quizStreak}</span>
+            </div>
+          )}
         </div>
       </div>
 

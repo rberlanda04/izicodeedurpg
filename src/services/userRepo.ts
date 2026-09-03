@@ -24,6 +24,8 @@ export function newUserProfile(uid: string, adventureName: string, realName = ''
     xp: 0,
     xpToNextLevel: 1000,
     izicoins: 50,
+    quizStreak: 0,
+    bestQuizStreak: 0,
     avatarConfig,
     unlockedSkills: [],
     badges: [],

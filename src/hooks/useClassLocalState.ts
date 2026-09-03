@@ -109,6 +109,10 @@ export function useClassLocalState(
   // pra qualquer papel e é o que o Maker Lab usa pra saber "já pedi este item?".
   const [hardwareRequests, setHardwareRequests] = useState<HardwareRequest[]>([]);
   const [myHardwareRequests, setMyHardwareRequests] = useState<HardwareRequest[]>([]);
+  // Só populado quando um ganho de XP realmente cruza pro próximo nível —
+  // ver maybeCelebrateLevelUp abaixo. Distingue esse momento de qualquer
+  // outro ganho de XP rotineiro, que só toca soundEngine.playSuccess().
+  const [levelUpInfo, setLevelUpInfo] = useState<{ level: number } | null>(null);
   // Passo intermediário entre "quiz do Desafio Relâmpago acertado" e
   // "pedido de validação realmente criado no Firestore" — o aluno ainda
   // precisa escolher entre link de projeto ou validação do professor. Só
@@ -198,7 +202,24 @@ export function useClassLocalState(
 
   const triggerConfetti = () => confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
 
+  /**
+   * Só abre o LevelUpCelebration quando newLevel realmente supera o nível
+   * anterior — nunca chamar de dentro do updater de applyUserPatch(fn), que
+   * o Firestore pode re-executar em retry de transação e abriria a tela
+   * mais de uma vez pra um único level-up real.
+   */
+  const maybeCelebrateLevelUp = (previousLevel: number, newLevel: number) => {
+    if (newLevel > previousLevel) setLevelUpInfo({ level: newLevel });
+  };
+  const handleCloseLevelUp = () => setLevelUpInfo(null);
+
   const grantXpAndCoins = (xp: number, coins: number) => {
+    // Prévia calculada fora da transação só pra decidir se comemora o
+    // level-up — cosmético, então uma divergência rara por escrita
+    // concorrente não tem consequência real (o valor gravado de verdade
+    // continua vindo só do updater abaixo, que lê o current autoritativo).
+    const previewLevel = profile.xp + xp >= profile.xpToNextLevel ? profile.level + 1 : profile.level;
+    maybeCelebrateLevelUp(profile.level, previewLevel);
     applyUserPatch((current) => {
       const newXp = current.xp + xp;
       let newLevel = current.level;
@@ -209,6 +230,19 @@ export function useClassLocalState(
       }
       return { xp: newXp, level: newLevel, xpToNextLevel: nextLevelXp, izicoins: current.izicoins + coins };
     });
+  };
+
+  /** Combo cosmético do quiz da Trilha — sem bônus de XP/moedas (o valor de cada nó já vem validado pelo servidor). */
+  const handleQuizAnswered = (correct: boolean) => {
+    if (!correct) {
+      applyUserPatch({ quizStreak: 0 });
+      return;
+    }
+    const nextStreak = (profile.quizStreak ?? 0) + 1;
+    applyUserPatch({ quizStreak: nextStreak, bestQuizStreak: Math.max(nextStreak, profile.bestQuizStreak ?? 0) });
+    if (nextStreak === 3) grantBadge('streak-3');
+    if (nextStreak === 5) grantBadge('streak-5');
+    if (nextStreak === 10) grantBadge('streak-10');
   };
 
   // Concede uma conquista do catálogo (idempotente — ignora se já possuída
@@ -336,7 +370,7 @@ export function useClassLocalState(
     if (!firebaseUser || !pendingSkillChoice) return;
     setValidationError('');
     try {
-      await completeSkillWithLinkApi(
+      const result = await completeSkillWithLinkApi(
         firebaseUser,
         classId,
         schoolId,
@@ -347,8 +381,9 @@ export function useClassLocalState(
         pendingSkillChoice.xpReward,
         pendingSkillChoice.coinReward
       );
-      soundEngine.playLevelUp();
+      soundEngine.playSuccess();
       triggerConfetti();
+      maybeCelebrateLevelUp(profile.level, result.newLevel);
       grantSkillBadges(pendingSkillChoice.skillId);
       setPendingSkillChoice(null);
     } catch (err) {
@@ -381,9 +416,10 @@ export function useClassLocalState(
     if (!firebaseUser) return;
     setValidationError('');
     try {
-      await submitSkillValidationCode(firebaseUser, classId, skillId, token);
-      soundEngine.playLevelUp();
+      const result = await submitSkillValidationCode(firebaseUser, classId, skillId, token);
+      soundEngine.playSuccess();
       triggerConfetti();
+      maybeCelebrateLevelUp(profile.level, result.newLevel);
       grantSkillBadges(skillId);
     } catch (err) {
       soundEngine.playErrorBeep();
@@ -478,9 +514,10 @@ export function useClassLocalState(
       // validação — depois de COMPLETED não dá mais pra saber quem a
       // concluiu, então esse registro por aluno só pode acontecer aqui.
       const sdgGoals = quests.find((q) => q.id === questId)?.sdgGoals ?? [];
-      await submitValidationCode(firebaseUser, questId, code);
-      soundEngine.playLevelUp();
+      const result = await submitValidationCode(firebaseUser, questId, code);
+      soundEngine.playSuccess();
       triggerConfetti();
+      maybeCelebrateLevelUp(profile.level, result.newLevel);
       if (sdgGoals.length > 0) {
         const merged = Array.from(new Set([...profile.completedQuestSdgGoals, ...sdgGoals]));
         applyUserPatch({ completedQuestSdgGoals: merged });
@@ -671,6 +708,9 @@ export function useClassLocalState(
     skillCompletions,
     hardwareRequests,
     myHardwareRequests,
+    levelUpInfo,
+    handleCloseLevelUp,
+    handleQuizAnswered,
     handleSignContract,
     handleUpdateAvatar,
     handleCompleteSkillSurvey,

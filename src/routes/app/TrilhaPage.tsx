@@ -20,6 +20,7 @@ export const TrilhaPage: React.FC = () => {
     handleAcceptQuest,
     handleCompleteSkillSurvey,
     handleSkipSkillSurvey,
+    handleQuizAnswered,
     classRoom
   } = useOutletContext<ClassOutletContext>();
   const { profile } = useAuth();
@@ -167,6 +168,8 @@ export const TrilhaPage: React.FC = () => {
           }}
           onUnlockSkill={handleUnlockSkill}
           onAcceptQuest={handleAcceptQuest}
+          quizStreak={profile.quizStreak}
+          onQuizAnswered={handleQuizAnswered}
           onBackToMap={() => {
             soundEngine.playClick();
             setViewMode('map');
@@ -181,6 +184,8 @@ export const TrilhaPage: React.FC = () => {
             currentUid={profile.uid}
             avatarHead={profile.avatarConfig.head}
             recommendedCategories={recommendedCategories}
+            quizStreak={profile.quizStreak}
+            onQuizAnswered={handleQuizAnswered}
             onUnlockSkill={handleUnlockSkill}
             onAcceptQuest={handleAcceptQuest}
           />

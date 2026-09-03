@@ -9,6 +9,7 @@ import { TopNav } from '../../components/stem/TopNav';
 import { Sidebar } from '../../components/stem/Sidebar';
 import { ErrorState } from '../../components/stem/ErrorState';
 import { HackerTerminalModal } from '../../components/HackerTerminalModal';
+import { LevelUpCelebration } from '../../components/LevelUpCelebration';
 import { BattleScreen } from '../../components/battle/BattleScreen';
 import type { ClassRoom } from '../../types';
 
@@ -105,6 +106,10 @@ export const ClassLayout: React.FC = () => {
         user={profile}
         onUnlockSecretQuest={classState.handleUnlockSecretQuest}
       />
+
+      {classState.levelUpInfo && (
+        <LevelUpCelebration level={classState.levelUpInfo.level} onClose={classState.handleCloseLevelUp} />
+      )}
     </div>
   );
 };

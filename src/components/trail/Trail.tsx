@@ -14,6 +14,8 @@ interface TrailProps {
   currentUid: string;
   avatarHead: string;
   recommendedCategories?: SkillNode['category'][];
+  quizStreak?: number;
+  onQuizAnswered?: (correct: boolean) => void;
   onUnlockSkill: (skillId: string) => void;
   onAcceptQuest: (questId: string, xpReward: number, coinReward: number) => void;
 }
@@ -25,6 +27,8 @@ export const Trail: React.FC<TrailProps> = ({
   currentUid,
   avatarHead,
   recommendedCategories = [],
+  quizStreak = 0,
+  onQuizAnswered,
   onUnlockSkill,
   onAcceptQuest
 }) => {
@@ -176,6 +180,8 @@ export const Trail: React.FC<TrailProps> = ({
           skill={selectedSkill}
           quiz={pickSkillQuiz(SKILL_QUIZZES.filter((q) => q.skillId === selectedSkill.id))}
           status={skillStatus(selectedSkill)}
+          quizStreak={quizStreak}
+          onQuizAnswered={onQuizAnswered}
           onSuccessUnlock={() => {
             onUnlockSkill(selectedSkill.id);
           }}
@@ -189,6 +195,8 @@ export const Trail: React.FC<TrailProps> = ({
           quest={selectedQuest}
           quiz={pickSkillQuiz(SKILL_QUIZZES.filter((q) => selectedQuest.requiredSkills.includes(q.skillId)))}
           status={questStatus(selectedQuest)}
+          quizStreak={quizStreak}
+          onQuizAnswered={onQuizAnswered}
           onSuccessUnlock={() => {
             onAcceptQuest(selectedQuest.id, selectedQuest.xpReward, selectedQuest.coinReward);
           }}

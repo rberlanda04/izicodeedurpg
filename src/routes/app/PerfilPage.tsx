@@ -49,7 +49,10 @@ export const PerfilPage: React.FC = () => {
               <span className="text-sm font-display font-bold text-stem-amber">🪙 {profile.izicoins}</span>
             </div>
             <div className="h-2 rounded-full bg-stem-mist overflow-hidden mt-2 max-w-xs mx-auto sm:mx-0">
-              <div className="h-full bg-stem-violet rounded-full" style={{ width: `${xpPercent}%` }} />
+              <div
+                className="h-full bg-stem-violet rounded-full transition-all duration-500"
+                style={{ width: `${xpPercent}%` }}
+              />
             </div>
             <p className="text-xs font-body-stem text-stem-ink-soft mt-1">
               {profile.xp} / {profile.xpToNextLevel} XP

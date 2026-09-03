@@ -49,5 +49,23 @@ export const BADGE_DEFINITIONS: Array<Omit<Badge, 'unlockedAt'>> = [
     name: 'Autoconhecimento',
     description: 'Descobriu seu arquétipo de aventureiro no questionário de perfil.',
     icon: '🧭'
+  },
+  {
+    id: 'streak-3',
+    name: 'Sequência de Fogo',
+    description: 'Acertou 3 enigmas seguidos na Trilha.',
+    icon: '🔥'
+  },
+  {
+    id: 'streak-5',
+    name: 'Em Chamas',
+    description: 'Acertou 5 enigmas seguidos na Trilha.',
+    icon: '🔥🔥'
+  },
+  {
+    id: 'streak-10',
+    name: 'Lendário',
+    description: 'Acertou 10 enigmas seguidos na Trilha.',
+    icon: '⚡'
   }
 ];
