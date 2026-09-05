@@ -30,10 +30,16 @@ export const TrilhaPage: React.FC = () => {
 
   if (!profile) return null;
 
-  // Unifica nós de habilidades e missões como fases ordenadas
+  // Unifica nós de habilidades e missões como fases ordenadas — mesmo filtro
+  // de nós/missões secretos que o modo Mapa já aplica (Trail.tsx e
+  // useTrailLayout.ts): um nó secreto só entra na lista depois de já
+  // desbloqueado por outro caminho (Terminal Hacker), e uma missão secreta
+  // nunca aparece aqui, os dois têm fluxo de desbloqueio próprio.
   const allStages: Array<{ kind: 'skill' | 'quest'; skill?: SkillNode; quest?: Quest }> = [
-    ...skills.map((s) => ({ kind: 'skill' as const, skill: s })),
-    ...quests.map((q) => ({ kind: 'quest' as const, quest: q }))
+    ...skills
+      .filter((s) => !s.isSecretNode || profile.unlockedSkills.includes(s.id))
+      .map((s) => ({ kind: 'skill' as const, skill: s })),
+    ...quests.filter((q) => !q.isSecretQuest).map((q) => ({ kind: 'quest' as const, quest: q }))
   ];
 
   const currentStage = allStages[currentStageIndex] || allStages[0];
