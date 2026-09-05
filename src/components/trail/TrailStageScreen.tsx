@@ -53,9 +53,6 @@ export const TrailStageScreen: React.FC<TrailStageScreenProps> = ({
   const [activeTab, setActiveTab] = useState<TabKey>('mission');
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [quizFeedback, setQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
-  const [projectLink, setProjectLink] = useState('');
-  const [teacherCode, setTeacherCode] = useState('');
-  const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [activeMentor, setActiveMentor] = useState<'ada' | 'byte'>('ada');
 
   const title = kind === 'skill' ? (skill?.title ?? 'Habilidade') : (quest?.title ?? 'Missão');
@@ -139,13 +136,16 @@ export const TrailStageScreen: React.FC<TrailStageScreenProps> = ({
     }
   };
 
-  const handleValidateSubmission = () => {
-    if (!projectLink.trim() && teacherCode !== '1234' && teacherCode.length !== 4) {
-      soundEngine.playWrong();
-      return;
-    }
-    soundEngine.playSuccess();
-    setSubmissionSuccess(true);
+  /**
+   * Só ABRE a validação de verdade (BattleScreen, que troca a tela inteira
+   * assim que onUnlockSkill/onAcceptQuest muda o activeChallenge) — nunca
+   * concede nada por si só. A versão anterior validava um link/código
+   * localmente com uma checagem quebrada (qualquer código de 4 caracteres
+   * passava) e mostrava "PROJETO VALIDADO COM SUCESSO" sem o servidor ter
+   * conferido nada de verdade.
+   */
+  const handleStartValidation = () => {
+    soundEngine.playClick();
     if (kind === 'skill' && skill) {
       onUnlockSkill(skill.id);
     } else if (kind === 'quest' && quest) {
@@ -447,46 +447,21 @@ export const TrailStageScreen: React.FC<TrailStageScreenProps> = ({
         {/* ABA 3: Bancada & Validação Maker */}
         {activeTab === 'workbench' && (
           <div className="max-w-2xl mx-auto space-y-5 animate-in fade-in duration-200">
-            <div className="bg-[#121c2d] border-2 border-[#2b3e5c] rounded-xl p-4 space-y-3">
-              <h3 className="font-pixel text-xs text-cyan-300">SUBMISSÃO DO PROJETO MAKER</h3>
+            <div className="bg-[#121c2d] border-2 border-[#2b3e5c] rounded-xl p-4 space-y-3 text-center">
+              <h3 className="font-pixel text-xs text-cyan-300">PRONTO PARA VALIDAR SEU PROJETO?</h3>
               <p className="text-xs font-body-stem text-slate-300">
-                Insira o link público do seu projeto no <strong>Scratch</strong>, <strong>Tinkercad</strong>, <strong>App Inventor</strong> ou <strong>GitHub</strong>:
+                Ao continuar, você vai poder enviar o link do seu projeto (<strong>Scratch</strong>,{' '}
+                <strong>Tinkercad</strong>, <strong>App Inventor</strong>, <strong>GitHub</strong>...) ou pedir a
+                validação presencial do seu Game Master com o código secreto.
               </p>
 
-              <input
-                value={projectLink}
-                onChange={(e) => setProjectLink(e.target.value)}
-                placeholder="https://scratch.mit.edu/projects/..."
-                className="w-full bg-slate-900 text-cyan-300 text-xs font-mono p-3 rounded-xl border border-slate-700 outline-none focus:border-cyan-400"
-              />
-
-              <div className="pt-2 border-t border-slate-700/60">
-                <label className="font-pixel text-[10px] text-amber-400 block mb-1.5">
-                  OU VALIDAÇÃO PRESENCIAL (CÓDIGO DE 4 DÍGITOS DO PROFESSOR):
-                </label>
-                <input
-                  value={teacherCode}
-                  onChange={(e) => setTeacherCode(e.target.value)}
-                  placeholder="Ex: 1234"
-                  maxLength={4}
-                  className="w-40 bg-slate-900 text-amber-300 font-pixel text-center text-xs p-2.5 rounded-xl border border-amber-500/50 outline-none focus:border-amber-400"
-                />
-              </div>
-
               <button
-                onClick={handleValidateSubmission}
+                onClick={handleStartValidation}
                 className="sunflower-btn sunflower-btn-gold text-[10px] py-2.5 px-6 font-pixel w-full justify-center mt-3"
               >
-                <Send className="w-4 h-4" /> ENVIAR SOLUÇÃO MAKER
+                <Send className="w-4 h-4" /> COMEÇAR VALIDAÇÃO
               </button>
             </div>
-
-            {submissionSuccess && (
-              <div className="bg-emerald-950 border-2 border-emerald-400 p-4 rounded-xl text-center space-y-1 animate-in zoom-in-95">
-                <p className="font-pixel text-xs text-emerald-300">✓ PROJETO VALIDADO COM SUCESSO!</p>
-                <p className="text-xs font-body-stem text-slate-300">Parabéns herói! O Game Master aprovou sua entrega.</p>
-              </div>
-            )}
           </div>
         )}
 
